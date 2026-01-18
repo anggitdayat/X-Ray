@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Library - Kontil</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+          body {
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('BG1.png') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Efek animasi subtle pada background */
+@keyframes backgroundPan {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+}
+
+body {
+    animation: backgroundPan 60s linear infinite alternate;
+}
+
+/* Efek partikel untuk background */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: -1;
+    pointer-events: none;
+        }
+        
+        .cropinsight-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            margin: 20px auto;
+            width: 95%;
+            max-width: 1400px;
+        }
+        
+         .header {
+    text-align: center;
+    padding: 40px 20px;
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.8), rgba(76, 73, 79, 0.8)),
+        url('BG.png') no-repeat center center;
+    background-size: cover;
+    color: white;
+    border-radius: 20px 20px 0 0;
+         }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .navbar {
+            border-radius: 0 0 20px 20px;
+            padding: 0 20px;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: #667eea !important;
+        }
+        
+        .jumbotron {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Filter and Search */
+        .library-filters {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-group {
+            margin-bottom: 15px;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        /* Album Cards */
+        .album-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 25px;
+            height: 100%;
+        }
+        
+        .album-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .album-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .album-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .album-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .album-icon.healthy {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        }
+        
+        .album-icon.disease {
+            background: linear-gradient(135deg, #F44336, #C62828);
+        }
+        
+        .album-icon.growth {
+            background: linear-gradient(135deg, #2196F3, #0D47A1);
+        }
+        
+        .album-icon.other {
+            background: linear-gradient(135deg, #9C27B0, #6A1B9A);
+        }
+        
+        .album-stats {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .album-content {
+            padding: 20px;
+        }
+        
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .thumbnail-item {
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            aspect-ratio: 1;
+            transition: transform 0.2s ease;
+        }
+        
+        .thumbnail-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .thumbnail-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .thumbnail-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 8px;
+            font-size: 0.7rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .detection-badge {
+            background: #FF9800;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+        
+        /* Image Modal */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            margin: auto;
+        }
+        
+        .modal-image {
+            width: 100%;
+            height: auto;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        
+        .modal-info {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            color: #333;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Detection Tags */
+        .detection-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .detection-tag {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .detection-tag.healthy {
+            background: #e8f5e9;
+            color: #2E7D32;
+            border: 1px solid #4CAF50;
+        }
+        
+        .detection-tag.disease {
+            background: #ffebee;
+            color: #C62828;
+            border: 1px solid #F44336;
+        }
+        
+        .detection-tag.nutrient {
+            background: #e3f2fd;
+            color: #1565C0;
+            border: 1px solid #2196F3;
+        }
+        
+        .detection-tag.insect {
+            background: #fff3e0;
+            color: #EF6C00;
+            border: 1px solid #FF9800;
+        }
+        
+        /* Analysis Card */
+        .analysis-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid;
+        }
+        
+        .analysis-card.healthy {
+            border-left-color: #4CAF50;
+        }
+        
+        .analysis-card.disease {
+            border-left-color: #F44336;
+        }
+        
+        .analysis-card.warning {
+            border-left-color: #FF9800;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .thumbnail-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            
+            .album-stats {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cropinsight-container">
+        <header class="header">
+            <img src="cvr1.png" width="150" height="150" style="border-radius: 10%; margin-bottom: 20px;" />
+            <h1><i class="fas fa-photo-video"></i> IMAGE LIBRARY</h1>
+            <p class="lead" style="color: rgba(255,255,255,0.9);">Plant Image Collection & Analysis Archive</p>
+        </header>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-tractor"></i> Cropinsight</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="camera.html">Camera</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="library.html">Library</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="result.html">Result</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="history.html">History</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="jumbotron">
+            <!-- Search and Filters -->
+            <div class="library-filters">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="searchImages"><i class="fas fa-search"></i> Search Images</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="searchImages" placeholder="Search by plant name, disease, date...">
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="filterCategory"><i class="fas fa-filter"></i> Filter by Category</label>
+                            <select class="form-control" id="filterCategory">
+                                <option value="all">All Categories</option>
+                                <option value="healthy">Healthy Plants</option>
+                                <option value="disease">Disease Detection</option>
+                                <option value="growth">Growth Monitoring</option>
+                                <option value="nutrient">Nutrient Analysis</option>
+                                <option value="insect">Insect Detection</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="filterDate"><i class="fas fa-calendar"></i> Date Range</label>
+                            <select class="form-control" id="filterDate">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="filterPlant"><i class="fas fa-seedling"></i> Plant Type</label>
+                            <select class="form-control" id="filterPlant">
+                                <option value="all">All Plants</option>
+                                <option value="padi">Padi (Rice)</option>
+                                <option value="jagung">Jagung (Corn)</option>
+                                <option value="kedelai">Kedelai (Soybean)</option>
+                                <option value="cabai">Cabai (Chili)</option>
+                                <option value="tomat">Tomat (Tomato)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="filterStatus"><i class="fas fa-chart-line"></i> Analysis Status</label>
+                            <select class="form-control" id="filterStatus">
+                                <option value="all">All Status</option>
+                                <option value="analyzed">Analyzed</option>
+                                <option value="pending">Pending Analysis</option>
+                                <option value="review">Needs Review</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button class="btn btn-success mr-2" id="applyFilters">
+                        <i class="fas fa-check"></i> Apply Filters
+                    </button>
+                    <button class="btn btn-outline-secondary" id="resetFilters">
+                        <i class="fas fa-redo"></i> Reset Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Library Summary -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="card-title text-success">152</h3>
+                            <p class="card-text">Total Images</p>
+                            <i class="fas fa-images fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="card-title text-primary">12</h3>
+                            <p class="card-text">Albums</p>
+                            <i class="fas fa-folder fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="card-title text-warning">45</h3>
+                            <p class="card-text">Detected Diseases</p>
+                            <i class="fas fa-bug fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="card-title text-info">8</h3>
+                            <p class="card-text">Plant Types</p>
+                            <i class="fas fa-seedling fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Album Section -->
+            <h3 class="mb-4"><i class="fas fa-folder"></i> Image Albums by Detection Category</h3>
+            
+            <div class="row" id="albumContainer">
+                <!-- Albums will be dynamically loaded here -->
+            </div>
+
+            <!-- Image Modal -->
+            <div class="image-modal" id="imageModal">
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <div class="modal-content">
+                    <img class="modal-image" id="modalImage" src="" alt="Full Size Image">
+                    <div class="modal-info">
+                        <h4 id="modalTitle"></h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Filename:</strong> <span id="modalFilename"></span></p>
+                                <p><strong>Date Captured:</strong> <span id="modalDate"></span></p>
+                                <p><strong>Plant Type:</strong> <span id="modalPlant"></span></p>
+                                <p><strong>Camera Used:</strong> <span id="modalCamera"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Resolution:</strong> <span id="modalResolution"></span></p>
+                                <p><strong>File Size:</strong> <span id="modalSize"></span></p>
+                                <p><strong>Location:</strong> <span id="modalLocation"></span></p>
+                                <p><strong>Analyst:</strong> <span id="modalAnalyst"></span></p>
+                            </div>
+                        </div>
+                        
+                        <h5 class="mt-3">Detection Results</h5>
+                        <div id="modalDetections"></div>
+                        
+                        <div class="analysis-card" id="modalAnalysis">
+                            <h6><i class="fas fa-chart-bar"></i> Analysis Summary</h6>
+                            <p id="modalSummary"></p>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-primary" onclick="viewDetailedAnalysis()">
+                                <i class="fas fa-chart-line"></i> View Detailed Analysis
+                            </button>
+                            <button class="btn btn-success" onclick="downloadImage()">
+                                <i class="fas fa-download"></i> Download Image
+                            </button>
+                            <button class="btn btn-outline-danger float-right" onclick="deleteImage()">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="mt-4">
+                <a href="index.html" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+                <a href="camera.html" class="btn btn-success">
+                    <i class="fas fa-camera"></i> Take New Photo
+                </a>
+                <a href="result.html" class="btn btn-primary float-right">
+                    View All Results <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Cropinsight Image Library | Total Storage Used: 2.4 GB / 10 GB | © 2024 Agricultural Technology</p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    
+    <script>
+        // Sample data for albums and images
+        const albumsData = [
+            {
+                id: 1,
+                title: "Healthy Plant Collection",
+                category: "healthy",
+                icon: "fas fa-leaf",
+                description: "Images of healthy plants for reference and comparison",
+                totalImages: 45,
+                analyzed: 45,
+                images: [
+                    { 
+                        id: 1, 
+                        name: "healthy_rice_001.jpg", 
+                        date: "2024-01-15 10:30", 
+                        plant: "Padi (Rice)", 
+                        detection: "Healthy", 
+                        confidence: 98,
+                        location: "Field A1",
+                        resolution: "1920x1080",
+                        size: "2.4 MB",
+                        camera: "External Camera USB 1",
+                        analyst: "Auto-Detection System",
+                        summary: "Plant shows optimal health with vibrant green leaves and proper growth pattern.",
+                        tags: ["healthy", "optimal-growth", "no-disease"]
+                    },
+                    { 
+                        id: 2, 
+                        name: "healthy_corn_023.jpg", 
+                        date: "2024-01-14 14:20", 
+                        plant: "Jagung (Corn)", 
+                        detection: "Healthy", 
+                        confidence: 96,
+                        location: "Field B3",
+                        resolution: "1280x720",
+                        size: "1.8 MB",
+                        camera: "Front Camera",
+                        analyst: "Dr. Agus",
+                        summary: "Corn plant showing excellent growth with no signs of disease or nutrient deficiency.",
+                        tags: ["healthy", "good-yield", "strong-stem"]
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Disease Detection Archive",
+                category: "disease",
+                icon: "fas fa-bug",
+                description: "Plant diseases identified and documented",
+                totalImages: 67,
+                analyzed: 67,
+                images: [
+                    { 
+                        id: 3, 
+                        name: "blight_tomato_015.jpg", 
+                        date: "2024-01-16 09:15", 
+                        plant: "Tomat (Tomato)", 
+                        detection: "Late Blight", 
+                        confidence: 92,
+                        location: "Greenhouse 2",
+                        resolution: "3840x2160",
+                        size: "4.2 MB",
+                        camera: "IP Camera Network",
+                        analyst: "Auto-Detection System",
+                        summary: "Early stage late blight detected. Requires immediate treatment with fungicide.",
+                        tags: ["disease", "blight", "fungal", "urgent"]
+                    },
+                    { 
+                        id: 4, 
+                        name: "rust_wheat_042.jpg", 
+                        date: "2024-01-13 11:45", 
+                        plant: "Gandum (Wheat)", 
+                        detection: "Leaf Rust", 
+                        confidence: 87,
+                        location: "Field C2",
+                        resolution: "1920x1080",
+                        size: "2.1 MB",
+                        camera: "Back Camera",
+                        analyst: "Prof. Sari",
+                        summary: "Moderate leaf rust infection. Recommend applying sulfur-based treatment.",
+                        tags: ["disease", "rust", "fungal", "moderate"]
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Growth Monitoring",
+                category: "growth",
+                icon: "fas fa-chart-line",
+                description: "Plant growth progression over time",
+                totalImages: 28,
+                analyzed: 28,
+                images: [
+                    { 
+                        id: 5, 
+                        name: "growth_week4_008.jpg", 
+                        date: "2024-01-17 08:30", 
+                        plant: "Kedelai (Soybean)", 
+                        detection: "Growth Stage 4", 
+                        confidence: 94,
+                        location: "Field D1",
+                        resolution: "1280x720",
+                        size: "1.5 MB",
+                        camera: "Web Camera",
+                        analyst: "Auto-Detection System",
+                        summary: "Plant at vegetative stage 4, showing 25% faster growth than average.",
+                        tags: ["growth", "vegetative", "above-average"]
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "Nutrient Deficiency",
+                category: "nutrient",
+                icon: "fas fa-flask",
+                description: "Images showing nutrient deficiency symptoms",
+                totalImages: 19,
+                analyzed: 19,
+                images: [
+                    { 
+                        id: 6, 
+                        name: "nitrogen_def_011.jpg", 
+                        date: "2024-01-12 13:20", 
+                        plant: "Cabai (Chili)", 
+                        detection: "Nitrogen Deficiency", 
+                        confidence: 89,
+                        location: "Field E3",
+                        resolution: "1920x1080",
+                        size: "2.3 MB",
+                        camera: "External Camera USB 2",
+                        analyst: "Dr. Budi",
+                        summary: "Yellowing of older leaves indicates nitrogen deficiency. Recommend nitrogen-rich fertilizer.",
+                        tags: ["nutrient", "deficiency", "nitrogen", "fertilizer-needed"]
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: "Insect & Pest Detection",
+                category: "insect",
+                icon: "fas fa-spider",
+                description: "Pest infestations and insect damage",
+                totalImages: 23,
+                analyzed: 23,
+                images: [
+                    { 
+                        id: 7, 
+                        name: "aphid_infest_007.jpg", 
+                        date: "2024-01-18 10:45", 
+                        plant: "Mawar (Rose)", 
+                        detection: "Aphid Infestation", 
+                        confidence: 91,
+                        location: "Garden Area",
+                        resolution: "3840x2160",
+                        size: "4.5 MB",
+                        camera: "IP Camera Network",
+                        analyst: "Auto-Detection System",
+                        summary: "Heavy aphid infestation detected on new growth. Immediate pesticide application recommended.",
+                        tags: ["insect", "aphid", "infestation", "urgent"]
+                    }
+                ]
+            }
+        ];
+
+        let currentAlbum = null;
+        let currentImage = null;
+
+        // DOM Elements
+        const albumContainer = document.getElementById('albumContainer');
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalFilename = document.getElementById('modalFilename');
+        const modalDate = document.getElementById('modalDate');
+        const modalPlant = document.getElementById('modalPlant');
+        const modalCamera = document.getElementById('modalCamera');
+        const modalResolution = document.getElementById('modalResolution');
+        const modalSize = document.getElementById('modalSize');
+        const modalLocation = document.getElementById('modalLocation');
+        const modalAnalyst = document.getElementById('modalAnalyst');
+        const modalDetections = document.getElementById('modalDetections');
+        const modalAnalysis = document.getElementById('modalAnalysis');
+        const modalSummary = document.getElementById('modalSummary');
+
+        // Initialize albums
+        function loadAlbums() {
+            albumContainer.innerHTML = '';
+            
+            albumsData.forEach(album => {
+                const albumCard = document.createElement('div');
+                albumCard.className = 'col-md-6 col-lg-4';
+                albumCard.innerHTML = `
+                    <div class="album-card">
+                        <div class="album-header">
+                            <div class="album-title">
+                                <div class="album-icon ${album.category}">
+                                    <i class="${album.icon}"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">${album.title}</h5>
+                                    <small class="text-muted">${album.description}</small>
+                                </div>
+                            </div>
+                            <div class="album-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">${album.totalImages}</div>
+                                    <div class="stat-label">Images</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${album.analyzed}</div>
+                                    <div class="stat-label">Analyzed</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="album-content">
+                            <div class="thumbnail-grid" id="thumbnails-${album.id}">
+                                <!-- Thumbnails will be loaded here -->
+                            </div>
+                            <div class="text-center mt-3">
+                                <button class="btn btn-outline-primary btn-sm" onclick="viewAlbum(${album.id})">
+                                    <i class="fas fa-expand"></i> View All (${album.totalImages})
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                albumContainer.appendChild(albumCard);
+                
+                // Load thumbnails for this album
+                loadAlbumThumbnails(album.id, album.images);
+            });
+        }
+
+        function loadAlbumThumbnails(albumId, images) {
+            const thumbnailContainer = document.getElementById(`thumbnails-${albumId}`);
+            thumbnailContainer.innerHTML = '';
+            
+            // Show first 6 images as thumbnails
+            const displayImages = images.slice(0, 6);
+            
+            displayImages.forEach(image => {
+                const thumbnailItem = document.createElement('div');
+                thumbnailItem.className = 'thumbnail-item';
+                thumbnailItem.innerHTML = `
+                    <img src="https://via.placeholder.com/120x120/${getColorByDetection(image.detection)}/FFFFFF?text=${encodeURIComponent(image.plant.substring(0, 10))}" alt="${image.name}">
+                    <div class="thumbnail-overlay">
+                        <span>${image.detection.substring(0, 12)}</span>
+                        <span class="detection-badge">${image.confidence}%</span>
+                    </div>
+                `;
+                thumbnailItem.addEventListener('click', () => {
+                    openImageModal(image, albumId);
+                });
+                thumbnailContainer.appendChild(thumbnailItem);
+            });
+            
+            // If there are more images, show a "more" indicator
+            if (images.length > 6) {
+                const moreItem = document.createElement('div');
+                moreItem.className = 'thumbnail-item';
+                moreItem.style.display = 'flex';
+                moreItem.style.alignItems = 'center';
+                moreItem.style.justifyContent = 'center';
+                moreItem.style.background = '#f8f9fa';
+                moreItem.style.cursor = 'pointer';
+                moreItem.innerHTML = `
+                    <div class="text-center">
+                        <i class="fas fa-plus fa-2x text-muted"></i>
+                        <p class="mt-2 small">+${images.length - 6} more</p>
+                    </div>
+                `;
+                moreItem.addEventListener('click', () => {
+                    viewAlbum(albumId);
+                });
+                thumbnailContainer.appendChild(moreItem);
+            }
+        }
+
+        function getColorByDetection(detection) {
+            const colors = {
+                'Healthy': '4CAF50',
+                'Late Blight': 'F44336',
+                'Leaf Rust': 'FF9800',
+                'Growth Stage': '2196F3',
+                'Nitrogen Deficiency': '9C27B0',
+                'Aphid Infestation': '795548'
+            };
+            return colors[detection] || '666666';
+        }
+
+        function openImageModal(image, albumId) {
+            currentImage = image;
+            currentAlbum = albumId;
+            
+            // Set modal content
+            modalImage.src = `https://via.placeholder.com/800x600/${getColorByDetection(image.detection)}/FFFFFF?text=${encodeURIComponent(image.name)}`;
+            modalTitle.textContent = `${image.detection} - ${image.plant}`;
+            modalFilename.textContent = image.name;
+            modalDate.textContent = image.date;
+            modalPlant.textContent = image.plant;
+            modalCamera.textContent = image.camera;
+            modalResolution.textContent = image.resolution;
+            modalSize.textContent = image.size;
+            modalLocation.textContent = image.location;
+            modalAnalyst.textContent = image.analyst;
+            modalSummary.textContent = image.summary;
+            
+            // Set detection tags
+            modalDetections.innerHTML = '';
+            image.tags.forEach(tag => {
+                const tagClass = getTagClass(tag);
+                const tagElement = document.createElement('span');
+                tagElement.className = `detection-tag ${tagClass}`;
+                tagElement.textContent = tag;
+                modalDetections.appendChild(tagElement);
+            });
+            
+            // Set analysis card class
+            modalAnalysis.className = 'analysis-card ' + getAnalysisClass(image.detection);
+            
+            // Show modal
+            imageModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function getTagClass(tag) {
+            if (tag.includes('healthy')) return 'healthy';
+            if (tag.includes('disease')) return 'disease';
+            if (tag.includes('nutrient')) return 'nutrient';
+            if (tag.includes('insect')) return 'insect';
+            return 'healthy';
+        }
+
+        function getAnalysisClass(detection) {
+            if (detection.includes('Healthy')) return 'healthy';
+            if (detection.includes('Blight') || detection.includes('Rust') || detection.includes('Infestation')) return 'disease';
+            return 'warning';
+        }
+
+        function closeModal() {
+            imageModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function viewAlbum(albumId) {
+            const album = albumsData.find(a => a.id === albumId);
+            if (album) {
+                alert(`Viewing all images in: ${album.title}\nTotal images: ${album.images.length}`);
+                // In real implementation, this would navigate to album detail page
+            }
+        }
+
+        function viewDetailedAnalysis() {
+            if (currentImage) {
+                alert(`Opening detailed analysis for: ${currentImage.name}`);
+                // Navigate to result page with this image's analysis
+                setTimeout(() => {
+                    window.location.href = 'result.html?image=' + currentImage.id;
+                }, 500);
+            }
+        }
+
+        function downloadImage() {
+            if (currentImage) {
+                alert(`Downloading: ${currentImage.name}`);
+                // In real implementation, trigger file download
+            }
+        }
+
+        function deleteImage() {
+            if (currentImage && confirm(`Are you sure you want to delete "${currentImage.name}"?`)) {
+                alert(`Image "${currentImage.name}" deleted successfully`);
+                closeModal();
+                // In real implementation, remove from data and refresh
+                loadAlbums();
+            }
+        }
+
+        // Filter functionality
+        document.getElementById('applyFilters').addEventListener('click', function() {
+            const category = document.getElementById('filterCategory').value;
+            const date = document.getElementById('filterDate').value;
+            const plant = document.getElementById('filterPlant').value;
+            const status = document.getElementById('filterStatus').value;
+            
+            alert(`Filters applied:\nCategory: ${category}\nDate: ${date}\nPlant: ${plant}\nStatus: ${status}`);
+            // In real implementation, filter albums based on criteria
+        });
+
+        document.getElementById('resetFilters').addEventListener('click', function() {
+            document.getElementById('filterCategory').value = 'all';
+            document.getElementById('filterDate').value = 'all';
+            document.getElementById('filterPlant').value = 'all';
+            document.getElementById('filterStatus').value = 'all';
+            alert('All filters reset');
+        });
+
+        // Search functionality
+        document.getElementById('searchImages').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.toLowerCase();
+                if (query.length >= 2) {
+                    alert(`Searching for: ${query}`);
+                    // In real implementation, filter albums based on search query
+                }
+            }
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === imageModal) {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAlbums();
+        });
+    </script>
+</body>
+</html>

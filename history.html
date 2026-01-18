@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detection History - Cropinsight</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+           body {
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('BG1.png') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Efek animasi subtle pada background */
+@keyframes backgroundPan {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+}
+
+body {
+    animation: backgroundPan 60s linear infinite alternate;
+}
+
+/* Efek partikel untuk background */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: -1;
+    pointer-events: none;
+}
+        
+        .cropinsight-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            margin: 20px auto;
+            width: 95%;
+            max-width: 1400px;
+        }
+        
+        .header {
+    text-align: center;
+    padding: 40px 20px;
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.8), rgba(76, 73, 79, 0.8)),
+        url('BG.png') no-repeat center center;
+    background-size: cover;
+    color: white;
+    border-radius: 20px 20px 0 0;
+        }
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .navbar {
+            border-radius: 0 0 20px 20px;
+            padding: 0 20px;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: #667eea !important;
+        }
+        
+        .jumbotron {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Timeline View */
+        .timeline-container {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+        
+        .timeline-item:nth-child(odd) {
+            padding-right: calc(50% + 30px);
+            text-align: right;
+        }
+        
+        .timeline-item:nth-child(even) {
+            padding-left: calc(50% + 30px);
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid;
+            z-index: 10;
+        }
+        
+        .timeline-item:nth-child(odd) .timeline-dot {
+            right: -8px;
+            left: auto;
+        }
+        
+        .timeline-item:nth-child(even) .timeline-dot {
+            left: -8px;
+        }
+        
+        .timeline-dot.good {
+            border-color: #4CAF50;
+        }
+        
+        .timeline-dot.defect {
+            border-color: #F44336;
+        }
+        
+        .timeline-dot.suspicious {
+            border-color: #FF9800;
+        }
+        
+        .timeline-dot.processing {
+            border-color: #2196F3;
+        }
+        
+        .timeline-content {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+            transition: transform 0.3s ease;
+        }
+        
+        .timeline-content:hover {
+            transform: translateY(-5px);
+        }
+        
+        .timeline-item:nth-child(odd) .timeline-content {
+            border-left: none;
+            border-right: 5px solid;
+        }
+        
+        .timeline-content.good {
+            border-color: #4CAF50;
+        }
+        
+        .timeline-content.defect {
+            border-color: #F44336;
+        }
+        
+        .timeline-content.suspicious {
+            border-color: #FF9800;
+        }
+        
+        .timeline-content.processing {
+            border-color: #2196F3;
+        }
+        
+        .timeline-date {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Statistics Cards */
+        .history-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .history-stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .history-stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 10px;
+            color: white;
+        }
+        
+        .history-stat-icon.total {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .history-stat-icon.today {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        }
+        
+        .history-stat-icon.defects {
+            background: linear-gradient(135deg, #F44336, #C62828);
+        }
+        
+        .history-stat-icon.avg {
+            background: linear-gradient(135deg, #FF9800, #EF6C00);
+        }
+        
+        .history-stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .history-stat-label {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        /* History Table */
+        .history-table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .view-btn {
+            padding: 8px 20px;
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 8px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .view-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .view-btn:hover {
+            border-color: #667eea;
+        }
+        
+        /* Calendar View */
+        .calendar-view {
+            display: none;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        
+        .calendar-day {
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .calendar-day:hover {
+            border-color: #667eea;
+        }
+        
+        .calendar-day.active {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+        
+        .calendar-day-header {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .calendar-count {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .calendar-good {
+            color: #4CAF50;
+            font-size: 0.8rem;
+        }
+        
+        .calendar-defect {
+            color: #F44336;
+            font-size: 0.8rem;
+        }
+        
+        /* Status Badges */
+        .history-status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .badge-good {
+            background: #e8f5e9;
+            color: #2E7D32;
+        }
+        
+        .badge-defect {
+            background: #ffebee;
+            color: #C62828;
+        }
+        
+        .badge-suspicious {
+            background: #fff3e0;
+            color: #EF6C00;
+        }
+        
+        /* Activity Log */
+        .activity-log {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .log-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
+        }
+        
+        .log-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .log-item:last-child {
+            border-bottom: none;
+        }
+        
+        .log-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .log-icon.detection {
+            background: linear-gradient(135deg, #2196F3, #0D47A1);
+        }
+        
+        .log-icon.export {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        }
+        
+        .log-icon.settings {
+            background: linear-gradient(135deg, #9C27B0, #6A1B9A);
+        }
+        
+        .log-icon.system {
+            background: linear-gradient(135deg, #607D8B, #37474F);
+        }
+        
+        .log-content {
+            flex: 1;
+        }
+        
+        .log-action {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .log-details {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .log-time {
+            font-size: 0.8rem;
+            color: #999;
+            text-align: right;
+            min-width: 100px;
+        }
+        
+        /* Time Range Selector */
+        .time-range-selector {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .range-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .range-btn {
+            padding: 8px 20px;
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 8px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .range-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .range-btn:hover {
+            border-color: #667eea;
+        }
+        
+        .custom-range {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        /* Export Section */
+        .export-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .export-option {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .export-option:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+        }
+        
+        .export-option i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .timeline-container::before {
+                left: 30px;
+            }
+            
+            .timeline-item:nth-child(odd),
+            .timeline-item:nth-child(even) {
+                padding-left: 60px;
+                padding-right: 15px;
+                text-align: left;
+            }
+            
+            .timeline-item:nth-child(odd) .timeline-dot,
+            .timeline-item:nth-child(even) .timeline-dot {
+                left: 22px;
+                right: auto;
+            }
+            
+            .timeline-item:nth-child(odd) .timeline-content {
+                border-left: 5px solid;
+                border-right: none;
+            }
+            
+            .history-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .custom-range {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .history-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cropinsight-container">
+        <header class="header">
+            <img src="logo.png" width="150" height="150" style="border-radius: 50%; margin-bottom: 20px;" />
+            <h1><i class="fas fa-history"></i> DETECTION HISTORY</h1>
+            <p class="lead" style="color: rgba(255,255,255,0.9);">Complete Audit Trail of Seed Quality Analysis</p>
+        </header>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-tractor"></i> Cropinsight</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="camera.html">Camera</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="library.html">Library</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="result.html">Result</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="history.html">History</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="jumbotron">
+            <!-- Statistics Summary -->
+            <div class="history-stats">
+                <div class="history-stat-card">
+                    <div class="history-stat-icon total">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="history-stat-value">12,847</div>
+                    <div class="history-stat-label">Total Detections</div>
+                </div>
+                
+                <div class="history-stat-card">
+                    <div class="history-stat-icon today">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="history-stat-value">1,245</div>
+                    <div class="history-stat-label">Today's Scans</div>
+                </div>
+                
+                <div class="history-stat-card">
+                    <div class="history-stat-icon defects">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <div class="history-stat-value">15.3%</div>
+                    <div class="history-stat-label">Avg Defect Rate</div>
+                </div>
+                
+                <div class="history-stat-card">
+                    <div class="history-stat-icon avg">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="history-stat-value">2.4s</div>
+                    <div class="history-stat-label">Avg Processing Time</div>
+                </div>
+            </div>
+
+            <!-- Time Range Selector -->
+            <div class="time-range-selector">
+                <h5><i class="fas fa-calendar-alt"></i> Select Time Range</h5>
+                <div class="range-buttons">
+                    <button class="range-btn active" onclick="setTimeRange('today')">Today</button>
+                    <button class="range-btn" onclick="setTimeRange('yesterday')">Yesterday</button>
+                    <button class="range-btn" onclick="setTimeRange('week')">Last 7 Days</button>
+                    <button class="range-btn" onclick="setTimeRange('month')">Last 30 Days</button>
+                    <button class="range-btn" onclick="setTimeRange('quarter')">Last 90 Days</button>
+                    <button class="range-btn" onclick="setTimeRange('year')">Last Year</button>
+                </div>
+                <div class="custom-range">
+                    <div class="form-group mb-0">
+                        <label>From</label>
+                        <input type="date" class="form-control" id="dateFrom" value="2024-01-01">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label>To</label>
+                        <input type="date" class="form-control" id="dateTo" value="2024-01-19">
+                    </div>
+                    <button class="btn btn-primary" onclick="applyCustomRange()">
+                        <i class="fas fa-check"></i> Apply
+                    </button>
+                </div>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button class="view-btn active" onclick="setView('timeline')">
+                    <i class="fas fa-stream"></i> Timeline View
+                </button>
+                <button class="view-btn" onclick="setView('table')">
+                    <i class="fas fa-table"></i> Table View
+                </button>
+                <button class="view-btn" onclick="setView('calendar')">
+                    <i class="fas fa-calendar"></i> Calendar View
+                </button>
+            </div>
+
+            <!-- Timeline View -->
+            <div id="timelineView" class="timeline-container">
+                <!-- Timeline items will be dynamically loaded -->
+            </div>
+
+            <!-- Table View -->
+            <div id="tableView" class="history-table-container" style="display: none;">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Seed ID</th>
+                                <th>Type</th>
+                                <th>Detection Result</th>
+                                <th>Defect Types</th>
+                                <th>Confidence</th>
+                                <th>Operator</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTable">
+                            <!-- Table data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted">
+                        Showing <span id="tableCount">10</span> of 12,847 records
+                    </div>
+                    <nav>
+                        <ul class="pagination mb-0">
+                            <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div id="calendarView" class="calendar-view">
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar days will be dynamically loaded -->
+                </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="activity-log">
+                <h5 class="mb-4"><i class="fas fa-clipboard-list"></i> Recent System Activities</h5>
+                <div id="activityLog">
+                    <!-- Activity log items will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Export Section -->
+            <div class="export-section">
+                <h5 class="mb-4"><i class="fas fa-file-export"></i> Export History Data</h5>
+                <div class="export-options">
+                    <div class="export-option" onclick="exportData('pdf')">
+                        <i class="fas fa-file-pdf"></i>
+                        <h6>Export as PDF</h6>
+                        <p class="small text-muted">Detailed report with charts</p>
+                    </div>
+                    
+                    <div class="export-option" onclick="exportData('csv')">
+                        <i class="fas fa-file-csv"></i>
+                        <h6>Export as CSV</h6>
+                        <p class="small text-muted">Raw data for analysis</p>
+                    </div>
+                    
+                    <div class="export-option" onclick="exportData('excel')">
+                        <i class="fas fa-file-excel"></i>
+                        <h6>Export as Excel</h6>
+                        <p class="small text-muted">Formatted spreadsheet</p>
+                    </div>
+                    
+                    <div class="export-option" onclick="exportData('json')">
+                        <i class="fas fa-file-code"></i>
+                        <h6>Export as JSON</h6>
+                        <p class="small text-muted">Structured data format</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <label><i class="fas fa-filter"></i> Export Filters</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Date Range</label>
+                                <select class="form-control" id="exportDateRange">
+                                    <option value="all">All Time</option>
+                                    <option value="today">Today</option>
+                                    <option value="week">This Week</option>
+                                    <option value="month">This Month</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Data Type</label>
+                                <select class="form-control" id="exportDataType">
+                                    <option value="all">All Data</option>
+                                    <option value="defects">Defects Only</option>
+                                    <option value="good">Good Only</option>
+                                    <option value="suspicious">Suspicious Only</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <button class="btn btn-success" onclick="startExport()">
+                            <i class="fas fa-download"></i> Start Export
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="scheduleExport()">
+                            <i class="fas fa-clock"></i> Schedule Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="mt-4">
+                <a href="index.html" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+                <a href="result.html" class="btn btn-primary">
+                    <i class="fas fa-chart-bar"></i> View Results
+                </a>
+                <button class="btn btn-warning float-right" onclick="clearHistory()">
+                    <i class="fas fa-trash-alt"></i> Clear Old History
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Cropinsight Detection History | Database Size: 4.7 GB | Last Backup: 2024-01-18 23:45:00</p>
+            <p>System Uptime: <span id="uptimeCounter">15 days, 7 hours, 32 minutes</span></p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    
+    <script>
+        // Sample history data
+        const historyData = [
+            {
+                id: "SD-2024-001",
+                timestamp: "2024-01-19 14:30:45",
+                date: "Today",
+                time: "14:30",
+                seedType: "Padi (Rice)",
+                result: "Defective",
+                defectTypes: ["Cracked", "Discolored"],
+                confidence: 92,
+                operator: "Auto-System",
+                status: "defect",
+                description: "Seed detected with internal cracks and discoloration"
+            },
+            {
+                id: "SD-2024-002",
+                timestamp: "2024-01-19 14:28:12",
+                date: "Today",
+                time: "14:28",
+                seedType: "Jagung (Corn)",
+                result: "Good",
+                defectTypes: [],
+                confidence: 98,
+                operator: "Auto-System",
+                status: "good",
+                description: "Perfect seed with no defects detected"
+            },
+            {
+                id: "SD-2024-003",
+                timestamp: "2024-01-19 10:15:33",
+                date: "Today",
+                time: "10:15",
+                seedType: "Kedelai (Soybean)",
+                result: "Suspicious",
+                defectTypes: ["Mold/Fungus"],
+                confidence: 76,
+                operator: "Operator-001",
+                status: "suspicious",
+                description: "Possible mold growth detected, needs manual review"
+            },
+            {
+                id: "SD-2024-004",
+                timestamp: "2024-01-18 16:22:18",
+                date: "Yesterday",
+                time: "16:22",
+                seedType: "Gandum (Wheat)",
+                result: "Defective",
+                defectTypes: ["Broken/Damaged", "Insect Damage"],
+                confidence: 95,
+                operator: "Auto-System",
+                status: "defect",
+                description: "Multiple defects: broken structure and insect marks"
+            },
+            {
+                id: "SD-2024-005",
+                timestamp: "2024-01-18 09:45:05",
+                date: "Yesterday",
+                time: "09:45",
+                seedType: "Padi (Rice)",
+                result: "Good",
+                defectTypes: [],
+                confidence: 96,
+                operator: "Auto-System",
+                status: "good",
+                description: "High quality rice seed passed inspection"
+            },
+            {
+                id: "SD-2024-006",
+                timestamp: "2024-01-17 13:18:42",
+                date: "2 days ago",
+                time: "13:18",
+                seedType: "Kapas (Cotton)",
+                result: "Processing",
+                defectTypes: ["Analyzing..."],
+                confidence: 0,
+                operator: "System",
+                status: "processing",
+                description: "Analysis in progress, please wait..."
+            },
+            {
+                id: "SD-2024-007",
+                timestamp: "2024-01-16 11:15:27",
+                date: "3 days ago",
+                time: "11:15",
+                seedType: "Jagung (Corn)",
+                result: "Defective",
+                defectTypes: ["Immature", "Discolored"],
+                confidence: 88,
+                operator: "Operator-003",
+                status: "defect",
+                description: "Seed appears immature with abnormal coloration"
+            },
+            {
+                id: "SD-2024-008",
+                timestamp: "2024-01-15 08:12:55",
+                date: "4 days ago",
+                time: "08:12",
+                seedType: "Kedelai (Soybean)",
+                result: "Good",
+                defectTypes: [],
+                confidence: 94,
+                operator: "Auto-System",
+                status: "good",
+                description: "Soybean seed meets all quality standards"
+            },
+            {
+                id: "SD-2024-009",
+                timestamp: "2024-01-14 14:10:33",
+                date: "5 days ago",
+                time: "14:10",
+                seedType: "Gandum (Wheat)",
+                result: "Suspicious",
+                defectTypes: ["Cracked"],
+                confidence: 65,
+                operator: "Auto-System",
+                status: "suspicious",
+                description: "Minor crack detected, requires secondary inspection"
+            },
+            {
+                id: "SD-2024-010",
+                timestamp: "2024-01-13 17:08:19",
+                date: "6 days ago",
+                time: "17:08",
+                seedType: "Padi (Rice)",
+                result: "Defective",
+                defectTypes: ["Mold/Fungus", "Insect Damage"],
+                confidence: 91,
+                operator: "Operator-002",
+                status: "defect",
+                description: "Fungal infection with insect damage detected"
+            }
+        ];
+
+        // Sample activity log data
+        const activityLogData = [
+            {
+                id: 1,
+                action: "Batch Detection Completed",
+                details: "Processed 250 rice seeds with 92.3% accuracy",
+                time: "14:30:45",
+                type: "detection"
+            },
+            {
+                id: 2,
+                action: "Data Export",
+                details: "Exported weekly report as PDF",
+                time: "13:45:22",
+                type: "export"
+            },
+            {
+                id: 3,
+                action: "System Settings Updated",
+                details: "Detection sensitivity increased to 95%",
+                time: "12:15:10",
+                type: "settings"
+            },
+            {
+                id: 4,
+                action: "Maintenance Completed",
+                details: "X-Ray calibration and cleaning performed",
+                time: "10:30:05",
+                type: "system"
+            },
+            {
+                id: 5,
+                action: "New User Login",
+                details: "Operator-004 logged in from Station-3",
+                time: "09:15:33",
+                type: "system"
+            },
+            {
+                id: 6,
+                action: "Database Backup",
+                details: "Automatic backup completed successfully",
+                time: "08:00:00",
+                type: "system"
+            }
+        ];
+
+        // DOM Elements
+        const timelineView = document.getElementById('timelineView');
+        const tableView = document.getElementById('tableView');
+        const calendarView = document.getElementById('calendarView');
+        const historyTable = document.getElementById('historyTable');
+        const activityLog = document.getElementById('activityLog');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const uptimeCounter = document.getElementById('uptimeCounter');
+
+        // Initialize
+        function initializeHistory() {
+            loadTimelineView();
+            loadTableView();
+            loadActivityLog();
+            loadCalendarView();
+            startUptimeCounter();
+        }
+
+        // Timeline View
+        function loadTimelineView() {
+            timelineView.innerHTML = '';
+            
+            historyData.forEach((item, index) => {
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                
+                timelineItem.innerHTML = `
+                    <div class="timeline-dot ${item.status}"></div>
+                    <div class="timeline-content ${item.status}">
+                        <div class="timeline-date">
+                            <i class="fas fa-calendar"></i>
+                            <span>${item.date} at ${item.time}</span>
+                        </div>
+                        <h6>${item.seedType} - ${item.id}</h6>
+                        <p class="mb-2">${item.description}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="history-status-badge badge-${item.status}">
+                                    ${item.result}
+                                </span>
+                                <small class="ml-2 text-muted">
+                                    Confidence: ${item.confidence}%
+                                </small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewHistoryDetail('${item.id}')">
+                                <i class="fas fa-eye"></i> Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                timelineView.appendChild(timelineItem);
+            });
+        }
+
+        // Table View
+        function loadTableView() {
+            historyTable.innerHTML = '';
+            
+            historyData.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Create defect tags
+                let defectTags = '';
+                if (item.defectTypes.length > 0) {
+                    item.defectTypes.forEach(defect => {
+                        defectTags += `<span class="badge badge-secondary mr-1">${defect}</span>`;
+                    });
+                } else {
+                    defectTags = '<span class="text-muted">None</span>';
+                }
+                
+                // Status badge
+                let statusBadge = '';
+                if (item.status === 'good') {
+                    statusBadge = '<span class="badge badge-success">Good</span>';
+                } else if (item.status === 'defect') {
+                    statusBadge = '<span class="badge badge-danger">Defective</span>';
+                } else if (item.status === 'suspicious') {
+                    statusBadge = '<span class="badge badge-warning">Suspicious</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-info">Processing</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>
+                        <strong>${item.date}</strong><br>
+                        <small>${item.time}</small>
+                    </td>
+                    <td><code>${item.id}</code></td>
+                    <td>${item.seedType}</td>
+                    <td>${statusBadge}</td>
+                    <td>${defectTags}</td>
+                    <td>
+                        <div class="progress" style="height: 6px; width: 60px;">
+                            <div class="progress-bar ${getConfidenceClass(item.confidence)}" 
+                                 style="width: ${item.confidence}%"></div>
+                        </div>
+                        <small>${item.confidence}%</small>
+                    </td>
+                    <td>${item.operator}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewHistoryDetail('${item.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="exportSingleHistory('${item.id}')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                `;
+                
+                historyTable.appendChild(row);
+            });
+        }
+
+        // Activity Log
+        function loadActivityLog() {
+            activityLog.innerHTML = '';
+            
+            activityLogData.forEach(log => {
+                const logItem = document.createElement('div');
+                logItem.className = 'log-item';
+                
+                logItem.innerHTML = `
+                    <div class="log-icon ${log.type}">
+                        <i class="fas fa-${getActivityIcon(log.type)}"></i>
+                    </div>
+                    <div class="log-content">
+                        <div class="log-action">${log.action}</div>
+                        <div class="log-details">${log.details}</div>
+                    </div>
+                    <div class="log-time">${log.time}</div>
+                `;
+                
+                activityLog.appendChild(logItem);
+            });
+        }
+
+        // Calendar View
+        function loadCalendarView() {
+            calendarGrid.innerHTML = '';
+            
+            // Generate 30 days of calendar data
+            for (let i = 0; i < 30; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                // Simulate random data for each day
+                const total = Math.floor(Math.random() * 500) + 100;
+                const good = Math.floor(total * (0.7 + Math.random() * 0.2));
+                const defects = total - good;
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = `calendar-day ${i === 0 ? 'active' : ''}`;
+                dayElement.innerHTML = `
+                    <div class="calendar-day-header">
+                        ${date.toLocaleDateString('en-US', { weekday: 'short' })}
+                    </div>
+                    <div class="calendar-count">${total}</div>
+                    <div class="calendar-good">${good} good</div>
+                    <div class="calendar-defect">${defects} defects</div>
+                    <small>${date.getDate()}/${date.getMonth() + 1}</small>
+                `;
+                
+                dayElement.addEventListener('click', () => {
+                    document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('active'));
+                    dayElement.classList.add('active');
+                    viewDayDetails(dateStr, total, good, defects);
+                });
+                
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+
+        // Helper functions
+        function getConfidenceClass(confidence) {
+            if (confidence >= 90) return 'bg-success';
+            if (confidence >= 70) return 'bg-warning';
+            return 'bg-danger';
+        }
+
+        function getActivityIcon(type) {
+            const iconMap = {
+                'detection': 'search',
+                'export': 'file-export',
+                'settings': 'cogs',
+                'system': 'server'
+            };
+            return iconMap[type] || 'info-circle';
+        }
+
+        // View Management
+        function setView(viewType) {
+            // Update active button
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show selected view
+            timelineView.style.display = 'none';
+            tableView.style.display = 'none';
+            calendarView.style.display = 'none';
+            
+            if (viewType === 'timeline') {
+                timelineView.style.display = 'block';
+            } else if (viewType === 'table') {
+                tableView.style.display = 'block';
+            } else if (viewType === 'calendar') {
+                calendarView.style.display = 'block';
+            }
+        }
+
+        // Time Range Management
+        function setTimeRange(range) {
+            // Update active button
+            document.querySelectorAll('.range-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // In real implementation, filter data based on range
+            alert(`Loading data for: ${range}`);
+        }
+
+        function applyCustomRange() {
+            const from = document.getElementById('dateFrom').value;
+            const to = document.getElementById('dateTo').value;
+            alert(`Loading data from ${from} to ${to}`);
+            // In real implementation, filter data based on custom range
+        }
+
+        // Action Functions
+        function viewHistoryDetail(id) {
+            const item = historyData.find(d => d.id === id);
+            if (item) {
+                alert(`Viewing details for: ${id}\n\nType: ${item.seedType}\nResult: ${item.result}\nConfidence: ${item.confidence}%\nOperator: ${item.operator}\nTime: ${item.timestamp}\n\nDescription: ${item.description}`);
+                // In real implementation, open detail modal
+            }
+        }
+
+        function exportSingleHistory(id) {
+            alert(`Exporting history for: ${id}`);
+            // In real implementation, trigger download
+        }
+
+        function exportData(format) {
+            const dateRange = document.getElementById('exportDateRange').value;
+            const dataType = document.getElementById('exportDataType').value;
+            
+            alert(`Exporting ${dataType} data from ${dateRange} as ${format.toUpperCase()}`);
+            // In real implementation, trigger export
+        }
+
+        function startExport() {
+            alert('Export started. You will be notified when it completes.');
+            // In real implementation, start export process
+        }
+
+        function scheduleExport() {
+            alert('Export scheduled for daily at 2:00 AM');
+            // In real implementation, schedule export
+        }
+
+        function viewDayDetails(date, total, good, defects) {
+            alert(`Date: ${date}\nTotal Scans: ${total}\nGood Seeds: ${good}\nDefective Seeds: ${defects}\nDefect Rate: ${((defects/total)*100).toFixed(1)}%`);
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear history older than 90 days?')) {
+                alert('Old history cleared successfully. 8,452 records removed.');
+                // In real implementation, clear old history
+            }
+        }
+
+        // Uptime counter
+        function startUptimeCounter() {
+            let days = 15, hours = 7, minutes = 32;
+            
+            setInterval(() => {
+                minutes++;
+                if (minutes >= 60) {
+                    minutes = 0;
+                    hours++;
+                    if (hours >= 24) {
+                        hours = 0;
+                        days++;
+                    }
+                }
+                
+                uptimeCounter.textContent = `${days} days, ${hours} hours, ${minutes} minutes`;
+            }, 60000); // Update every minute
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initializeHistory);
+    </script>
+</body>
+</html>

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Module - Cropinsight</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+           body {
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('BG1.png') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Efek animasi subtle pada background */
+@keyframes backgroundPan {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+}
+
+body {
+    animation: backgroundPan 60s linear infinite alternate;
+}
+
+/* Efek partikel untuk background */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: -1;
+    pointer-events: none;
+}
+        
+        .cropinsight-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            margin: 20px auto;
+            width: 95%;
+            max-width: 1200px;
+        }
+        
+         .header {
+    text-align: center;
+    padding: 40px 20px;
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.8), rgba(76, 73, 79, 0.8)),
+        url('BG.png') no-repeat center center;
+    background-size: cover;
+    color: white;
+    border-radius: 20px 20px 0 0;
+         }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .navbar {
+            border-radius: 0 0 20px 20px;
+            padding: 0 20px;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: #667eea !important;
+        }
+        
+        .jumbotron {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .camera-preview {
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #e0e0e0;
+        }
+        
+        .camera-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .overlay-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+        }
+        
+        .camera-status {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .camera-controls {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .camera-controls .btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .capture-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #333;
+        }
+        
+        .captured-image {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #dee2e6;
+        }
+        
+        .captured-image img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .camera-settings {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .setting-group {
+            margin-bottom: 20px;
+        }
+        
+        .setting-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .thumbnail-item {
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s;
+            position: relative;
+        }
+        
+        .thumbnail-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .thumbnail-item img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+        }
+        
+        .thumbnail-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .camera-preview {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cropinsight-container">
+        <header class="header">
+            <img src="cvr1.png" width="150" height="150" style="border-radius: 10%; margin-bottom: 20px;" />
+            <h1><i class="fas fa-camera"></i> CAMERA MODULE</h1>
+            <p class="lead" style="color: rgba(255,255,255,0.9);">Capture and Analyze Plant Images</p>
+        </header>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-tractor"></i> Cropinsight</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="camera.html">Camera</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="library.html">Library</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="result.html">Result</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="history.html">History</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Camera Control Panel -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title"><i class="fas fa-camera"></i> Live Camera</h4>
+                            
+                            <!-- Camera Selection Dropdown -->
+                            <div class="form-group">
+                                <label for="cameraSelect"><i class="fas fa-video"></i> Select Camera</label>
+                                <select class="form-control" id="cameraSelect">
+                                    <option value="">-- Select Camera --</option>
+                                    <option value="front">Front Camera (Built-in)</option>
+                                    <option value="back">Back Camera (Built-in)</option>
+                                    <option value="external1">External Camera USB 1</option>
+                                    <option value="external2">External Camera USB 2</option>
+                                    <option value="webcam">Web Camera</option>
+                                    <option value="ipcam">IP Camera Network</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Camera Resolution -->
+                            <div class="form-group">
+                                <label for="resolutionSelect"><i class="fas fa-expand"></i> Resolution</label>
+                                <select class="form-control" id="resolutionSelect">
+                                    <option value="low">Low (640x480)</option>
+                                    <option value="medium" selected>Medium (1280x720)</option>
+                                    <option value="high">High (1920x1080)</option>
+                                    <option value="ultra">Ultra (3840x2160)</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Camera Preview Area -->
+                            <div class="camera-preview" id="cameraPreview">
+                                <div id="cameraPlaceholder">
+                                    <i class="fas fa-camera fa-5x text-light mb-3"></i>
+                                    <p class="text-light">Camera preview will appear here</p>
+                                    <p class="text-light small">Select a camera from dropdown to start</p>
+                                </div>
+                                <video id="cameraStream" style="display: none;"></video>
+                                <div class="camera-overlay">
+                                    <div class="overlay-grid"></div>
+                                    <div class="camera-status">
+                                        <i class="fas fa-circle text-success mr-2"></i>
+                                        <span id="cameraStatus">Ready</span>
+                                    </div>
+                                    <div class="camera-controls">
+                                        <button class="btn btn-danger" id="captureBtn">
+                                            <i class="fas fa-camera"></i>
+                                        </button>
+                                        <button class="btn btn-info" id="recordBtn">
+                                            <i class="fas fa-video"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="capture-indicator" id="captureIndicator">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Camera Controls -->
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary btn-block" id="startCameraBtn">
+                                        <i class="fas fa-play"></i> Start Camera
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-warning btn-block" id="stopCameraBtn" disabled>
+                                        <i class="fas fa-stop"></i> Stop Camera
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-secondary btn-block" id="switchCameraBtn">
+                                        <i class="fas fa-sync-alt"></i> Switch Camera
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <!-- Captured Image Display -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-image"></i> Latest Capture</h5>
+                            <div class="captured-image" id="capturedImage">
+                                <i class="fas fa-image fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No image captured yet</p>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-success btn-block" id="analyzeBtn" disabled>
+                                    <i class="fas fa-search"></i> Analyze Image
+                                </button>
+                                <button class="btn btn-info btn-block mt-2" id="saveBtn" disabled>
+                                    <i class="fas fa-save"></i> Save to Library
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Camera Settings -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-cogs"></i> Camera Settings</h5>
+                            <div class="camera-settings">
+                                <div class="setting-group">
+                                    <label><i class="fas fa-sun"></i> Brightness</label>
+                                    <input type="range" class="form-control-range" id="brightnessSlider" min="0" max="100" value="50">
+                                    <small class="text-muted" id="brightnessValue">50%</small>
+                                </div>
+                                
+                                <div class="setting-group">
+                                    <label><i class="fas fa-adjust"></i> Contrast</label>
+                                    <input type="range" class="form-control-range" id="contrastSlider" min="0" max="100" value="50">
+                                    <small class="text-muted" id="contrastValue">50%</small>
+                                </div>
+                                
+                                <div class="setting-group">
+                                    <label><i class="fas fa-snowflake"></i> White Balance</label>
+                                    <select class="form-control" id="whiteBalanceSelect">
+                                        <option value="auto">Auto</option>
+                                        <option value="sunlight">Sunlight</option>
+                                        <option value="cloudy">Cloudy</option>
+                                        <option value="shade">Shade</option>
+                                        <option value="tungsten">Tungsten</option>
+                                        <option value="fluorescent">Fluorescent</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="setting-group">
+                                    <label><i class="fas fa-lightbulb"></i> Flash Mode</label>
+                                    <select class="form-control" id="flashSelect">
+                                        <option value="off">Off</option>
+                                        <option value="auto">Auto</option>
+                                        <option value="on">On</option>
+                                        <option value="torch">Torch</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Captures -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-history"></i> Recent Captures</h5>
+                    <div class="thumbnail-grid" id="thumbnailGrid">
+                        <!-- Thumbnails will be dynamically added here -->
+                        <div class="text-center text-muted p-4">
+                            <i class="fas fa-images fa-2x mb-3"></i>
+                            <p>No recent captures</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="mt-4">
+                <a href="index.html" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+                <a href="library.html" class="btn btn-primary float-right">
+                    Go to Library <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Cropinsight Camera Module | Version 2.0 | © 2024 Agricultural Technology</p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    
+    <script>
+        // Simulated camera data
+        const sampleImages = [
+            { id: 1, name: 'plant_001.jpg', date: '2024-01-15 10:30', type: 'Leaf Analysis' },
+            { id: 2, name: 'plant_002.jpg', date: '2024-01-15 11:45', type: 'Disease Detection' },
+            { id: 3, name: 'plant_003.jpg', date: '2024-01-14 09:20', type: 'Growth Monitor' },
+            { id: 4, name: 'plant_004.jpg', date: '2024-01-14 14:15', type: 'Leaf Analysis' },
+            { id: 5, name: 'plant_005.jpg', date: '2024-01-13 16:40', type: 'Disease Detection' },
+            { id: 6, name: 'plant_006.jpg', date: '2024-01-13 08:55', type: 'Growth Monitor' }
+        ];
+        
+        let currentCamera = null;
+        let isCameraActive = false;
+        let currentImage = null;
+        
+        // DOM Elements
+        const cameraSelect = document.getElementById('cameraSelect');
+        const resolutionSelect = document.getElementById('resolutionSelect');
+        const cameraPreview = document.getElementById('cameraPreview');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const cameraStream = document.getElementById('cameraStream');
+        const cameraStatus = document.getElementById('cameraStatus');
+        const startCameraBtn = document.getElementById('startCameraBtn');
+        const stopCameraBtn = document.getElementById('stopCameraBtn');
+        const switchCameraBtn = document.getElementById('switchCameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const recordBtn = document.getElementById('recordBtn');
+        const captureIndicator = document.getElementById('captureIndicator');
+        const capturedImage = document.getElementById('capturedImage');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const brightnessSlider = document.getElementById('brightnessSlider');
+        const contrastSlider = document.getElementById('contrastSlider');
+        const brightnessValue = document.getElementById('brightnessValue');
+        const contrastValue = document.getElementById('contrastValue');
+        const thumbnailGrid = document.getElementById('thumbnailGrid');
+        
+        // Initialize sample thumbnails
+        function loadSampleThumbnails() {
+            thumbnailGrid.innerHTML = '';
+            sampleImages.forEach(image => {
+                const thumbnailItem = document.createElement('div');
+                thumbnailItem.className = 'thumbnail-item';
+                thumbnailItem.innerHTML = `
+                    <img src="https://via.placeholder.com/100x100/4CAF50/FFFFFF?text=Plant" alt="${image.name}">
+                    <div class="thumbnail-overlay">
+                        ${image.type}
+                    </div>
+                `;
+                thumbnailItem.addEventListener('click', () => {
+                    showImageInPreview(image);
+                });
+                thumbnailGrid.appendChild(thumbnailItem);
+            });
+        }
+        
+        function showImageInPreview(image) {
+            capturedImage.innerHTML = `
+                <img src="https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=${encodeURIComponent(image.name)}" alt="${image.name}">
+                <div class="mt-3 text-center">
+                    <small class="text-muted">${image.name}</small><br>
+                    <small class="text-muted">${image.date}</small>
+                </div>
+            `;
+            analyzeBtn.disabled = false;
+            saveBtn.disabled = false;
+            currentImage = image;
+        }
+        
+        // Camera Control Functions
+        function startCamera() {
+            if (!cameraSelect.value) {
+                alert('Please select a camera first');
+                return;
+            }
+            
+            cameraPlaceholder.style.display = 'none';
+            cameraStream.style.display = 'block';
+            cameraStatus.innerHTML = 'Live';
+            cameraStatus.className = 'camera-status';
+            
+            // Simulate camera stream (in real app, this would be actual video stream)
+            cameraStream.src = 'https://via.placeholder.com/800x600/333333/FFFFFF?text=LIVE+CAMERA+FEED';
+            
+            startCameraBtn.disabled = true;
+            stopCameraBtn.disabled = false;
+            captureBtn.disabled = false;
+            recordBtn.disabled = false;
+            isCameraActive = true;
+            currentCamera = cameraSelect.value;
+            
+            updateCameraStatus();
+        }
+        
+        function stopCamera() {
+            cameraPlaceholder.style.display = 'flex';
+            cameraStream.style.display = 'none';
+            cameraStatus.innerHTML = 'Stopped';
+            
+            startCameraBtn.disabled = false;
+            stopCameraBtn.disabled = true;
+            captureBtn.disabled = true;
+            recordBtn.disabled = true;
+            isCameraActive = false;
+            
+            updateCameraStatus();
+        }
+        
+        function captureImage() {
+            if (!isCameraActive) {
+                alert('Please start the camera first');
+                return;
+            }
+            
+            // Show capture indicator
+            captureIndicator.style.display = 'flex';
+            
+            // Simulate capture process
+            setTimeout(() => {
+                captureIndicator.style.display = 'none';
+                
+                // Create mock captured image
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const imageName = `capture_${timestamp}.jpg`;
+                
+                capturedImage.innerHTML = `
+                    <img src="https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=CAPTURED+IMAGE" alt="Captured Image">
+                    <div class="mt-3 text-center">
+                        <small class="text-muted">${imageName}</small><br>
+                        <small class="text-muted">${new Date().toLocaleString()}</small>
+                    </div>
+                `;
+                
+                analyzeBtn.disabled = false;
+                saveBtn.disabled = false;
+                
+                // Add to recent captures
+                addToRecentCaptures(imageName);
+                
+                // Show success notification
+                showNotification('Image captured successfully!', 'success');
+            }, 500);
+        }
+        
+        function addToRecentCaptures(imageName) {
+            const newImage = {
+                id: sampleImages.length + 1,
+                name: imageName,
+                date: new Date().toLocaleString(),
+                type: 'New Capture'
+            };
+            
+            sampleImages.unshift(newImage);
+            loadSampleThumbnails();
+        }
+        
+        function switchCamera() {
+            if (!isCameraActive) {
+                alert('Please start the camera first');
+                return;
+            }
+            
+            // Get current selected camera index
+            const currentIndex = cameraSelect.selectedIndex;
+            const nextIndex = (currentIndex + 1) % cameraSelect.options.length;
+            
+            // Skip the first option (placeholder)
+            if (nextIndex === 0) {
+                cameraSelect.selectedIndex = 1;
+            } else {
+                cameraSelect.selectedIndex = nextIndex;
+            }
+            
+            currentCamera = cameraSelect.value;
+            updateCameraStatus();
+            showNotification(`Switched to: ${cameraSelect.options[cameraSelect.selectedIndex].text}`, 'info');
+        }
+        
+        function updateCameraStatus() {
+            const statusText = isCameraActive ? 
+                `Active - ${cameraSelect.options[cameraSelect.selectedIndex].text}` : 
+                'Ready';
+            cameraStatus.innerHTML = statusText;
+        }
+        
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show`;
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '1000';
+            notification.style.minWidth = '300px';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Event Listeners
+        cameraSelect.addEventListener('change', function() {
+            if (isCameraActive) {
+                stopCamera();
+            }
+            updateCameraStatus();
+        });
+        
+        resolutionSelect.addEventListener('change', function() {
+            showNotification(`Resolution changed to: ${this.options[this.selectedIndex].text}`, 'info');
+        });
+        
+        startCameraBtn.addEventListener('click', startCamera);
+        stopCameraBtn.addEventListener('click', stopCamera);
+        switchCameraBtn.addEventListener('click', switchCamera);
+        captureBtn.addEventListener('click', captureImage);
+        
+        recordBtn.addEventListener('click', function() {
+            if (!isCameraActive) {
+                alert('Please start the camera first');
+                return;
+            }
+            
+            const isRecording = this.classList.contains('btn-danger');
+            
+            if (isRecording) {
+                this.classList.remove('btn-danger');
+                this.classList.add('btn-info');
+                this.innerHTML = '<i class="fas fa-video"></i>';
+                showNotification('Recording stopped', 'warning');
+            } else {
+                this.classList.remove('btn-info');
+                this.classList.add('btn-danger');
+                this.innerHTML = '<i class="fas fa-stop"></i>';
+                showNotification('Recording started', 'success');
+            }
+        });
+        
+        analyzeBtn.addEventListener('click', function() {
+            if (!currentImage) {
+                alert('No image to analyze');
+                return;
+            }
+            
+            showNotification('Analyzing image...', 'info');
+            
+            // Simulate analysis process
+            setTimeout(() => {
+                showNotification('Analysis complete! Redirecting to results...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'result.html';
+                }, 1000);
+            }, 2000);
+        });
+        
+        saveBtn.addEventListener('click', function() {
+            if (!currentImage) {
+                alert('No image to save');
+                return;
+            }
+            
+            showNotification('Image saved to library', 'success');
+            setTimeout(() => {
+                window.location.href = 'library.html';
+            }, 1000);
+        });
+        
+        // Slider value updates
+        brightnessSlider.addEventListener('input', function() {
+            brightnessValue.textContent = `${this.value}%`;
+        });
+        
+        contrastSlider.addEventListener('input', function() {
+            contrastValue.textContent = `${this.value}%`;
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSampleThumbnails();
+            updateCameraStatus();
+            
+            // Load last used camera if available
+            const lastCamera = localStorage.getItem('lastCamera');
+            if (lastCamera) {
+                cameraSelect.value = lastCamera;
+            }
+        });
+        
+        // Save camera selection
+        cameraSelect.addEventListener('change', function() {
+            localStorage.setItem('lastCamera', this.value);
+        });
+    </script>
+</body>
+</html>

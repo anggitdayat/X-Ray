@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defect Detection Results - Cropinsight</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+           body {
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('BG1.png') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Efek animasi subtle pada background */
+@keyframes backgroundPan {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
+}
+
+body {
+    animation: backgroundPan 60s linear infinite alternate;
+}
+
+/* Efek partikel untuk background */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: -1;
+    pointer-events: none;
+}
+        
+        .cropinsight-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            margin: 20px auto;
+            width: 95%;
+            max-width: 1400px;
+        }
+        
+         .header {
+    text-align: center;
+    padding: 40px 20px;
+    background: 
+        linear-gradient(rgba(0, 0, 0, 0.8), rgba(76, 73, 79, 0.8)),
+        url('BG.png') no-repeat center center;
+    background-size: cover;
+    color: white;
+    border-radius: 20px 20px 0 0;
+         }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .navbar {
+            border-radius: 0 0 20px 20px;
+            padding: 0 20px;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: #667eea !important;
+        }
+        
+        .jumbotron {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .stat-info h3 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-info p {
+            color: #666;
+            margin: 0;
+        }
+        
+        .stat-card.total { border-left-color: #667eea; }
+        .stat-card.total .stat-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
+        
+        .stat-card.good { border-left-color: #4CAF50; }
+        .stat-card.good .stat-icon { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
+        
+        .stat-card.defect { border-left-color: #F44336; }
+        .stat-card.defect .stat-icon { background: linear-gradient(135deg, #F44336, #C62828); }
+        
+        .stat-card.suspicious { border-left-color: #FF9800; }
+        .stat-card.suspicious .stat-icon { background: linear-gradient(135deg, #FF9800, #EF6C00); }
+        
+        /* Result Table */
+        .result-table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            border-top: none;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            color: #333;
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-good {
+            background: #e8f5e9;
+            color: #2E7D32;
+            border: 1px solid #4CAF50;
+        }
+        
+        .status-defect {
+            background: #ffebee;
+            color: #C62828;
+            border: 1px solid #F44336;
+        }
+        
+        .status-suspicious {
+            background: #fff3e0;
+            color: #EF6C00;
+            border: 1px solid #FF9800;
+        }
+        
+        .status-processing {
+            background: #e3f2fd;
+            color: #1565C0;
+            border: 1px solid #2196F3;
+        }
+        
+        /* Defect Type Tags */
+        .defect-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin: 2px;
+        }
+        
+        .defect-crack { background: #ffcdd2; color: #b71c1c; }
+        .defect-mold { background: #c8e6c9; color: #1b5e20; }
+        .defect-discolored { background: #fff9c4; color: #f57f17; }
+        .defect-broken { background: #e1bee7; color: #4a148c; }
+        .defect-immature { background: #bbdefb; color: #0d47a1; }
+        .defect-insect { background: #ffccbc; color: #bf360c; }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-view { background: #e3f2fd; color: #2196F3; }
+        .btn-export { background: #e8f5e9; color: #4CAF50; }
+        .btn-delete { background: #ffebee; color: #F44336; }
+        
+        /* Charts Section */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chart-placeholder {
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 10px;
+            color: #666;
+        }
+        
+        /* Filter Controls */
+        .filter-controls {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .filter-group {
+            margin-bottom: 15px;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        /* Image Preview Modal */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .image-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .image-box {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .image-box img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        
+        .image-label {
+            padding: 10px;
+            background: #f8f9fa;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .image-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .table {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cropinsight-container">
+        <header class="header">
+            <img src="cvr1.png" width="150" height="150" style="border-radius: 10%; margin-bottom: 20px;" />
+            <h1><i class="fas fa-search"></i> DEFECT DETECTION RESULTS</h1>
+            <p class="lead" style="color: rgba(255,255,255,0.9);">X-Ray & Camera Based Seed Quality Analysis System</p>
+        </header>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-tractor"></i> Cropinsight</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="camera.html">Camera</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="library.html">Library</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="result.html">Result</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="history.html">History</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="jumbotron">
+            <!-- Dashboard Stats -->
+            <div class="stats-grid">
+                <div class="stat-card total">
+                    <div class="stat-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>1,245</h3>
+                        <p>Total Seeds Analyzed</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card good">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>987</h3>
+                        <p>Good Quality Seeds</p>
+                        <small>79.2% Acceptance Rate</small>
+                    </div>
+                </div>
+                
+                <div class="stat-card defect">
+                    <div class="stat-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>187</h3>
+                        <p>Defective Seeds</p>
+                        <small>15.0% Rejection Rate</small>
+                    </div>
+                </div>
+                
+                <div class="stat-card suspicious">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>71</h3>
+                        <p>Suspicious Seeds</p>
+                        <small>5.8% Review Needed</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="filter-controls">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="filter-group">
+                            <label><i class="fas fa-calendar"></i> Date Range</label>
+                            <select class="form-control" id="dateRange">
+                                <option value="today">Today</option>
+                                <option value="week" selected>This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="quarter">This Quarter</option>
+                                <option value="year">This Year</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="filter-group">
+                            <label><i class="fas fa-filter"></i> Seed Type</label>
+                            <select class="form-control" id="seedType">
+                                <option value="all">All Types</option>
+                                <option value="padi">Padi (Rice)</option>
+                                <option value="jagung">Jagung (Corn)</option>
+                                <option value="kedelai">Kedelai (Soybean)</option>
+                                <option value="gandum">Gandum (Wheat)</option>
+                                <option value="kapas">Kapas (Cotton)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="filter-group">
+                            <label><i class="fas fa-bug"></i> Defect Type</label>
+                            <select class="form-control" id="defectType">
+                                <option value="all">All Defects</option>
+                                <option value="crack">Cracked</option>
+                                <option value="mold">Mold/Fungus</option>
+                                <option value="discolored">Discolored</option>
+                                <option value="broken">Broken/Damaged</option>
+                                <option value="immature">Immature</option>
+                                <option value="insect">Insect Damage</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="filter-group">
+                            <label><i class="fas fa-sort"></i> Sort By</label>
+                            <select class="form-control" id="sortBy">
+                                <option value="date_desc">Date (Newest First)</option>
+                                <option value="date_asc">Date (Oldest First)</option>
+                                <option value="confidence_desc">Confidence (High to Low)</option>
+                                <option value="confidence_asc">Confidence (Low to High)</option>
+                                <option value="defect_desc">Defect Severity (High to Low)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button class="btn btn-primary mr-2" id="applyFilters">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <button class="btn btn-outline-secondary mr-2" id="resetFilters">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button class="btn btn-success" id="exportData">
+                        <i class="fas fa-file-export"></i> Export Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-pie"></i> Defect Distribution
+                    </div>
+                    <div class="chart-placeholder">
+                        <div class="text-center">
+                            <i class="fas fa-chart-pie fa-3x mb-3 text-muted"></i>
+                            <p>Defect distribution pie chart</p>
+                            <small>Showing breakdown of defect types</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-line"></i> Daily Defect Trend
+                    </div>
+                    <div class="chart-placeholder">
+                        <div class="text-center">
+                            <i class="fas fa-chart-line fa-3x mb-3 text-muted"></i>
+                            <p>Daily defect trend line chart</p>
+                            <small>Showing defects per day over time</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div class="result-table-container">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4><i class="fas fa-table"></i> Detection Results</h4>
+                    <div class="d-flex gap-2">
+                        <div class="input-group" style="width: 300px;">
+                            <input type="text" class="form-control" placeholder="Search results..." id="searchResults">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Timestamp</th>
+                                <th>Seed Type</th>
+                                <th>X-Ray Image</th>
+                                <th>Camera Image</th>
+                                <th>Detection Result</th>
+                                <th>Defect Type</th>
+                                <th>Confidence</th>
+                                <th>Severity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTable">
+                            <!-- Results will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted">
+                        Showing <span id="showingCount">10</span> of <span id="totalCount">1245</span> results
+                    </div>
+                    <nav>
+                        <ul class="pagination mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">Previous</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">5</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Batch Actions -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-tasks"></i> Batch Actions</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-check-square"></i> Select All
+                        </button>
+                        <button class="btn btn-outline-success">
+                            <i class="fas fa-check-double"></i> Mark as Good
+                        </button>
+                        <button class="btn btn-outline-danger">
+                            <i class="fas fa-times-circle"></i> Mark as Defective
+                        </button>
+                        <button class="btn btn-outline-warning">
+                            <i class="fas fa-flag"></i> Flag for Review
+                        </button>
+                        <button class="btn btn-outline-info">
+                            <i class="fas fa-download"></i> Batch Export
+                        </button>
+                        <button class="btn btn-outline-dark">
+                            <i class="fas fa-trash"></i> Delete Selected
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Preview Modal -->
+            <div class="image-modal" id="imageModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="mb-0"><i class="fas fa-images"></i> Seed Image Analysis</h5>
+                        <button class="modal-close" onclick="closeModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="image-comparison">
+                            <div class="image-box">
+                                <img id="modalXrayImage" src="" alt="X-Ray Image">
+                                <div class="image-label">X-Ray Image</div>
+                            </div>
+                            <div class="image-box">
+                                <img id="modalCameraImage" src="" alt="Camera Image">
+                                <div class="image-label">Camera Image</div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6><i class="fas fa-info-circle"></i> Seed Information</h6>
+                                        <p><strong>Seed ID:</strong> <span id="modalSeedId"></span></p>
+                                        <p><strong>Type:</strong> <span id="modalSeedType"></span></p>
+                                        <p><strong>Size:</strong> <span id="modalSeedSize"></span> mm</p>
+                                        <p><strong>Weight:</strong> <span id="modalSeedWeight"></span> mg</p>
+                                        <p><strong>Density:</strong> <span id="modalSeedDensity"></span> g/cm³</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6><i class="fas fa-search"></i> Detection Details</h6>
+                                        <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+                                        <p><strong>Defect Type:</strong> <span id="modalDefectType"></span></p>
+                                        <p><strong>Confidence:</strong> <span id="modalConfidence"></span></p>
+                                        <p><strong>Severity:</strong> <span id="modalSeverity"></span></p>
+                                        <p><strong>Location:</strong> <span id="modalDefectLocation"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <h6><i class="fas fa-chart-bar"></i> AI Analysis Metrics</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p><strong>X-Ray Score:</strong> <span id="modalXrayScore"></span></p>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar" id="modalXrayProgress" style="width: 85%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p><strong>Camera Score:</strong> <span id="modalCameraScore"></span></p>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-success" id="modalCameraProgress" style="width: 92%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p><strong>Overall Score:</strong> <span id="modalOverallScore"></span></p>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-info" id="modalOverallProgress" style="width: 88%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button class="btn btn-primary" onclick="viewDetailedReport()">
+                                <i class="fas fa-file-alt"></i> View Detailed Report
+                            </button>
+                            <button class="btn btn-success" onclick="downloadReport()">
+                                <i class="fas fa-download"></i> Download Report
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteResult()">
+                                <i class="fas fa-trash"></i> Delete Result
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="mt-4">
+                <a href="index.html" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+                <a href="camera.html" class="btn btn-success">
+                    <i class="fas fa-camera"></i> New Detection
+                </a>
+                <a href="history.html" class="btn btn-info float-right">
+                    View History <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Cropinsight Defect Detection System | Conveyor Line: Active | X-Ray Status: Online | Camera Status: Online</p>
+            <p>Last Updated: <span id="lastUpdated">2024-01-19 14:30:45</span></p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    
+    <script>
+        // Sample detection data
+        const detectionData = [
+            {
+                id: "SD-2024-001",
+                timestamp: "2024-01-19 14:30:45",
+                seedType: "Padi (Rice)",
+                xrayImage: "xray_rice_001.jpg",
+                cameraImage: "camera_rice_001.jpg",
+                result: "Defective",
+                defectTypes: ["Cracked", "Discolored"],
+                confidence: 92,
+                severity: "High",
+                status: "defect",
+                size: "6.2",
+                weight: "25.4",
+                density: "1.15",
+                location: "Center, Surface",
+                xrayScore: 85,
+                cameraScore: 92,
+                overallScore: 88
+            },
+            {
+                id: "SD-2024-002",
+                timestamp: "2024-01-19 14:28:12",
+                seedType: "Jagung (Corn)",
+                xrayImage: "xray_corn_045.jpg",
+                cameraImage: "camera_corn_045.jpg",
+                result: "Good",
+                defectTypes: [],
+                confidence: 98,
+                severity: "None",
+                status: "good",
+                size: "8.5",
+                weight: "350.2",
+                density: "1.32",
+                location: "N/A",
+                xrayScore: 96,
+                cameraScore: 98,
+                overallScore: 97
+            },
+            {
+                id: "SD-2024-003",
+                timestamp: "2024-01-19 14:25:33",
+                seedType: "Kedelai (Soybean)",
+                xrayImage: "xray_soy_023.jpg",
+                cameraImage: "camera_soy_023.jpg",
+                result: "Suspicious",
+                defectTypes: ["Mold/Fungus"],
+                confidence: 76,
+                severity: "Medium",
+                status: "suspicious",
+                size: "7.8",
+                weight: "180.5",
+                density: "1.08",
+                location: "Edge",
+                xrayScore: 82,
+                cameraScore: 70,
+                overallScore: 76
+            },
+            {
+                id: "SD-2024-004",
+                timestamp: "2024-01-19 14:22:18",
+                seedType: "Gandum (Wheat)",
+                xrayImage: "xray_wheat_012.jpg",
+                cameraImage: "camera_wheat_012.jpg",
+                result: "Defective",
+                defectTypes: ["Broken/Damaged", "Insect Damage"],
+                confidence: 95,
+                severity: "Critical",
+                status: "defect",
+                size: "5.4",
+                weight: "42.8",
+                density: "1.22",
+                location: "Multiple",
+                xrayScore: 92,
+                cameraScore: 97,
+                overallScore: 95
+            },
+            {
+                id: "SD-2024-005",
+                timestamp: "2024-01-19 14:20:05",
+                seedType: "Padi (Rice)",
+                xrayImage: "xray_rice_087.jpg",
+                cameraImage: "camera_rice_087.jpg",
+                result: "Good",
+                defectTypes: [],
+                confidence: 96,
+                severity: "None",
+                status: "good",
+                size: "6.5",
+                weight: "27.1",
+                density: "1.18",
+                location: "N/A",
+                xrayScore: 94,
+                cameraScore: 97,
+                overallScore: 96
+            },
+            {
+                id: "SD-2024-006",
+                timestamp: "2024-01-19 14:18:42",
+                seedType: "Kapas (Cotton)",
+                xrayImage: "xray_cotton_009.jpg",
+                cameraImage: "camera_cotton_009.jpg",
+                result: "Processing",
+                defectTypes: ["Analyzing..."],
+                confidence: 0,
+                severity: "Pending",
+                status: "processing",
+                size: "9.2",
+                weight: "125.3",
+                density: "0.95",
+                location: "Processing",
+                xrayScore: 0,
+                cameraScore: 0,
+                overallScore: 0
+            },
+            {
+                id: "SD-2024-007",
+                timestamp: "2024-01-19 14:15:27",
+                seedType: "Jagung (Corn)",
+                xrayImage: "xray_corn_112.jpg",
+                cameraImage: "camera_corn_112.jpg",
+                result: "Defective",
+                defectTypes: ["Immature", "Discolored"],
+                confidence: 88,
+                severity: "Medium",
+                status: "defect",
+                size: "7.2",
+                weight: "280.4",
+                density: "1.25",
+                location: "Core",
+                xrayScore: 90,
+                cameraScore: 86,
+                overallScore: 88
+            },
+            {
+                id: "SD-2024-008",
+                timestamp: "2024-01-19 14:12:55",
+                seedType: "Kedelai (Soybean)",
+                xrayImage: "xray_soy_067.jpg",
+                cameraImage: "camera_soy_067.jpg",
+                result: "Good",
+                defectTypes: [],
+                confidence: 94,
+                severity: "None",
+                status: "good",
+                size: "8.1",
+                weight: "195.8",
+                density: "1.12",
+                location: "N/A",
+                xrayScore: 92,
+                cameraScore: 95,
+                overallScore: 94
+            },
+            {
+                id: "SD-2024-009",
+                timestamp: "2024-01-19 14:10:33",
+                seedType: "Gandum (Wheat)",
+                xrayImage: "xray_wheat_045.jpg",
+                cameraImage: "camera_wheat_045.jpg",
+                result: "Suspicious",
+                defectTypes: ["Cracked"],
+                confidence: 65,
+                severity: "Low",
+                status: "suspicious",
+                size: "5.8",
+                weight: "45.2",
+                density: "1.20",
+                location: "Surface",
+                xrayScore: 70,
+                cameraScore: 60,
+                overallScore: 65
+            },
+            {
+                id: "SD-2024-010",
+                timestamp: "2024-01-19 14:08:19",
+                seedType: "Padi (Rice)",
+                xrayImage: "xray_rice_123.jpg",
+                cameraImage: "camera_rice_123.jpg",
+                result: "Defective",
+                defectTypes: ["Mold/Fungus", "Insect Damage"],
+                confidence: 91,
+                severity: "High",
+                status: "defect",
+                size: "5.9",
+                weight: "23.7",
+                density: "1.10",
+                location: "Multiple",
+                xrayScore: 88,
+                cameraScore: 93,
+                overallScore: 91
+            }
+        ];
+
+        let currentModalData = null;
+
+        // DOM Elements
+        const resultsTable = document.getElementById('resultsTable');
+        const imageModal = document.getElementById('imageModal');
+        const lastUpdated = document.getElementById('lastUpdated');
+        const showingCount = document.getElementById('showingCount');
+        const totalCount = document.getElementById('totalCount');
+
+        // Initialize table
+        function loadResultsTable() {
+            resultsTable.innerHTML = '';
+            
+            detectionData.forEach(data => {
+                const row = document.createElement('tr');
+                
+                // Determine status badge
+                let statusBadge = '';
+                if (data.status === 'good') {
+                    statusBadge = '<span class="status-badge status-good">Good</span>';
+                } else if (data.status === 'defect') {
+                    statusBadge = '<span class="status-badge status-defect">Defective</span>';
+                } else if (data.status === 'suspicious') {
+                    statusBadge = '<span class="status-badge status-suspicious">Suspicious</span>';
+                } else {
+                    statusBadge = '<span class="status-badge status-processing">Processing</span>';
+                }
+                
+                // Create defect tags
+                let defectTags = '';
+                if (data.defectTypes.length > 0) {
+                    data.defectTypes.forEach(defect => {
+                        const defectClass = getDefectClass(defect);
+                        defectTags += `<span class="defect-tag ${defectClass}">${defect}</span> `;
+                    });
+                } else {
+                    defectTags = '<span class="text-muted">None</span>';
+                }
+                
+                row.innerHTML = `
+                    <td><strong>${data.id}</strong></td>
+                    <td>${data.timestamp}</td>
+                    <td>${data.seedType}</td>
+                    <td>
+                        <div class="text-center">
+                            <i class="fas fa-x-ray fa-lg text-info"></i><br>
+                            <small>${data.xrayImage}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="text-center">
+                            <i class="fas fa-camera fa-lg text-primary"></i><br>
+                            <small>${data.cameraImage}</small>
+                        </div>
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td>${defectTags}</td>
+                    <td>
+                        <div class="progress" style="height: 8px; width: 80px;">
+                            <div class="progress-bar ${getConfidenceClass(data.confidence)}" 
+                                 style="width: ${data.confidence}%"></div>
+                        </div>
+                        <small>${data.confidence}%</small>
+                    </td>
+                    <td>
+                        <span class="${getSeverityClass(data.severity)}">
+                            ${data.severity}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn btn-view" onclick="viewResult('${data.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn btn-export" onclick="exportResult('${data.id}')">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="action-btn btn-delete" onclick="deleteSingleResult('${data.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                resultsTable.appendChild(row);
+            });
+            
+            // Update counts
+            showingCount.textContent = detectionData.length;
+            totalCount.textContent = '1245';
+        }
+
+        function getDefectClass(defect) {
+            const defectMap = {
+                'Cracked': 'defect-crack',
+                'Mold/Fungus': 'defect-mold',
+                'Discolored': 'defect-discolored',
+                'Broken/Damaged': 'defect-broken',
+                'Immature': 'defect-immature',
+                'Insect Damage': 'defect-insect',
+                'Analyzing...': 'defect-immature'
+            };
+            return defectMap[defect] || 'defect-crack';
+        }
+
+        function getConfidenceClass(confidence) {
+            if (confidence >= 90) return 'bg-success';
+            if (confidence >= 70) return 'bg-warning';
+            return 'bg-danger';
+        }
+
+        function getSeverityClass(severity) {
+            const severityMap = {
+                'None': 'text-success',
+                'Low': 'text-warning',
+                'Medium': 'text-warning',
+                'High': 'text-danger',
+                'Critical': 'text-danger',
+                'Pending': 'text-secondary'
+            };
+            return severityMap[severity] || 'text-secondary';
+        }
+
+        function viewResult(seedId) {
+            const data = detectionData.find(d => d.id === seedId);
+            if (!data) return;
+            
+            currentModalData = data;
+            
+            // Set modal content
+            document.getElementById('modalSeedId').textContent = data.id;
+            document.getElementById('modalSeedType').textContent = data.seedType;
+            document.getElementById('modalSeedSize').textContent = data.size;
+            document.getElementById('modalSeedWeight').textContent = data.weight;
+            document.getElementById('modalSeedDensity').textContent = data.density;
+            document.getElementById('modalStatus').innerHTML = data.status === 'good' ? 
+                '<span class="status-badge status-good">Good</span>' :
+                data.status === 'defect' ? 
+                '<span class="status-badge status-defect">Defective</span>' :
+                '<span class="status-badge status-suspicious">Suspicious</span>';
+            document.getElementById('modalDefectType').innerHTML = data.defectTypes.length > 0 ? 
+                data.defectTypes.map(d => `<span class="defect-tag ${getDefectClass(d)}">${d}</span>`).join(' ') : 
+                'None';
+            document.getElementById('modalConfidence').textContent = data.confidence + '%';
+            document.getElementById('modalSeverity').textContent = data.severity;
+            document.getElementById('modalDefectLocation').textContent = data.location;
+            document.getElementById('modalXrayScore').textContent = data.xrayScore + '%';
+            document.getElementById('modalCameraScore').textContent = data.cameraScore + '%';
+            document.getElementById('modalOverallScore').textContent = data.overallScore + '%';
+            
+            // Set progress bars
+            document.getElementById('modalXrayProgress').style.width = data.xrayScore + '%';
+            document.getElementById('modalCameraProgress').style.width = data.cameraScore + '%';
+            document.getElementById('modalOverallProgress').style.width = data.overallScore + '%';
+            
+            // Set images (using placeholders)
+            document.getElementById('modalXrayImage').src = `https://via.placeholder.com/400x300/2196F3/FFFFFF?text=X-RAY+${seedId}`;
+            document.getElementById('modalCameraImage').src = `https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=CAMERA+${seedId}`;
+            
+            // Show modal
+            imageModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            imageModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function exportResult(seedId) {
+            alert(`Exporting data for seed: ${seedId}`);
+            // In real implementation, trigger download of report
+        }
+
+        function deleteSingleResult(seedId) {
+            if (confirm(`Are you sure you want to delete result for ${seedId}?`)) {
+                alert(`Result ${seedId} deleted successfully`);
+                // In real implementation, remove from data and refresh
+            }
+        }
+
+        function viewDetailedReport() {
+            if (currentModalData) {
+                alert(`Opening detailed report for: ${currentModalData.id}`);
+                // Navigate to detailed report page
+            }
+        }
+
+        function downloadReport() {
+            if (currentModalData) {
+                alert(`Downloading report for: ${currentModalData.id}`);
+                // Trigger download
+            }
+        }
+
+        function deleteResult() {
+            if (currentModalData && confirm(`Delete result for ${currentModalData.id}?`)) {
+                alert(`Result ${currentModalData.id} deleted`);
+                closeModal();
+                // Refresh data
+            }
+        }
+
+        // Filter functionality
+        document.getElementById('applyFilters').addEventListener('click', function() {
+            const dateRange = document.getElementById('dateRange').value;
+            const seedType = document.getElementById('seedType').value;
+            const defectType = document.getElementById('defectType').value;
+            const sortBy = document.getElementById('sortBy').value;
+            
+            alert(`Filters applied:\nDate: ${dateRange}\nSeed: ${seedType}\nDefect: ${defectType}\nSort: ${sortBy}`);
+            // In real implementation, filter and sort data
+        });
+
+        document.getElementById('resetFilters').addEventListener('click', function() {
+            document.getElementById('dateRange').value = 'week';
+            document.getElementById('seedType').value = 'all';
+            document.getElementById('defectType').value = 'all';
+            document.getElementById('sortBy').value = 'date_desc';
+            alert('Filters reset to default');
+        });
+
+        document.getElementById('exportData').addEventListener('click', function() {
+            alert('Exporting all filtered data to CSV...');
+            // In real implementation, export data
+        });
+
+        // Search functionality
+        document.getElementById('searchResults').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.toLowerCase();
+                if (query.length >= 2) {
+                    alert(`Searching for: ${query}`);
+                    // In real implementation, filter table
+                }
+            }
+        });
+
+        // Update last updated time
+        function updateLastUpdated() {
+            const now = new Date();
+            lastUpdated.textContent = now.toISOString().replace('T', ' ').substring(0, 19);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadResultsTable();
+            updateLastUpdated();
+            
+            // Update time every minute
+            setInterval(updateLastUpdated, 60000);
+            
+            // Close modal on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === imageModal) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
