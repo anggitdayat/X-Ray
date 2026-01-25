@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-Ray</title>
+    <title>Conveyor Plant Seed Detector - Home</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -14,41 +14,41 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-       body {
-    background: 
-        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-        url('BG1.png') no-repeat center center fixed;
-    background-size: cover;
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-}
+        body {
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('BG1.png') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-/* Efek animasi subtle pada background */
-@keyframes backgroundPan {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 100% 100%; }
-}
+        /* Efek animasi subtle pada background */
+        @keyframes backgroundPan {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
 
-body {
-    animation: backgroundPan 60s linear infinite alternate;
-}
+        body {
+            animation: backgroundPan 60s linear infinite alternate;
+        }
 
-/* Efek partikel untuk background */
-body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
-        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px);
-    background-size: 50px 50px;
-    z-index: -1;
-    pointer-events: none;
-}
+        /* Efek partikel untuk background */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            pointer-events: none;
+        }
         
         .X-Ray-container {
             background: rgba(255, 255, 255, 0.95);
@@ -57,19 +57,19 @@ body::after {
             backdrop-filter: blur(10px);
             margin: 20px auto;
             width: 95%;
-            max-width: 1200px;
+            max-width: 1400px;
         }
         
         .header {
-    text-align: center;
-    padding: 40px 20px;
-    background: 
-        linear-gradient(rgba(0, 0, 0, 0.8), rgba(76, 73, 79, 0.8)),
-        url('BG.png') no-repeat center center;
-    background-size: cover;
-    color: white;
-    border-radius: 20px 20px 0 0;
-}
+            text-align: center;
+            padding: 40px 20px;
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.8), rgba(76, 73, 79, 0.8)),
+                url('BG.png') no-repeat center center;
+            background-size: cover;
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
         
         .header h1 {
             font-size: 3rem;
@@ -91,16 +91,18 @@ body::after {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
             margin: 20px;
+            padding: 30px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
+        /* Feature Cards */
         .feature-card {
             background: white;
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             border-left: 5px solid;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             margin-bottom: 20px;
             height: 100%;
             text-decoration: none !important;
@@ -110,9 +112,7 @@ body::after {
         
         .feature-card:hover {
             transform: translateY(-5px);
-            text-decoration: none !important;
-            color: inherit;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
         
         .feature-card.camera {
@@ -140,27 +140,34 @@ body::after {
             gap: 10px;
         }
         
-        .feature-card p {
-            color: #666;
-            margin-bottom: 10px;
-        }
-        
-        .feature-card .small {
-            color: #888;
-            font-size: 0.85rem;
-        }
-        
+        /* Status Cards */
         .wifi-status {
             background: #f8f9fa;
             padding: 15px;
             border-radius: 10px;
             margin: 20px;
-            border-left: 4px solid #4CAF50;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+        
+        .wifi-status.connected {
+            border-left-color: #4CAF50;
+            background: linear-gradient(to right, #e8f5e9, #f1f8e9);
+        }
+        
+        .wifi-status.ap {
+            border-left-color: #2196F3;
+            background: linear-gradient(to right, #e3f2fd, #e1f5fe);
+        }
+        
+        .wifi-status.disconnected {
+            border-left-color: #F44336;
+            background: linear-gradient(to right, #ffebee, #ffcdd2);
         }
         
         .status-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
             margin: 20px;
         }
@@ -172,6 +179,18 @@ body::after {
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             border-left: 5px solid;
             transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: inherit;
         }
         
         .status-card:hover {
@@ -200,12 +219,33 @@ body::after {
         }
         
         .status-value {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: bold;
-            color: #333;
             margin: 10px 0;
+            font-family: 'Courier New', monospace;
         }
         
+        .status-conveyor {
+            color: #4CAF50;
+        }
+        
+        .status-conveyor.off {
+            color: #F44336;
+        }
+        
+        .status-sensor {
+            color: #2196F3;
+        }
+        
+        .status-sensor.detected {
+            color: #F44336;
+        }
+        
+        .status-timer {
+            color: #FF9800;
+        }
+        
+        /* Control Panel */
         .control-panel {
             background: white;
             padding: 30px;
@@ -214,6 +254,98 @@ body::after {
             margin: 20px;
         }
         
+        .tab-container {
+            margin-bottom: 25px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Button Styles */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(to right, #F44336, #C62828);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(to right, #FF9800, #EF6C00);
+            color: white;
+        }
+        
+        .btn-info {
+            background: linear-gradient(to right, #2196F3, #0D47A1);
+            color: white;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+            min-width: 140px;
+        }
+        
+        /* Footer */
         .footer {
             text-align: center;
             color: #666;
@@ -222,13 +354,102 @@ body::after {
             border-top: 1px solid #e0e0e0;
         }
         
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+        }
+        
+        .notification.error {
+            background: linear-gradient(to right, #F44336, #C62828);
+        }
+        
+        .notification.info {
+            background: linear-gradient(to right, #2196F3, #0D47A1);
+        }
+        
+        .notification.warning {
+            background: linear-gradient(to right, #FF9800, #EF6C00);
+        }
+        
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive Design */
         @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
             .status-grid {
                 grid-template-columns: 1fr;
             }
             
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .feature-card h3 {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                padding: 20px 10px;
+            }
+            
             .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .status-value {
                 font-size: 2rem;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -237,8 +458,8 @@ body::after {
     <div class="X-Ray-container">
         <header class="header">
             <img src="cvr1.png" width="150" height="150" style="border-radius: 10%; margin-bottom: 20px;" />
-            <h1><i class="fas fa-seedling"></i> Conveyor Plan Seed Detector</h1>
-            <p class="lead" style="color: rgba(255,255,255,0.9);">Smart X-Ray Detevtor Platform</p>
+            <h1><i class="fas fa-seedling"></i> Conveyor Plant Seed Detector</h1>
+            <p class="lead" style="color: rgba(255,255,255,0.9);">Smart X-Ray Detection Platform</p>
         </header>
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -269,14 +490,16 @@ body::after {
 
         <div class="jumbotron">
             <h1 class="display-4">Welcome to Conveyor Plant Seed Detector</h1>
-            <p class="lead">A comprehensive platform designed to provide you with smart tools to detec and optimize your farming operations.</p>
+            <p class="lead">A comprehensive platform designed to provide you with smart tools to detect and optimize your seed quality operations.</p>
             <hr class="my-4">
-            <p>Monitor, control, and predict your agricultural systems with advanced IoT technology.</p>
+            <p>Monitor, control, and analyze your seed conveyor system with advanced X-Ray and IoT technology.</p>
         </div>
 
-        <div class="wifi-status">
-            <h3><i class="fas fa-wifi"></i> System Status: Connected</h3>
-            <p>All systems operational</p>
+        <!-- ESP32 Connection Status -->
+        <div class="wifi-status" id="wifiStatus">
+            <h3 id="wifiStatusTitle"><i class="fas fa-microchip"></i> ESP32 Status: Checking...</h3>
+            <p id="wifiStatusDetail">Attempting to connect to ESP32...</p>
+            <p id="wifiIP">IP Address: <span id="ipAddress">Loading...</span></p>
         </div>
 
         <div class="container mt-5">
@@ -286,8 +509,8 @@ body::after {
                 <div class="col-md-3">
                     <a href="camera.html" class="feature-card camera">
                         <h3><i class="fas fa-camera"></i> Camera</h3>
-                        <p>take your foto-video.</p>
-                        <div class="small mt-2">Klik untuk membuka Camera Module</div>
+                        <p>Capture live images of seeds for visual inspection and analysis.</p>
+                        <div class="small mt-2">Click to open Camera Module</div>
                     </a>
                 </div>
                 
@@ -295,8 +518,8 @@ body::after {
                 <div class="col-md-3">
                     <a href="library.html" class="feature-card library">
                         <h3><i class="fas fa-photo-video"></i> Library</h3>
-                        <p>Lihat gambar yang telah diambil.</p>
-                        <div class="small mt-2">Klik untuk membuka Image Library</div>
+                        <p>View and manage captured seed images and X-Ray scans.</p>
+                        <div class="small mt-2">Click to open Image Library</div>
                     </a>
                 </div>
                 
@@ -304,8 +527,8 @@ body::after {
                 <div class="col-md-3">
                     <a href="result.html" class="feature-card result">
                         <h3><i class="fas fa-chart-bar"></i> Result</h3>
-                        <p>Lihat hasil analisis deteksi cacat benih.</p>
-                        <div class="small mt-2">Klik untuk membuka Analysis Results</div>
+                        <p>View analysis results of seed defect detection and quality assessment.</p>
+                        <div class="small mt-2">Click to open Analysis Results</div>
                     </a>
                 </div>
                 
@@ -313,75 +536,144 @@ body::after {
                 <div class="col-md-3">
                     <a href="history.html" class="feature-card history">
                         <h3><i class="fas fa-history"></i> History</h3>
-                        <p>Riwayat analisis dan aktivitas sebelumnya.</p>
-                        <div class="small mt-2">Klik untuk membuka Activity History</div>
+                        <p>Review historical data and previous seed analysis reports.</p>
+                        <div class="small mt-2">Click to open Activity History</div>
                     </a>
                 </div>
             </div>
         </div>
 
+        <!-- Real-time Status Cards -->
         <div class="status-grid">
             <div class="status-card conveyor">
-                <h3><i class="fas fa-cogs"></i> Conveyor Status</h3>
-                <div class="status-value" style="color: #4CAF50;">STOPPED</div>
-                <p>Conveyor system is ready</p>
+                <h3><i class="fas fa-conveyor-belt"></i> Conveyor Status</h3>
+                <div class="status-value status-conveyor" id="conveyorStatus">CHECKING...</div>
+                <p id="conveyorDesc">Checking conveyor system status...</p>
             </div>
             
             <div class="status-card sensor">
-                <h3><i class="fas fa-sensor"></i> Proximity Sensor</h3>
-                <div class="status-value" style="color: #2196F3;">CLEAR</div>
-                <p>No object detected</p>
+                <h3><i class="fas fa-sensor"></i> X-Ray Sensor</h3>
+                <div class="status-value status-sensor" id="sensorStatus">CHECKING...</div>
+                <p id="sensorDesc">Checking X-Ray sensor status...</p>
             </div>
             
             <div class="status-card timer">
                 <h3><i class="fas fa-clock"></i> Timer Status</h3>
-                <div class="status-value" style="color: #FF9800;">0s</div>
-                <p>No active timer</p>
+                <div class="status-value status-timer" id="timerStatus">0s</div>
+                <p id="timerDesc">No active timer</p>
             </div>
         </div>
 
+        <!-- ESP32 Control Panel -->
         <div class="control-panel">
             <h2><i class="fas fa-conveyor-belt"></i> Conveyor Control System</h2>
-            <p>ESP32-Based Industrial Conveyor Control with Proximity Sensor</p>
+            <p>ESP32-Based Industrial Conveyor Control with X-Ray Detection</p>
             
-            <div class="form-group">
-                <label for="deltaTime"><i class="fas fa-hourglass-half"></i> Set Delta Time (seconds)</label>
-                <div class="input-group">
-                    <input type="number" class="form-control" id="deltaTime" min="1" max="3600" placeholder="Enter seconds (1-3600)">
-                    <div class="input-group-append">
-                        <button class="btn btn-primary">
-                            <i class="fas fa-play"></i> Start Timer
-                        </button>
-                    </div>
-                </div>
-                <small class="form-text text-muted">
-                    Conveyor will automatically turn ON after this time
-                </small>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('control')">Control</button>
+                <button class="tab" onclick="switchTab('wifi')">WiFi Config</button>
+                <button class="tab" onclick="switchTab('system')">System Info</button>
             </div>
             
-            <div class="row mt-3">
-                <div class="col-md-4">
-                    <button class="btn btn-success btn-block">
+            <div id="control-tab" class="tab-content active">
+                <h4><i class="fas fa-sliders-h"></i> Control Panel</h4>
+                
+                <div class="form-group">
+                    <label for="deltaTime"><i class="fas fa-hourglass-half"></i> Set Delta Time (seconds)</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="deltaTime" min="1" max="3600" placeholder="Enter seconds (1-3600)">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" onclick="setDeltaTime()">
+                                <i class="fas fa-play"></i> Start Timer
+                            </button>
+                        </div>
+                    </div>
+                    <small class="form-text text-muted">
+                        Conveyor will automatically start after this time
+                    </small>
+                </div>
+                
+                <div class="btn-group mt-3">
+                    <button class="btn btn-success" onclick="sendCommand('start')">
                         <i class="fas fa-power-off"></i> Force START
                     </button>
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-danger btn-block">
+                    <button class="btn btn-danger" onclick="sendCommand('stop')">
                         <i class="fas fa-stop"></i> Force STOP
                     </button>
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-warning btn-block">
+                    <button class="btn btn-warning" onclick="sendCommand('reset')">
                         <i class="fas fa-redo"></i> Reset System
                     </button>
+                </div>
+            </div>
+            
+            <div id="wifi-tab" class="tab-content">
+                <h4><i class="fas fa-wifi"></i> WiFi Configuration</h4>
+                
+                <div class="form-group">
+                    <label for="wifiSSID"><i class="fas fa-network-wired"></i> WiFi SSID</label>
+                    <input type="text" class="form-control" id="wifiSSID" placeholder="Enter WiFi network name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="wifiPassword"><i class="fas fa-key"></i> WiFi Password</label>
+                    <input type="password" class="form-control" id="wifiPassword" placeholder="Enter WiFi password">
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="saveWiFiConfig()">
+                        <i class="fas fa-save"></i> Save & Connect
+                    </button>
+                    <button class="btn btn-info" onclick="startAPMode()">
+                        <i class="fas fa-broadcast-tower"></i> Start AP Mode
+                    </button>
+                    <button class="btn btn-warning" onclick="forgetWiFi()">
+                        <i class="fas fa-trash"></i> Forget WiFi
+                    </button>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <h5><i class="fas fa-info-circle"></i> AP Mode Info</h5>
+                    <p>If WiFi is unavailable, ESP32 will create its own network:</p>
+                    <p><strong>SSID:</strong> <span id="apSSID">ESP32-Conveyor</span></p>
+                    <p><strong>Password:</strong> <span id="apPassword">conveyor123</span></p>
+                    <p><strong>AP IP:</strong> <span id="apIP">192.168.4.1</span></p>
+                </div>
+            </div>
+            
+            <div id="system-tab" class="tab-content">
+                <h4><i class="fas fa-info-circle"></i> System Information</h4>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-microchip"></i> Device Information</h5>
+                        <p><strong>Chip Model:</strong> <span id="chipModel">ESP32</span></p>
+                        <p><strong>CPU Frequency:</strong> <span id="cpuFreq">240 MHz</span></p>
+                        <p><strong>Free Heap:</strong> <span id="freeHeap">Loading...</span> bytes</p>
+                        <p><strong>Uptime:</strong> <span id="uptime">Loading...</span></p>
+                        
+                        <h5 class="mt-3"><i class="fas fa-cogs"></i> System Status</h5>
+                        <p><strong>Conveyor State:</strong> <span id="sysConveyorState">Loading...</span></p>
+                        <p><strong>Sensor State:</strong> <span id="sysSensorState">Loading...</span></p>
+                        <p><strong>WiFi Mode:</strong> <span id="sysWiFiMode">Loading...</span></p>
+                        <p><strong>Current Delta Time:</strong> <span id="sysDeltaTime">0</span> seconds</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>Conveyor Plant Seed Detector | Version 2.0 | © 2026 Agricultural Technology</p>
-            <p>Connection: wifi-status</p>
+            <p>Conveyor Plant Seed Detector | Version 3.0 | © 2026 Agricultural Technology</p>
+            <p>Connection: <span id="connectionType">Checking...</span> | <span id="currentIP">Loading...</span></p>
         </div>
+    </div>
+
+    <!-- Notification System -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Processing...</p>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -389,28 +681,370 @@ body::after {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     
     <script>
-        // Smooth scrolling untuk link anchor
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth'
-                    });
+        // Konfigurasi ESP32
+        const ESP32_BASE_URL = "http://192.168.4.1"; // Default ESP32 AP IP
+        let currentTab = 'control';
+        let esp32Connected = false;
+
+        // DOM Elements
+        const wifiStatus = document.getElementById('wifiStatus');
+        const wifiStatusTitle = document.getElementById('wifiStatusTitle');
+        const wifiStatusDetail = document.getElementById('wifiStatusDetail');
+        const ipAddress = document.getElementById('ipAddress');
+        const conveyorStatus = document.getElementById('conveyorStatus');
+        const conveyorDesc = document.getElementById('conveyorDesc');
+        const sensorStatus = document.getElementById('sensorStatus');
+        const sensorDesc = document.getElementById('sensorDesc');
+        const timerStatus = document.getElementById('timerStatus');
+        const timerDesc = document.getElementById('timerDesc');
+        const connectionType = document.getElementById('connectionType');
+        const currentIP = document.getElementById('currentIP');
+        const notification = document.getElementById('notification');
+        const loading = document.getElementById('loading');
+
+        // Fungsi untuk menampilkan notifikasi
+        function showNotification(message, type = 'info') {
+            notification.textContent = message;
+            notification.className = 'notification ' + type;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Fungsi untuk menampilkan/menyembunyikan loading
+        function showLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+        }
+
+        // Fungsi untuk mengganti tab
+        function switchTab(tabName) {
+            // Sembunyikan semua tab
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Hapus active class dari semua tombol tab
+            document.querySelectorAll('.tab').forEach(tabBtn => {
+                tabBtn.classList.remove('active');
+            });
+            
+            // Tampilkan tab yang dipilih
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Aktifkan tombol tab yang dipilih
+            event.currentTarget.classList.add('active');
+            
+            currentTab = tabName;
+        }
+
+        // Fungsi untuk mengupdate status dari ESP32
+        async function updateESP32Status() {
+            try {
+                const response = await fetch(`${ESP32_BASE_URL}/status`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
+                const data = await response.json();
+                
+                // Update WiFi status
+                wifiStatus.className = 'wifi-status ' + data.wifiStatus;
+                
+                if (data.wifiStatus === 'connected') {
+                    wifiStatusTitle.innerHTML = '<i class="fas fa-wifi"></i> ESP32 Status: Connected';
+                    wifiStatusDetail.textContent = 'ESP32 connected to WiFi network';
+                    ipAddress.textContent = data.ipAddress || 'N/A';
+                    connectionType.textContent = 'WiFi';
+                    currentIP.textContent = data.ipAddress || 'N/A';
+                    esp32Connected = true;
+                } else if (data.wifiStatus === 'ap') {
+                    wifiStatusTitle.innerHTML = '<i class="fas fa-broadcast-tower"></i> ESP32 Status: AP Mode';
+                    wifiStatusDetail.textContent = 'ESP32 is in Access Point mode';
+                    ipAddress.textContent = data.ipAddress || '192.168.4.1';
+                    connectionType.textContent = 'AP Mode';
+                    currentIP.textContent = data.ipAddress || '192.168.4.1';
+                    esp32Connected = true;
+                } else {
+                    wifiStatusTitle.innerHTML = '<i class="fas fa-wifi-slash"></i> ESP32 Status: Disconnected';
+                    wifiStatusDetail.textContent = 'Unable to connect to ESP32';
+                    ipAddress.textContent = 'Not available';
+                    connectionType.textContent = 'Disconnected';
+                    currentIP.textContent = 'Not available';
+                    esp32Connected = false;
+                }
+                
+                // Update conveyor status
+                if (data.conveyorRunning) {
+                    conveyorStatus.textContent = 'RUNNING';
+                    conveyorStatus.className = 'status-value status-conveyor';
+                    conveyorDesc.textContent = 'Conveyor is currently running';
+                } else {
+                    conveyorStatus.textContent = 'STOPPED';
+                    conveyorStatus.className = 'status-value status-conveyor off';
+                    conveyorDesc.textContent = 'Conveyor is currently stopped';
+                }
+                
+                // Update sensor status
+                if (data.objectDetected) {
+                    sensorStatus.textContent = 'OBJECT DETECTED';
+                    sensorStatus.className = 'status-value status-sensor detected';
+                    sensorDesc.textContent = 'Object detected by X-Ray sensor';
+                } else {
+                    sensorStatus.textContent = 'CLEAR';
+                    sensorStatus.className = 'status-value status-sensor';
+                    sensorDesc.textContent = 'No object detected';
+                }
+                
+                // Update timer status
+                if (data.waitingForDelta && data.deltaTime > 0) {
+                    const remaining = Math.ceil((data.deltaTime - (Date.now() - data.waitStartTime)) / 1000);
+                    timerStatus.textContent = remaining + 's';
+                    timerDesc.textContent = 'Conveyor will start in ' + remaining + ' seconds';
+                } else {
+                    timerStatus.textContent = '0s';
+                    timerDesc.textContent = 'No active timer';
+                }
+                
+                // Update system info tab
+                document.getElementById('freeHeap').textContent = data.freeHeap || 'Loading...';
+                document.getElementById('uptime').textContent = formatUptime(data.uptime || 0);
+                document.getElementById('sysConveyorState').textContent = data.conveyorRunning ? 'Running' : 'Stopped';
+                document.getElementById('sysSensorState').textContent = data.objectDetected ? 'Object Detected' : 'Clear';
+                document.getElementById('sysWiFiMode').textContent = data.wifiStatus === 'ap' ? 'Access Point' : 'Station';
+                document.getElementById('sysDeltaTime').textContent = Math.floor(data.deltaTime / 1000) || 0;
+                
+            } catch (error) {
+                console.error('Error fetching ESP32 status:', error);
+                wifiStatus.className = 'wifi-status disconnected';
+                wifiStatusTitle.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ESP32 Status: Connection Failed';
+                wifiStatusDetail.textContent = 'Cannot connect to ESP32. Please check connection.';
+                ipAddress.textContent = 'Not available';
+                connectionType.textContent = 'Disconnected';
+                currentIP.textContent = 'Not available';
+                esp32Connected = false;
+            }
+        }
+
+        // Fungsi untuk mengirim perintah ke ESP32
+        async function sendCommand(command) {
+            if (!esp32Connected) {
+                showNotification('Please connect to ESP32 first', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${ESP32_BASE_URL}/control`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ command: command })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    // Update status setelah perintah
+                    setTimeout(updateESP32Status, 500);
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showNotification('ESP32 Connection error', 'error');
+                console.error('Error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Fungsi untuk set delta time
+        async function setDeltaTime() {
+            const deltaTimeInput = document.getElementById('deltaTime');
+            const seconds = parseInt(deltaTimeInput.value);
+            
+            if (isNaN(seconds) || seconds < 1 || seconds > 3600) {
+                showNotification('Please enter a valid number between 1 and 3600', 'error');
+                return;
+            }
+            
+            if (!esp32Connected) {
+                showNotification('Please connect to ESP32 first', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${ESP32_BASE_URL}/setDeltaTime`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ seconds: seconds })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    deltaTimeInput.value = '';
+                    // Update status
+                    setTimeout(updateESP32Status, 500);
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showNotification('ESP32 Connection error', 'error');
+                console.error('Error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Fungsi untuk menyimpan konfigurasi WiFi
+        async function saveWiFiConfig() {
+            const ssid = document.getElementById('wifiSSID').value;
+            const password = document.getElementById('wifiPassword').value;
+            
+            if (!ssid) {
+                showNotification('Please enter WiFi SSID', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${ESP32_BASE_URL}/configWiFi`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ssid: ssid, password: password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    document.getElementById('wifiSSID').value = '';
+                    document.getElementById('wifiPassword').value = '';
+                    // ESP32 akan restart, beri waktu
+                    setTimeout(() => {
+                        showNotification('ESP32 is restarting with new WiFi config...', 'info');
+                        setTimeout(updateESP32Status, 10000); // Cek ulang setelah 10 detik
+                    }, 1000);
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showNotification('ESP32 Connection error', 'error');
+                console.error('Error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Fungsi untuk start AP mode
+        async function startAPMode() {
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${ESP32_BASE_URL}/startAP`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    // Update status
+                    setTimeout(updateESP32Status, 2000);
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showNotification('ESP32 Connection error', 'error');
+                console.error('Error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Fungsi untuk forget WiFi
+        async function forgetWiFi() {
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${ESP32_BASE_URL}/forgetWiFi`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    // Update status
+                    setTimeout(updateESP32Status, 2000);
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showNotification('ESP32 Connection error', 'error');
+                console.error('Error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Fungsi untuk format uptime
+        function formatUptime(seconds) {
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+            if (hours > 0) return `${hours}h ${minutes}m ${secs}s`;
+            if (minutes > 0) return `${minutes}m ${secs}s`;
+            return `${secs}s`;
+        }
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cek koneksi ESP32 pertama kali
+            updateESP32Status();
+            
+            // Update status setiap 3 detik
+            setInterval(updateESP32Status, 3000);
+            
+            // Smooth scrolling untuk anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Tambahkan event listener untuk navbar toggle di mobile
+            document.querySelector('.navbar-toggler').addEventListener('click', function() {
+                document.querySelector('#navbarNav').classList.toggle('show');
             });
         });
-        
-        // Simulasi status update
-        setInterval(() => {
-            const timerElement = document.querySelector('.status-card.timer .status-value');
-            const currentValue = parseInt(timerElement.textContent);
-            if (currentValue > 0) {
-                timerElement.textContent = (currentValue - 1) + 's';
-                timerElement.style.color = '#FF9800';
-            }
-        }, 1000);
     </script>
 </body>
 </html>
