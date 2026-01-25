@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test ESP32 Connection</title>
+</head>
+<body>
+    <h1>Test Koneksi ESP32</h1>
+    
+    <div>
+        <label>ESP32 IP:</label>
+        <input type="text" id="ip" value="192.168.1.100">
+        <button onclick="testConnection()">Test</button>
+    </div>
+    
+    <div id="result" style="margin-top:20px;"></div>
+    
+    <script>
+    async function testConnection() {
+        const ip = document.getElementById('ip').value;
+        const resultDiv = document.getElementById('result');
+        
+        resultDiv.innerHTML = `<p>Testing http://${ip}/status...</p>`;
+        
+        try {
+            const response = await fetch(`http://${ip}/status`, {
+                method: 'GET',
+                mode: 'no-cors'
+            });
+            
+            resultDiv.innerHTML += `<p style="color:green">✅ Berhasil terhubung!</p>`;
+            resultDiv.innerHTML += `<p>Status: ${response.status}</p>`;
+            
+            // Coba baca response jika bisa
+            try {
+                const text = await response.text();
+                resultDiv.innerHTML += `<pre>${text}</pre>`;
+            } catch(e) {
+                resultDiv.innerHTML += `<p>Tidak bisa membaca response (CORS)</p>`;
+            }
+            
+        } catch(error) {
+            resultDiv.innerHTML += `<p style="color:red">❌ Error: ${error.message}</p>`;
+        }
+    }
+    
+    // Auto test beberapa IP saat load
+    window.onload = function() {
+        const possibleIPs = ["192.168.1.100", "192.168.1.101", "192.168.4.1"];
+        possibleIPs.forEach(ip => {
+            fetch(`http://${ip}/status`, {mode: 'no-cors'})
+                .then(() => {
+                    document.getElementById('result').innerHTML += 
+                        `<p>✅ ESP32 mungkin di: ${ip}</p>`;
+                    document.getElementById('ip').value = ip;
+                })
+                .catch(() => {});
+        });
+    };
+    </script>
+</body>
+</html>

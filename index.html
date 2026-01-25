@@ -24,7 +24,6 @@
             overflow-x: hidden;
         }
 
-        /* Efek animasi subtle pada background */
         @keyframes backgroundPan {
             0% { background-position: 0% 0%; }
             100% { background-position: 100% 100%; }
@@ -34,7 +33,6 @@
             animation: backgroundPan 60s linear infinite alternate;
         }
 
-        /* Efek partikel untuk background */
         body::after {
             content: '';
             position: fixed;
@@ -95,7 +93,6 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
-        /* Feature Cards */
         .feature-card {
             background: white;
             padding: 25px;
@@ -140,7 +137,6 @@
             gap: 10px;
         }
         
-        /* Status Cards */
         .wifi-status {
             background: #f8f9fa;
             padding: 15px;
@@ -245,7 +241,6 @@
             color: #FF9800;
         }
         
-        /* Control Panel */
         .control-panel {
             background: white;
             padding: 30px;
@@ -289,7 +284,6 @@
             display: block;
         }
         
-        /* Button Styles */
         .btn {
             padding: 12px 24px;
             border: none;
@@ -345,7 +339,6 @@
             min-width: 140px;
         }
         
-        /* Statistics Panel */
         .statistics-panel {
             background: white;
             padding: 20px;
@@ -380,7 +373,6 @@
             color: #666;
         }
         
-        /* Footer */
         .footer {
             text-align: center;
             color: #666;
@@ -389,7 +381,6 @@
             border-top: 1px solid #e0e0e0;
         }
         
-        /* Notification System */
         .notification {
             position: fixed;
             top: 20px;
@@ -424,7 +415,6 @@
             background: linear-gradient(to right, #FF9800, #EF6C00);
         }
         
-        /* Connection Status Indicator */
         .connection-indicator {
             display: inline-block;
             width: 10px;
@@ -448,7 +438,6 @@
             100% { opacity: 1; }
         }
         
-        /* Loading Spinner */
         .loading {
             display: none;
             text-align: center;
@@ -470,7 +459,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Manual IP Input */
         .manual-ip-input {
             display: flex;
             gap: 10px;
@@ -486,7 +474,6 @@
             width: 150px;
         }
         
-        /* Responsive Design */
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
@@ -580,7 +567,7 @@
         <!-- ESP32 Connection Status -->
         <div class="wifi-status" id="wifiStatus">
             <h3 id="wifiStatusTitle"><i class="fas fa-microchip"></i> ESP32 Status: <span id="statusText">Checking...</span></h3>
-            <p id="wifiStatusDetail">Attempting to establish WebSocket connection...</p>
+            <p id="wifiStatusDetail">Attempting to connect to ESP32...</p>
             <p id="wifiIP">Device IP: <span id="ipAddress">Auto-detecting...</span></p>
             <div class="manual-ip-input">
                 <input type="text" id="manualIP" placeholder="Enter ESP32 IP" value="192.168.1.100">
@@ -772,248 +759,455 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    
 <script>
-    // ====================== KONFIGURASI & VARIABEL ======================
-    let esp32IP = localStorage.getItem('esp32_ip') || "192.168.1.100"; // Default IP
-    let updateInterval;
-    let isConnected = false;
+// ====================== KONFIGURASI DASAR ======================
+let esp32IP = localStorage.getItem('esp32_ip') || "192.168.1.100";
+let statusUpdateInterval = null;
+let isConnected = false;
 
-    // ====================== FUNGSI UTAMA ======================
-    // 1. Fungsi untuk menampilkan notifikasi
-    function showNotification(message, type = 'info') {
-        const notification = document.getElementById('notification');
-        notification.textContent = message;
-        notification.className = 'notification ' + type;
-        notification.classList.add('show');
-        setTimeout(() => notification.classList.remove('show'), 3000);
+// ====================== FUNGSI UTAMA ======================
+
+// 1. Fungsi untuk menampilkan notifikasi
+function showNotification(message, type = 'info') {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = 'notification ' + type;
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
+// 2. Fungsi untuk mengirim perintah ke ESP32
+async function sendCommand(command) {
+    try {
+        showLoading(true);
+        
+        const response = await fetch(`http://${esp32IP}/control`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ command: command })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            // Update status setelah perintah
+            setTimeout(updateESP32Status, 500);
+        } else {
+            showNotification('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        showNotification('ESP32 Connection error', 'error');
+        console.error('Error:', error);
+    } finally {
+        showLoading(false);
     }
+}
 
-    // 2. Fungsi untuk mengirim perintah ke ESP32
-    async function sendCommand(command) {
+// 3. Fungsi untuk set delta time
+async function setDeltaTime() {
+    const deltaTimeInput = document.getElementById('deltaTime');
+    const seconds = parseInt(deltaTimeInput.value);
+    
+    if (isNaN(seconds) || seconds < 1 || seconds > 3600) {
+        showNotification('Please enter a valid number between 1 and 3600', 'error');
+        return;
+    }
+    
+    try {
+        showLoading(true);
+        
+        const response = await fetch(`http://${esp32IP}/setDeltaTime`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ seconds: seconds })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            deltaTimeInput.value = '';
+            // Update status
+            setTimeout(updateESP32Status, 500);
+        } else {
+            showNotification('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        showNotification('ESP32 Connection error', 'error');
+        console.error('Error:', error);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// 4. Fungsi untuk auto-detect IP ESP32
+async function detectESP32IP() {
+    // Coba beberapa kemungkinan IP
+    const possibleIPs = [
+        "192.168.1.100",        // IP default untuk REDMINOTE8 network
+        "192.168.1.101",
+        "192.168.1.102",
+        "192.168.4.1",          // AP mode default
+        "192.168.0.100",
+        "192.168.0.101"
+    ];
+    
+    // Tambahkan IP dari local storage jika ada
+    const savedIP = localStorage.getItem('esp32_ip');
+    if (savedIP && !possibleIPs.includes(savedIP)) {
+        possibleIPs.unshift(savedIP);
+    }
+    
+    for (const ip of possibleIPs) {
         try {
-            const response = await fetch(`http://${esp32IP}/control`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ command: command })
+            const testUrl = `http://${ip}/status`;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            
+            const response = await fetch(testUrl, {
+                method: 'GET',
+                signal: controller.signal
             });
-            const data = await response.json();
-            showNotification(data.message, data.success ? 'success' : 'error');
-            updateStatus(); // Update UI setelah perintah
-        } catch (error) {
-            showNotification('Gagal terhubung ke ESP32', 'error');
-            console.error('Error:', error);
-        }
-    }
-
-    // 3. Fungsi untuk mengatur timer (Delta Time)
-    async function setDeltaTime() {
-        const deltaTimeInput = document.getElementById('deltaTime');
-        const seconds = parseInt(deltaTimeInput.value);
-        if (isNaN(seconds) || seconds < 1 || seconds > 3600) {
-            showNotification('Masukkan angka 1-3600', 'error');
-            return;
-        }
-        try {
-            const response = await fetch(`http://${esp32IP}/setDeltaTime`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ seconds: seconds })
-            });
-            const data = await response.json();
-            showNotification(data.message, data.success ? 'success' : 'error');
-            deltaTimeInput.value = ''; // Kosongkan input
-            updateStatus();
-        } catch (error) {
-            showNotification('Gagal mengatur timer', 'error');
-        }
-    }
-
-    // 4. Fungsi untuk mengambil dan memperbarui status sistem dari ESP32
-    async function updateStatus() {
-        try {
-            const response = await fetch(`http://${esp32IP}/status`);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
             
-            // Update indikator koneksi di Jumbotron
-            document.getElementById('connectionIndicator').className = 'connection-indicator connected';
-            document.getElementById('connectionStatusText').textContent = 'Terhubung ke ESP32';
+            clearTimeout(timeoutId);
             
-            // Update status WiFi card
-            const wifiCard = document.getElementById('wifiStatus');
-            wifiCard.className = 'wifi-status ' + data.wifiStatus;
-            document.getElementById('statusText').textContent = data.wifiStatus === 'connected' ? 'Terhubung' : 'AP Mode';
-            document.getElementById('wifiStatusDetail').textContent = `SSID: ${data.ssid}`;
-            document.getElementById('ipAddress').textContent = data.ipAddress;
-            
-            // Update Status Cards (Conveyor, Sensor, Timer)
-            updateStatusCards(data);
-            
-            // Update Statistics Panel
-            updateStatisticsPanel(data);
-            
-            // Update Sensor Active Status di Tab Sensor
-            const sensorStatusSpan = document.getElementById('sensorActiveStatus');
-            if (sensorStatusSpan) {
-                sensorStatusSpan.textContent = data.sensorActive ? 'Enabled' : 'Disabled';
-                sensorStatusSpan.style.color = data.sensorActive ? '#4CAF50' : '#F44336';
+            if (response.ok) {
+                const data = await response.json();
+                if (data.conveyorRunning !== undefined) {
+                    esp32IP = ip;
+                    localStorage.setItem('esp32_ip', ip);
+                    console.log(`ESP32 ditemukan di: ${ip}`);
+                    showNotification(`Connected to ESP32 at ${ip}`, 'success');
+                    return true;
+                }
             }
-            
-            // Update informasi koneksi di footer
-            document.getElementById('connectionType').textContent = data.apMode ? 'AP Mode' : 'WiFi';
-            document.getElementById('currentStatus').textContent = data.conveyorRunning ? 'Running' : 'Idle';
-            
-            isConnected = true;
-            
         } catch (error) {
-            console.error('Gagal mengambil status:', error);
-            // Update UI ke status offline
+            // Lanjut ke IP berikutnya
+            console.log(`IP ${ip} tidak merespon`);
+        }
+    }
+    
+    return false;
+}
+
+// 5. Fungsi untuk mengupdate status dari ESP32
+async function updateESP32Status() {
+    try {
+        const response = await fetch(`http://${esp32IP}/status`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Update WiFi status
+        const wifiStatusElement = document.getElementById('wifiStatus');
+        wifiStatusElement.className = 'wifi-status ' + data.wifiStatus;
+        
+        if (data.wifiStatus === 'connected') {
+            document.getElementById('wifiStatusTitle').innerHTML = '<i class="fas fa-wifi"></i> ESP32 Status: Connected';
+            document.getElementById('statusText').textContent = 'Connected';
+            document.getElementById('wifiStatusDetail').textContent = `Connected to: ${data.ssid || 'WiFi Network'}`;
+            document.getElementById('ipAddress').textContent = data.ipAddress;
+            document.getElementById('connectionIndicator').className = 'connection-indicator connected';
+            document.getElementById('connectionStatusText').textContent = 'Connected to ESP32';
+            document.getElementById('connectionType').textContent = 'WiFi';
+            document.getElementById('currentStatus').textContent = 'Online';
+            isConnected = true;
+        } else if (data.wifiStatus === 'ap') {
+            document.getElementById('wifiStatusTitle').innerHTML = '<i class="fas fa-broadcast-tower"></i> ESP32 Status: AP Mode';
+            document.getElementById('statusText').textContent = 'AP Mode';
+            document.getElementById('wifiStatusDetail').textContent = 'ESP32 is in Access Point mode';
+            document.getElementById('ipAddress').textContent = data.ipAddress || '192.168.4.1';
+            document.getElementById('connectionIndicator').className = 'connection-indicator connected';
+            document.getElementById('connectionStatusText').textContent = 'Connected to ESP32 (AP Mode)';
+            document.getElementById('connectionType').textContent = 'AP Mode';
+            document.getElementById('currentStatus').textContent = 'Online';
+            isConnected = true;
+        } else {
+            document.getElementById('wifiStatusTitle').innerHTML = '<i class="fas fa-wifi-slash"></i> ESP32 Status: Disconnected';
+            document.getElementById('statusText').textContent = 'Disconnected';
+            document.getElementById('wifiStatusDetail').textContent = 'Unable to connect to ESP32';
+            document.getElementById('ipAddress').textContent = 'Not available';
             document.getElementById('connectionIndicator').className = 'connection-indicator disconnected';
-            document.getElementById('connectionStatusText').textContent = 'ESP32 Offline';
-            document.getElementById('wifiStatus').className = 'wifi-status disconnected';
-            document.getElementById('statusText').textContent = 'Offline';
-            document.getElementById('conveyorStatus').textContent = 'OFFLINE';
-            document.getElementById('sensorStatus').textContent = 'OFFLINE';
+            document.getElementById('connectionStatusText').textContent = 'Disconnected from ESP32';
+            document.getElementById('connectionType').textContent = 'Disconnected';
+            document.getElementById('currentStatus').textContent = 'Offline';
             isConnected = false;
         }
-    }
-
-    // 5. Fungsi helper: Update Status Cards
-    function updateStatusCards(data) {
-        // Conveyor Status
-        const conveyorEl = document.getElementById('conveyorStatus');
-        const conveyorDesc = document.getElementById('conveyorDesc');
+        
+        // Update conveyor status
         if (data.conveyorRunning) {
-            conveyorEl.textContent = 'RUNNING';
-            conveyorEl.className = 'status-value status-conveyor';
-            conveyorDesc.textContent = 'Conveyor sedang berjalan';
+            document.getElementById('conveyorStatus').textContent = 'RUNNING';
+            document.getElementById('conveyorStatus').className = 'status-value status-conveyor';
+            document.getElementById('conveyorDesc').textContent = 'Conveyor is currently running';
         } else {
-            conveyorEl.textContent = 'STOPPED';
-            conveyorEl.className = 'status-value status-conveyor off';
-            conveyorDesc.textContent = 'Conveyor berhenti';
+            document.getElementById('conveyorStatus').textContent = 'STOPPED';
+            document.getElementById('conveyorStatus').className = 'status-value status-conveyor off';
+            document.getElementById('conveyorDesc').textContent = 'Conveyor is currently stopped';
         }
         
-        // Sensor Status
-        const sensorEl = document.getElementById('sensorStatus');
-        const sensorDesc = document.getElementById('sensorDesc');
+        // Update sensor status
         if (data.objectDetected) {
-            sensorEl.textContent = 'OBJECT DETECTED';
-            sensorEl.className = 'status-value status-sensor detected';
-            sensorDesc.textContent = 'Objek terdeteksi oleh sensor';
+            document.getElementById('sensorStatus').textContent = 'OBJECT DETECTED';
+            document.getElementById('sensorStatus').className = 'status-value status-sensor detected';
+            document.getElementById('sensorDesc').textContent = 'Object detected by proximity sensor';
         } else {
-            sensorEl.textContent = 'CLEAR';
-            sensorEl.className = 'status-value status-sensor';
-            sensorDesc.textContent = 'Tidak ada objek terdeteksi';
+            document.getElementById('sensorStatus').textContent = 'CLEAR';
+            document.getElementById('sensorStatus').className = 'status-value status-sensor';
+            document.getElementById('sensorDesc').textContent = 'No object detected';
         }
         
-        // Timer Status
-        const timerEl = document.getElementById('timerStatus');
-        const timerDesc = document.getElementById('timerDesc');
+        // Update timer status
         if (data.waitingForDelta && data.deltaTime > 0) {
             const remaining = Math.max(0, Math.ceil((data.deltaTime - (Date.now() - data.waitStartTime)) / 1000));
-            timerEl.textContent = remaining + 's';
-            timerDesc.textContent = `Conveyor akan mulai dalam ${remaining} detik`;
+            if (remaining > 0) {
+                document.getElementById('timerStatus').textContent = remaining + 's';
+                document.getElementById('timerDesc').textContent = 'Conveyor will start in ' + remaining + ' seconds';
+            } else {
+                document.getElementById('timerStatus').textContent = '0s';
+                document.getElementById('timerDesc').textContent = 'Timer completed';
+            }
         } else {
-            timerEl.textContent = '0s';
-            timerDesc.textContent = 'Tidak ada timer aktif';
+            document.getElementById('timerStatus').textContent = '0s';
+            document.getElementById('timerDesc').textContent = 'No active timer';
         }
-    }
-
-    // 6. Fungsi helper: Update Statistics Panel
-    function updateStatisticsPanel(data) {
+        
+        // Update statistics
         document.getElementById('totalDetections').textContent = data.totalDetections || 0;
         document.getElementById('totalRunTime').textContent = data.totalRunTime || 0;
         document.getElementById('systemUptime').textContent = formatUptime(data.uptime || 0);
         document.getElementById('freeHeap').textContent = data.freeHeap ? Math.round(data.freeHeap / 1024) + ' KB' : '0 KB';
-    }
-
-    // 7. Fungsi untuk format waktu (Uptime)
-    function formatUptime(seconds) {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-        if (hours > 0) return `${hours}j ${minutes}m`;
-        if (minutes > 0) return `${minutes}m ${secs}s`;
-        return `${secs}s`;
-    }
-
-    // ====================== FUNGSI KONTROL TAMBAHAN ======================
-    // 8. Fungsi untuk mengganti tab (tetap sama)
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(tabBtn => tabBtn.classList.remove('active'));
-        document.getElementById(tabName + '-tab').classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
-
-    // 9. Fungsi untuk enable/disable sensor
-    function enableSensor() {
-        sendCommand('sensor_enable');
-    }
-    function disableSensor() {
-        sendCommand('sensor_disable');
-    }
-
-    // 10. Fungsi untuk Refresh Status (manual)
-    function refreshStatus() {
-        updateStatus();
-        showNotification('Memperbarui status...', 'info');
-    }
-
-    // 11. Fungsi untuk Atur IP Manual
-    function setManualIP() {
-        const manualIP = document.getElementById('manualIP').value.trim();
-        if (!manualIP) {
-            showNotification('Masukkan alamat IP', 'error');
-            return;
+        
+        // Update sensor active status
+        const sensorActiveStatus = document.getElementById('sensorActiveStatus');
+        if (sensorActiveStatus) {
+            sensorActiveStatus.textContent = data.sensorActive ? 'Enabled' : 'Disabled';
+            sensorActiveStatus.style.color = data.sensorActive ? '#4CAF50' : '#F44336';
         }
+        
+        return data;
+        
+    } catch (error) {
+        console.error('Error fetching ESP32 status:', error);
+        
+        // Update UI untuk status error
+        document.getElementById('wifiStatus').className = 'wifi-status disconnected';
+        document.getElementById('wifiStatusTitle').innerHTML = '<i class="fas fa-exclamation-triangle"></i> ESP32 Status: Connection Failed';
+        document.getElementById('statusText').textContent = 'Failed';
+        document.getElementById('wifiStatusDetail').textContent = 'Cannot connect to ESP32. Please check connection.';
+        document.getElementById('ipAddress').textContent = 'Not available';
+        document.getElementById('connectionIndicator').className = 'connection-indicator disconnected';
+        document.getElementById('connectionStatusText').textContent = 'Cannot connect to ESP32';
+        document.getElementById('connectionType').textContent = 'Disconnected';
+        document.getElementById('currentStatus').textContent = 'Offline';
+        isConnected = false;
+        
+        // Coba auto-detect IP baru
+        if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
+            showNotification('Trying to reconnect to ESP32...', 'info');
+            const detected = await detectESP32IP();
+            if (detected) {
+                showNotification('ESP32 found!', 'success');
+            }
+        }
+        
+        return null;
+    }
+}
+
+// 6. Fungsi untuk enable/disable sensor
+async function enableSensor() {
+    try {
+        showLoading(true);
+        
+        const response = await fetch(`http://${esp32IP}/sensorControl`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ command: "enable" })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            // Update status
+            setTimeout(updateESP32Status, 500);
+        } else {
+            showNotification('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        showNotification('ESP32 Connection error', 'error');
+        console.error('Error:', error);
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function disableSensor() {
+    try {
+        showLoading(true);
+        
+        const response = await fetch(`http://${esp32IP}/sensorControl`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ command: "disable" })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            // Update status
+            setTimeout(updateESP32Status, 500);
+        } else {
+            showNotification('Error: ' + data.message, 'error');
+        }
+    } catch (error) {
+        showNotification('ESP32 Connection error', 'error');
+        console.error('Error:', error);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// 7. Fungsi untuk refresh status
+function refreshStatus() {
+    updateESP32Status();
+    showNotification('Refreshing status...', 'info');
+}
+
+// 8. Fungsi untuk set IP manual
+function setManualIP() {
+    const manualIP = document.getElementById('manualIP').value.trim();
+    if (manualIP) {
         esp32IP = manualIP;
         localStorage.setItem('esp32_ip', manualIP);
-        showNotification(`Menyambung ke ${manualIP}...`, 'info');
-        // Hentikan interval lama, mulai interval baru
-        if (updateInterval) clearInterval(updateInterval);
-        updateStatus(); // Coba sambung sekali
-        updateInterval = setInterval(updateStatus, 2000); // Polling setiap 2 detik
+        showNotification(`Manual IP set to: ${manualIP}`, 'success');
+        
+        // Update UI
+        document.getElementById('ipAddress').textContent = manualIP;
+        document.getElementById('currentStatus').textContent = 'Connecting...';
+        
+        // Test connection with new IP
+        updateESP32Status();
+    } else {
+        showNotification('Please enter a valid IP address', 'error');
     }
+}
 
-    // 12. Fungsi Reset Koneksi
-    function resetConnection() {
-        localStorage.removeItem('esp32_ip');
-        esp32IP = "192.168.1.100";
-        document.getElementById('manualIP').value = esp32IP;
-        showNotification('Koneksi direset. Menyambung ulang...', 'info');
-        updateStatus();
+// 9. Fungsi untuk reset koneksi
+function resetConnection() {
+    localStorage.removeItem('esp32_ip');
+    esp32IP = "192.168.1.100";
+    document.getElementById('manualIP').value = esp32IP;
+    showNotification('Connection reset. Reconnecting...', 'info');
+    
+    // Hentikan interval lama
+    if (statusUpdateInterval) {
+        clearInterval(statusUpdateInterval);
     }
+    
+    // Mulai interval baru
+    updateESP32Status();
+    statusUpdateInterval = setInterval(updateESP32Status, 3000);
+}
 
-    // ====================== INISIALISASI SAAT HALAMAN DIMUAT ======================
-    document.addEventListener('DOMContentLoaded', function() {
-        // Set nilai input IP dari localStorage
-        document.getElementById('manualIP').value = esp32IP;
-        
-        // Coba koneksi pertama kali
-        updateStatus();
-        
-        // Mulai polling status otomatis setiap 2 detik
-        updateInterval = setInterval(updateStatus, 2000);
-        
-        // Setup tombol navbar untuk mobile (jika ada)
-        const navbarToggler = document.querySelector('.navbar-toggler');
-        if (navbarToggler) {
-            navbarToggler.addEventListener('click', function() {
-                const navbarNav = document.querySelector('#navbarNav');
-                if (navbarNav) navbarNav.classList.toggle('show');
-            });
-        }
-        
-        // Auto-detect ESP32 IP pada beberapa alamat umum saat pertama kali
-        const possibleIPs = ["192.168.1.100", "192.168.1.101", "192.168.4.1"];
-        possibleIPs.forEach(ip => {
-            fetch(`http://${ip}/status`, { method: 'HEAD', mode: 'no-cors' })
-            .catch(() => {}); // Mencoba koneksi tanpa menangani error
+// 10. Fungsi untuk format uptime
+function formatUptime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m ${secs}s`;
+    return `${secs}s`;
+}
+
+// 11. Fungsi untuk menampilkan/menyembunyikan loading
+function showLoading(show) {
+    document.getElementById('loading').style.display = show ? 'block' : 'none';
+}
+
+// 12. Fungsi untuk mengganti tab
+function switchTab(tabName) {
+    // Sembunyikan semua tab
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Hapus active class dari semua tombol tab
+    document.querySelectorAll('.tab').forEach(tabBtn => {
+        tabBtn.classList.remove('active');
+    });
+    
+    // Tampilkan tab yang dipilih
+    document.getElementById(tabName + '-tab').classList.add('active');
+    
+    // Aktifkan tombol tab yang dipilih
+    event.currentTarget.classList.add('active');
+}
+
+// ====================== INISIALISASI ======================
+document.addEventListener('DOMContentLoaded', async function() {
+    // Setup manual IP input value
+    const savedIP = localStorage.getItem('esp32_ip');
+    if (savedIP) {
+        document.getElementById('manualIP').value = savedIP;
+        esp32IP = savedIP;
+    }
+    
+    // Auto-detect ESP32 IP
+    await detectESP32IP();
+    
+    // Cek koneksi ESP32 pertama kali
+    updateESP32Status();
+    
+    // Update status setiap 3 detik
+    statusUpdateInterval = setInterval(updateESP32Status, 3000);
+    
+    // Smooth scrolling untuk anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
         });
     });
+    
+    // Tambahkan event listener untuk navbar toggle di mobile
+    const navbarToggler = document.querySelector('.navbar-toggler');
+    if (navbarToggler) {
+        navbarToggler.addEventListener('click', function() {
+            const navbarNav = document.querySelector('#navbarNav');
+            if (navbarNav) {
+                navbarNav.classList.toggle('show');
+            }
+        });
+    }
+});
 </script>
 </body>
 </html>
