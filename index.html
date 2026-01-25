@@ -682,7 +682,7 @@
     
     <script>
         // Konfigurasi ESP32
-        const ESP32_BASE_URL = "http://192.168.4.1"; // Default ESP32 AP IP
+        let ESP32_BASE_URL = "http://192.168.1.100"; // Default IP untuk WiFi REDMINOTE8
         let currentTab = 'control';
         let esp32Connected = false;
 
@@ -739,13 +739,83 @@
             currentTab = tabName;
         }
 
+        // Fungsi untuk auto-detect IP ESP32
+        async function detectESP32IP() {
+            // Coba beberapa kemungkinan IP
+            const possibleIPs = [
+                "192.168.1.100",        // IP default untuk REDMINOTE8 network
+                "192.168.1.101",
+                "192.168.1.102",
+                "192.168.4.1",          // AP mode default
+                "192.168.0.100",
+                "192.168.0.101"
+            ];
+            
+            // Tambahkan IP dari local storage jika ada
+            const savedIP = localStorage.getItem('esp32_ip');
+            if (savedIP && !possibleIPs.includes(savedIP)) {
+                possibleIPs.unshift(savedIP);
+            }
+            
+            for (const ip of possibleIPs) {
+                try {
+                    const testUrl = `http://${ip}/status`;
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2000);
+                    
+                    const response = await fetch(testUrl, {
+                        method: 'GET',
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.conveyorRunning !== undefined) {
+                            ESP32_BASE_URL = `http://${ip}`;
+                            localStorage.setItem('esp32_ip', ip);
+                            console.log(`ESP32 ditemukan di: ${ip}`);
+                            showNotification(`Connected to ESP32 at ${ip}`, 'success');
+                            return true;
+                        }
+                    }
+                } catch (error) {
+                    // Lanjut ke IP berikutnya
+                    console.log(`IP ${ip} tidak merespon`);
+                }
+            }
+            
+            return false;
+        }
+
+        // Fungsi fetch dengan timeout
+        async function fetchWithTimeout(url, options = {}, timeout = 5000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(id);
+                return response;
+            } catch (error) {
+                clearTimeout(id);
+                throw error;
+            }
+        }
+
         // Fungsi untuk mengupdate status dari ESP32
         async function updateESP32Status() {
             try {
-                const response = await fetch(`${ESP32_BASE_URL}/status`);
+                const response = await fetchWithTimeout(`${ESP32_BASE_URL}/status`);
+                
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+                
                 const data = await response.json();
                 
                 // Update WiFi status
@@ -799,8 +869,13 @@
                 // Update timer status
                 if (data.waitingForDelta && data.deltaTime > 0) {
                     const remaining = Math.ceil((data.deltaTime - (Date.now() - data.waitStartTime)) / 1000);
-                    timerStatus.textContent = remaining + 's';
-                    timerDesc.textContent = 'Conveyor will start in ' + remaining + ' seconds';
+                    if (remaining > 0) {
+                        timerStatus.textContent = remaining + 's';
+                        timerDesc.textContent = 'Conveyor will start in ' + remaining + ' seconds';
+                    } else {
+                        timerStatus.textContent = '0s';
+                        timerDesc.textContent = 'Timer completed';
+                    }
                 } else {
                     timerStatus.textContent = '0s';
                     timerDesc.textContent = 'No active timer';
@@ -814,6 +889,8 @@
                 document.getElementById('sysWiFiMode').textContent = data.wifiStatus === 'ap' ? 'Access Point' : 'Station';
                 document.getElementById('sysDeltaTime').textContent = Math.floor(data.deltaTime / 1000) || 0;
                 
+                return data;
+                
             } catch (error) {
                 console.error('Error fetching ESP32 status:', error);
                 wifiStatus.className = 'wifi-status disconnected';
@@ -823,16 +900,22 @@
                 connectionType.textContent = 'Disconnected';
                 currentIP.textContent = 'Not available';
                 esp32Connected = false;
+                
+                // Coba auto-detect IP baru
+                if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
+                    showNotification('Mencoba koneksi ulang ke ESP32...', 'info');
+                    const detected = await detectESP32IP();
+                    if (detected) {
+                        showNotification('ESP32 ditemukan!', 'success');
+                    }
+                }
+                
+                return null;
             }
         }
 
         // Fungsi untuk mengirim perintah ke ESP32
         async function sendCommand(command) {
-            if (!esp32Connected) {
-                showNotification('Please connect to ESP32 first', 'error');
-                return;
-            }
-            
             showLoading(true);
             
             try {
@@ -868,11 +951,6 @@
             
             if (isNaN(seconds) || seconds < 1 || seconds > 3600) {
                 showNotification('Please enter a valid number between 1 and 3600', 'error');
-                return;
-            }
-            
-            if (!esp32Connected) {
-                showNotification('Please connect to ESP32 first', 'error');
                 return;
             }
             
@@ -935,7 +1013,13 @@
                     // ESP32 akan restart, beri waktu
                     setTimeout(() => {
                         showNotification('ESP32 is restarting with new WiFi config...', 'info');
-                        setTimeout(updateESP32Status, 10000); // Cek ulang setelah 10 detik
+                        // Reset IP untuk koneksi baru
+                        localStorage.removeItem('esp32_ip');
+                        setTimeout(() => {
+                            detectESP32IP().then(() => {
+                                updateESP32Status();
+                            });
+                        }, 10000);
                     }, 1000);
                 } else {
                     showNotification('Error: ' + data.message, 'error');
@@ -1020,7 +1104,10 @@
         }
 
         // Inisialisasi
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Auto-detect ESP32 IP
+            await detectESP32IP();
+            
             // Cek koneksi ESP32 pertama kali
             updateESP32Status();
             
@@ -1041,10 +1128,50 @@
             });
             
             // Tambahkan event listener untuk navbar toggle di mobile
-            document.querySelector('.navbar-toggler').addEventListener('click', function() {
-                document.querySelector('#navbarNav').classList.toggle('show');
-            });
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            if (navbarToggler) {
+                navbarToggler.addEventListener('click', function() {
+                    const navbarNav = document.querySelector('#navbarNav');
+                    if (navbarNav) {
+                        navbarNav.classList.toggle('show');
+                    }
+                });
+            }
+            
+            // Tambahkan manual IP input di footer
+            addManualIPInput();
         });
+        
+        // Fungsi untuk menambahkan input IP manual di footer
+        function addManualIPInput() {
+            const footer = document.querySelector('.footer');
+            if (!footer) return;
+            
+            const ipInputHTML = `
+                <div style="margin-top: 10px;">
+                    <input type="text" id="manualIP" placeholder="Enter ESP32 IP" 
+                           style="padding: 5px; width: 150px; border: 1px solid #ccc; border-radius: 4px;">
+                    <button onclick="setManualIP()" style="padding: 5px 10px; background: #667eea; color: white; border: none; border-radius: 4px; margin-left: 5px;">
+                        <i class="fas fa-plug"></i> Connect
+                    </button>
+                </div>
+            `;
+            
+            footer.innerHTML += ipInputHTML;
+        }
+        
+        // Fungsi untuk set IP manual
+        function setManualIP() {
+            const manualIP = document.getElementById('manualIP').value;
+            if (manualIP && manualIP.trim() !== '') {
+                ESP32_BASE_URL = `http://${manualIP.trim()}`;
+                localStorage.setItem('esp32_ip', manualIP.trim());
+                showNotification(`Manual IP set to: ${manualIP.trim()}`, 'success');
+                updateESP32Status();
+            } else {
+                showNotification('Please enter a valid IP address', 'error');
+            }
+        }
     </script>
 </body>
 </html>

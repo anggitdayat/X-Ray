@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ESP32 Connection Debug</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>ESP32 Connection Debug Tool</h1>
+    
+    <div>
+        <label>ESP32 IP Address:</label>
+        <input type="text" id="ipInput" value="192.168.4.1">
+        <button onclick="testConnection()">Test Connection</button>
+        <button onclick="scanNetwork()">Scan Network</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        async function testConnection() {
+            const ip = document.getElementById('ipInput').value;
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="status warning">Testing connection...</div>';
+            
+            const endpoints = ['/', '/status', '/ping', '/connection'];
+            
+            for (const endpoint of endpoints) {
+                const url = `http://${ip}${endpoint}`;
+                
+                try {
+                    const start = Date.now();
+                    const response = await fetch(url);
+                    const end = Date.now();
+                    const latency = end - start;
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        results.innerHTML += `
+                            <div class="status success">
+                                ✓ ${endpoint}: OK (${latency}ms)<br>
+                                Response: ${JSON.stringify(data)}
+                            </div>
+                        `;
+                    } else {
+                        results.innerHTML += `
+                            <div class="status error">
+                                ✗ ${endpoint}: HTTP ${response.status}
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    results.innerHTML += `
+                        <div class="status error">
+                            ✗ ${endpoint}: ${error.message}
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        async function scanNetwork() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="status warning">Scanning network...</div>';
+            
+            const baseIPs = ['192.168.4', '192.168.1', '192.168.0'];
+            const found = [];
+            
+            for (const base of baseIPs) {
+                for (let i = 1; i <= 255; i++) {
+                    const ip = `${base}.${i}`;
+                    
+                    try {
+                        const response = await fetch(`http://${ip}/ping`, { timeout: 100 });
+                        if (response.ok) {
+                            found.push(ip);
+                            results.innerHTML += `<div class="status success">Found ESP32 at: ${ip}</div>`;
+                        }
+                    } catch (error) {
+                        // Continue scanning
+                    }
+                }
+            }
+            
+            if (found.length === 0) {
+                results.innerHTML += '<div class="status error">No ESP32 devices found</div>';
+            }
+        }
+    </script>
+</body>
+</html>
