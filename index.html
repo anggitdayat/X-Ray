@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conveyor Plant Seed Detector - Home</title>
+    <title>Conveyor Plant Seed Detector - Control Panel</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -345,6 +345,41 @@
             min-width: 140px;
         }
         
+        /* Statistics Panel */
+        .statistics-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
         /* Footer */
         .footer {
             text-align: center;
@@ -389,6 +424,30 @@
             background: linear-gradient(to right, #FF9800, #EF6C00);
         }
         
+        /* Connection Status Indicator */
+        .connection-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .connection-indicator.connected {
+            background-color: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+        
+        .connection-indicator.disconnected {
+            background-color: #F44336;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
         /* Loading Spinner */
         .loading {
             display: none;
@@ -411,6 +470,22 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* Manual IP Input */
+        .manual-ip-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .manual-ip-input input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 150px;
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .header h1 {
@@ -431,6 +506,10 @@
             
             .feature-card h3 {
                 font-size: 1.2rem;
+            }
+            
+            .stat-grid {
+                grid-template-columns: 1fr;
             }
         }
         
@@ -459,18 +538,18 @@
         <header class="header">
             <img src="cvr1.png" width="150" height="150" style="border-radius: 10%; margin-bottom: 20px;" />
             <h1><i class="fas fa-seedling"></i> Conveyor Plant Seed Detector</h1>
-            <p class="lead" style="color: rgba(255,255,255,0.9);">Smart X-Ray Detection Platform</p>
+            <p class="lead" style="color: rgba(255,255,255,0.9);">Real-time Control & Monitoring System</p>
         </header>
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#"><i class="fas fa-tractor"></i> Conveyor Detector</a>
+            <a class="navbar-brand" href="#"><i class="fas fa-tractor"></i> Conveyor Control</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#">Home</a>
+                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="camera.html">Camera</a>
@@ -489,17 +568,29 @@
         </nav>
 
         <div class="jumbotron">
-            <h1 class="display-4">Welcome to Conveyor Plant Seed Detector</h1>
-            <p class="lead">A comprehensive platform designed to provide you with smart tools to detect and optimize your seed quality operations.</p>
+            <h1 class="display-4">Welcome to Conveyor Control System</h1>
+            <p class="lead">A comprehensive platform for real-time monitoring and control of your conveyor system with proximity sensor technology.</p>
             <hr class="my-4">
-            <p>Monitor, control, and analyze your seed conveyor system with advanced X-Ray and IoT technology.</p>
+            <div class="d-flex align-items-center">
+                <div class="connection-indicator disconnected" id="connectionIndicator"></div>
+                <p class="mb-0" id="connectionStatusText">Connecting to ESP32...</p>
+            </div>
         </div>
 
         <!-- ESP32 Connection Status -->
         <div class="wifi-status" id="wifiStatus">
-            <h3 id="wifiStatusTitle"><i class="fas fa-microchip"></i> ESP32 Status: Checking...</h3>
-            <p id="wifiStatusDetail">Attempting to connect to ESP32...</p>
-            <p id="wifiIP">IP Address: <span id="ipAddress">Loading...</span></p>
+            <h3 id="wifiStatusTitle"><i class="fas fa-microchip"></i> ESP32 Status: <span id="statusText">Checking...</span></h3>
+            <p id="wifiStatusDetail">Attempting to establish WebSocket connection...</p>
+            <p id="wifiIP">Device IP: <span id="ipAddress">Auto-detecting...</span></p>
+            <div class="manual-ip-input">
+                <input type="text" id="manualIP" placeholder="Enter ESP32 IP" value="192.168.1.100">
+                <button class="btn btn-sm btn-info" onclick="setManualIP()">
+                    <i class="fas fa-plug"></i> Connect
+                </button>
+                <button class="btn btn-sm btn-warning" onclick="resetConnection()">
+                    <i class="fas fa-sync-alt"></i> Reset
+                </button>
+            </div>
         </div>
 
         <div class="container mt-5">
@@ -547,14 +638,14 @@
         <div class="status-grid">
             <div class="status-card conveyor">
                 <h3><i class="fas fa-conveyor-belt"></i> Conveyor Status</h3>
-                <div class="status-value status-conveyor" id="conveyorStatus">CHECKING...</div>
-                <p id="conveyorDesc">Checking conveyor system status...</p>
+                <div class="status-value status-conveyor" id="conveyorStatus">OFFLINE</div>
+                <p id="conveyorDesc">Waiting for connection...</p>
             </div>
             
             <div class="status-card sensor">
-                <h3><i class="fas fa-sensor"></i> X-Ray Sensor</h3>
-                <div class="status-value status-sensor" id="sensorStatus">CHECKING...</div>
-                <p id="sensorDesc">Checking X-Ray sensor status...</p>
+                <h3><i class="fas fa-sensor"></i> Proximity Sensor</h3>
+                <div class="status-value status-sensor" id="sensorStatus">OFFLINE</div>
+                <p id="sensorDesc">Waiting for connection...</p>
             </div>
             
             <div class="status-card timer">
@@ -564,22 +655,44 @@
             </div>
         </div>
 
+        <!-- Statistics Panel -->
+        <div class="statistics-panel">
+            <h3><i class="fas fa-chart-line"></i> System Statistics</h3>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalDetections">0</div>
+                    <div class="stat-label">Total Detections</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalRunTime">0</div>
+                    <div class="stat-label">Run Time (seconds)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="systemUptime">0</div>
+                    <div class="stat-label">System Uptime</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="freeHeap">0</div>
+                    <div class="stat-label">Free Memory</div>
+                </div>
+            </div>
+        </div>
+
         <!-- ESP32 Control Panel -->
         <div class="control-panel">
             <h2><i class="fas fa-conveyor-belt"></i> Conveyor Control System</h2>
-            <p>ESP32-Based Industrial Conveyor Control with X-Ray Detection</p>
+            <p>ESP32-Based Industrial Conveyor Control with Proximity Detection</p>
             
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('control')">Control</button>
-                <button class="tab" onclick="switchTab('wifi')">WiFi Config</button>
-                <button class="tab" onclick="switchTab('system')">System Info</button>
+                <button class="tab active" onclick="switchTab('control')">Control Panel</button>
+                <button class="tab" onclick="switchTab('sensor')">Sensor Settings</button>
             </div>
             
             <div id="control-tab" class="tab-content active">
                 <h4><i class="fas fa-sliders-h"></i> Control Panel</h4>
                 
                 <div class="form-group">
-                    <label for="deltaTime"><i class="fas fa-hourglass-half"></i> Set Delta Time (seconds)</label>
+                    <label for="deltaTime"><i class="fas fa-hourglass-half"></i> Set Timer (seconds)</label>
                     <div class="input-group">
                         <input type="number" class="form-control" id="deltaTime" min="1" max="3600" placeholder="Enter seconds (1-3600)">
                         <div class="input-group-append">
@@ -595,75 +708,57 @@
                 
                 <div class="btn-group mt-3">
                     <button class="btn btn-success" onclick="sendCommand('start')">
-                        <i class="fas fa-power-off"></i> Force START
+                        <i class="fas fa-power-off"></i> Start Conveyor
                     </button>
                     <button class="btn btn-danger" onclick="sendCommand('stop')">
-                        <i class="fas fa-stop"></i> Force STOP
+                        <i class="fas fa-stop"></i> Stop Conveyor
                     </button>
-                    <button class="btn btn-warning" onclick="sendCommand('reset')">
+                    <button class="btn btn-warning" onclick="sendCommand('emergency_stop')">
+                        <i class="fas fa-exclamation-triangle"></i> Emergency Stop
+                    </button>
+                </div>
+                
+                <div class="btn-group mt-3">
+                    <button class="btn btn-info" onclick="sendCommand('reset')">
                         <i class="fas fa-redo"></i> Reset System
+                    </button>
+                    <button class="btn btn-secondary" onclick="refreshStatus()">
+                        <i class="fas fa-sync"></i> Refresh Status
                     </button>
                 </div>
             </div>
             
-            <div id="wifi-tab" class="tab-content">
-                <h4><i class="fas fa-wifi"></i> WiFi Configuration</h4>
+            <div id="sensor-tab" class="tab-content">
+                <h4><i class="fas fa-cogs"></i> Sensor Settings</h4>
                 
                 <div class="form-group">
-                    <label for="wifiSSID"><i class="fas fa-network-wired"></i> WiFi SSID</label>
-                    <input type="text" class="form-control" id="wifiSSID" placeholder="Enter WiFi network name">
-                </div>
-                
-                <div class="form-group">
-                    <label for="wifiPassword"><i class="fas fa-key"></i> WiFi Password</label>
-                    <input type="password" class="form-control" id="wifiPassword" placeholder="Enter WiFi password">
-                </div>
-                
-                <div class="btn-group">
-                    <button class="btn btn-primary" onclick="saveWiFiConfig()">
-                        <i class="fas fa-save"></i> Save & Connect
-                    </button>
-                    <button class="btn btn-info" onclick="startAPMode()">
-                        <i class="fas fa-broadcast-tower"></i> Start AP Mode
-                    </button>
-                    <button class="btn btn-warning" onclick="forgetWiFi()">
-                        <i class="fas fa-trash"></i> Forget WiFi
-                    </button>
+                    <label><i class="fas fa-toggle-on"></i> Sensor State</label>
+                    <div class="btn-group w-100">
+                        <button class="btn btn-success" onclick="enableSensor()">
+                            <i class="fas fa-check"></i> Enable Sensor
+                        </button>
+                        <button class="btn btn-warning" onclick="disableSensor()">
+                            <i class="fas fa-times"></i> Disable Sensor
+                        </button>
+                    </div>
+                    <small class="form-text text-muted">
+                        Enable or disable proximity sensor detection
+                    </small>
                 </div>
                 
                 <div class="alert alert-info mt-3">
-                    <h5><i class="fas fa-info-circle"></i> AP Mode Info</h5>
-                    <p>If WiFi is unavailable, ESP32 will create its own network:</p>
-                    <p><strong>SSID:</strong> <span id="apSSID">ESP32-Conveyor</span></p>
-                    <p><strong>Password:</strong> <span id="apPassword">conveyor123</span></p>
-                    <p><strong>AP IP:</strong> <span id="apIP">192.168.4.1</span></p>
-                </div>
-            </div>
-            
-            <div id="system-tab" class="tab-content">
-                <h4><i class="fas fa-info-circle"></i> System Information</h4>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <h5><i class="fas fa-microchip"></i> Device Information</h5>
-                        <p><strong>Chip Model:</strong> <span id="chipModel">ESP32</span></p>
-                        <p><strong>CPU Frequency:</strong> <span id="cpuFreq">240 MHz</span></p>
-                        <p><strong>Free Heap:</strong> <span id="freeHeap">Loading...</span> bytes</p>
-                        <p><strong>Uptime:</strong> <span id="uptime">Loading...</span></p>
-                        
-                        <h5 class="mt-3"><i class="fas fa-cogs"></i> System Status</h5>
-                        <p><strong>Conveyor State:</strong> <span id="sysConveyorState">Loading...</span></p>
-                        <p><strong>Sensor State:</strong> <span id="sysSensorState">Loading...</span></p>
-                        <p><strong>WiFi Mode:</strong> <span id="sysWiFiMode">Loading...</span></p>
-                        <p><strong>Current Delta Time:</strong> <span id="sysDeltaTime">0</span> seconds</p>
-                    </div>
+                    <h5><i class="fas fa-info-circle"></i> Sensor Information</h5>
+                    <p><strong>Sensor Type:</strong> Proximity/IR Sensor</p>
+                    <p><strong>Detection:</strong> Active LOW (LOW when object detected)</p>
+                    <p><strong>Function:</strong> Stops conveyor when object detected (safety feature)</p>
+                    <p><strong>Current State:</strong> <span id="sensorActiveStatus">Unknown</span></p>
                 </div>
             </div>
         </div>
 
         <div class="footer">
             <p>Conveyor Plant Seed Detector | Version 3.0 | © 2026 Agricultural Technology</p>
-            <p>Connection: <span id="connectionType">Checking...</span> | <span id="currentIP">Loading...</span></p>
+            <p>Connection: <span id="connectionType">Disconnected</span> | Status: <span id="currentStatus">Offline</span></p>
         </div>
     </div>
 
@@ -681,24 +776,24 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     
     <script>
-        // Konfigurasi ESP32
-        let ESP32_BASE_URL = "http://192.168.1.100"; // Default IP untuk WiFi REDMINOTE8
-        let currentTab = 'control';
-        let esp32Connected = false;
+        // WebSocket Configuration
+        let ws = null;
+        let esp32IP = "";
+        let reconnectInterval = null;
+        let pingInterval = null;
+        let isConnected = false;
+        let lastStatusUpdate = 0;
 
         // DOM Elements
         const wifiStatus = document.getElementById('wifiStatus');
         const wifiStatusTitle = document.getElementById('wifiStatusTitle');
+        const statusText = document.getElementById('statusText');
         const wifiStatusDetail = document.getElementById('wifiStatusDetail');
         const ipAddress = document.getElementById('ipAddress');
-        const conveyorStatus = document.getElementById('conveyorStatus');
-        const conveyorDesc = document.getElementById('conveyorDesc');
-        const sensorStatus = document.getElementById('sensorStatus');
-        const sensorDesc = document.getElementById('sensorDesc');
-        const timerStatus = document.getElementById('timerStatus');
-        const timerDesc = document.getElementById('timerDesc');
+        const connectionIndicator = document.getElementById('connectionIndicator');
+        const connectionStatusText = document.getElementById('connectionStatusText');
         const connectionType = document.getElementById('connectionType');
-        const currentIP = document.getElementById('currentIP');
+        const currentStatus = document.getElementById('currentStatus');
         const notification = document.getElementById('notification');
         const loading = document.getElementById('loading');
 
@@ -735,8 +830,6 @@
             
             // Aktifkan tombol tab yang dipilih
             event.currentTarget.classList.add('active');
-            
-            currentTab = tabName;
         }
 
         // Fungsi untuk auto-detect IP ESP32
@@ -773,11 +866,14 @@
                     if (response.ok) {
                         const data = await response.json();
                         if (data.conveyorRunning !== undefined) {
-                            ESP32_BASE_URL = `http://${ip}`;
+                            esp32IP = ip;
                             localStorage.setItem('esp32_ip', ip);
                             console.log(`ESP32 ditemukan di: ${ip}`);
-                            showNotification(`Connected to ESP32 at ${ip}`, 'success');
-                            return true;
+                            
+                            // Update IP input field
+                            document.getElementById('manualIP').value = ip;
+                            
+                            return ip;
                         }
                     }
                 } catch (error) {
@@ -786,166 +882,117 @@
                 }
             }
             
-            return false;
+            return null;
         }
 
-        // Fungsi fetch dengan timeout
-        async function fetchWithTimeout(url, options = {}, timeout = 5000) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
+        // Fungsi untuk koneksi WebSocket
+        async function connectWebSocket() {
+            if (!esp32IP) {
+                esp32IP = await detectESP32IP();
+                if (!esp32IP) {
+                    // Use default IP or get from input
+                    esp32IP = document.getElementById('manualIP').value || "192.168.1.100";
+                }
+            }
+            
+            const wsURL = `ws://${esp32IP}:81`;
             
             try {
-                const response = await fetch(url, {
-                    ...options,
-                    signal: controller.signal
-                });
-                clearTimeout(id);
-                return response;
+                // Close existing connection
+                if (ws) {
+                    ws.close();
+                }
+                
+                ws = new WebSocket(wsURL);
+                
+                ws.onopen = function() {
+                    console.log("WebSocket connected to", wsURL);
+                    isConnected = true;
+                    
+                    // Update UI
+                    wifiStatus.className = 'wifi-status connected';
+                    statusText.textContent = 'Connected';
+                    wifiStatusDetail.textContent = 'WebSocket connection established';
+                    ipAddress.textContent = esp32IP;
+                    connectionIndicator.className = 'connection-indicator connected';
+                    connectionStatusText.textContent = 'Connected to ESP32';
+                    connectionType.textContent = 'WebSocket';
+                    currentStatus.textContent = 'Online';
+                    
+                    showNotification(`Connected to ESP32 at ${esp32IP}`, 'success');
+                    
+                    // Start ping interval
+                    if (pingInterval) clearInterval(pingInterval);
+                    pingInterval = setInterval(() => {
+                        if (ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({command: "ping"}));
+                        }
+                    }, 30000);
+                    
+                    // Request initial status
+                    ws.send(JSON.stringify({command: "getStatus"}));
+                };
+                
+                ws.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        if (data.type === "status") {
+                            updateUIWithData(data);
+                        } else if (data.type === "notification") {
+                            showNotification(data.message, data.notificationType || "info");
+                        } else if (data.type === "pong") {
+                            // Ping response
+                        }
+                    } catch (e) {
+                        console.error("Error parsing WebSocket message:", e);
+                    }
+                };
+                
+                ws.onerror = function(error) {
+                    console.error("WebSocket error:", error);
+                    showNotification("WebSocket connection error", "error");
+                };
+                
+                ws.onclose = function() {
+                    console.log("WebSocket disconnected");
+                    isConnected = false;
+                    
+                    // Update UI
+                    wifiStatus.className = 'wifi-status disconnected';
+                    statusText.textContent = 'Disconnected';
+                    connectionIndicator.className = 'connection-indicator disconnected';
+                    connectionStatusText.textContent = 'Disconnected from ESP32';
+                    currentStatus.textContent = 'Offline';
+                    
+                    showNotification("Disconnected from ESP32", "error");
+                    
+                    // Try to reconnect after 3 seconds
+                    if (reconnectInterval) clearInterval(reconnectInterval);
+                    reconnectInterval = setInterval(connectWebSocket, 3000);
+                };
+                
+                return true;
             } catch (error) {
-                clearTimeout(id);
-                throw error;
+                console.error("WebSocket connection failed:", error);
+                showNotification("Failed to connect to ESP32", "error");
+                return false;
             }
         }
 
-        // Fungsi untuk mengupdate status dari ESP32
-        async function updateESP32Status() {
-            try {
-                const response = await fetchWithTimeout(`${ESP32_BASE_URL}/status`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                
-                // Update WiFi status
-                wifiStatus.className = 'wifi-status ' + data.wifiStatus;
-                
-                if (data.wifiStatus === 'connected') {
-                    wifiStatusTitle.innerHTML = '<i class="fas fa-wifi"></i> ESP32 Status: Connected';
-                    wifiStatusDetail.textContent = 'ESP32 connected to WiFi network';
-                    ipAddress.textContent = data.ipAddress || 'N/A';
-                    connectionType.textContent = 'WiFi';
-                    currentIP.textContent = data.ipAddress || 'N/A';
-                    esp32Connected = true;
-                } else if (data.wifiStatus === 'ap') {
-                    wifiStatusTitle.innerHTML = '<i class="fas fa-broadcast-tower"></i> ESP32 Status: AP Mode';
-                    wifiStatusDetail.textContent = 'ESP32 is in Access Point mode';
-                    ipAddress.textContent = data.ipAddress || '192.168.4.1';
-                    connectionType.textContent = 'AP Mode';
-                    currentIP.textContent = data.ipAddress || '192.168.4.1';
-                    esp32Connected = true;
-                } else {
-                    wifiStatusTitle.innerHTML = '<i class="fas fa-wifi-slash"></i> ESP32 Status: Disconnected';
-                    wifiStatusDetail.textContent = 'Unable to connect to ESP32';
-                    ipAddress.textContent = 'Not available';
-                    connectionType.textContent = 'Disconnected';
-                    currentIP.textContent = 'Not available';
-                    esp32Connected = false;
-                }
-                
-                // Update conveyor status
-                if (data.conveyorRunning) {
-                    conveyorStatus.textContent = 'RUNNING';
-                    conveyorStatus.className = 'status-value status-conveyor';
-                    conveyorDesc.textContent = 'Conveyor is currently running';
-                } else {
-                    conveyorStatus.textContent = 'STOPPED';
-                    conveyorStatus.className = 'status-value status-conveyor off';
-                    conveyorDesc.textContent = 'Conveyor is currently stopped';
-                }
-                
-                // Update sensor status
-                if (data.objectDetected) {
-                    sensorStatus.textContent = 'OBJECT DETECTED';
-                    sensorStatus.className = 'status-value status-sensor detected';
-                    sensorDesc.textContent = 'Object detected by X-Ray sensor';
-                } else {
-                    sensorStatus.textContent = 'CLEAR';
-                    sensorStatus.className = 'status-value status-sensor';
-                    sensorDesc.textContent = 'No object detected';
-                }
-                
-                // Update timer status
-                if (data.waitingForDelta && data.deltaTime > 0) {
-                    const remaining = Math.ceil((data.deltaTime - (Date.now() - data.waitStartTime)) / 1000);
-                    if (remaining > 0) {
-                        timerStatus.textContent = remaining + 's';
-                        timerDesc.textContent = 'Conveyor will start in ' + remaining + ' seconds';
-                    } else {
-                        timerStatus.textContent = '0s';
-                        timerDesc.textContent = 'Timer completed';
-                    }
-                } else {
-                    timerStatus.textContent = '0s';
-                    timerDesc.textContent = 'No active timer';
-                }
-                
-                // Update system info tab
-                document.getElementById('freeHeap').textContent = data.freeHeap || 'Loading...';
-                document.getElementById('uptime').textContent = formatUptime(data.uptime || 0);
-                document.getElementById('sysConveyorState').textContent = data.conveyorRunning ? 'Running' : 'Stopped';
-                document.getElementById('sysSensorState').textContent = data.objectDetected ? 'Object Detected' : 'Clear';
-                document.getElementById('sysWiFiMode').textContent = data.wifiStatus === 'ap' ? 'Access Point' : 'Station';
-                document.getElementById('sysDeltaTime').textContent = Math.floor(data.deltaTime / 1000) || 0;
-                
-                return data;
-                
-            } catch (error) {
-                console.error('Error fetching ESP32 status:', error);
-                wifiStatus.className = 'wifi-status disconnected';
-                wifiStatusTitle.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ESP32 Status: Connection Failed';
-                wifiStatusDetail.textContent = 'Cannot connect to ESP32. Please check connection.';
-                ipAddress.textContent = 'Not available';
-                connectionType.textContent = 'Disconnected';
-                currentIP.textContent = 'Not available';
-                esp32Connected = false;
-                
-                // Coba auto-detect IP baru
-                if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
-                    showNotification('Mencoba koneksi ulang ke ESP32...', 'info');
-                    const detected = await detectESP32IP();
-                    if (detected) {
-                        showNotification('ESP32 ditemukan!', 'success');
-                    }
-                }
-                
-                return null;
+        // Fungsi untuk mengirim perintah via WebSocket
+        function sendCommand(command) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                showNotification("Not connected to ESP32", "error");
+                return false;
             }
-        }
-
-        // Fungsi untuk mengirim perintah ke ESP32
-        async function sendCommand(command) {
-            showLoading(true);
             
-            try {
-                const response = await fetch(`${ESP32_BASE_URL}/control`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ command: command })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    // Update status setelah perintah
-                    setTimeout(updateESP32Status, 500);
-                } else {
-                    showNotification('Error: ' + data.message, 'error');
-                }
-            } catch (error) {
-                showNotification('ESP32 Connection error', 'error');
-                console.error('Error:', error);
-            } finally {
-                showLoading(false);
-            }
+            ws.send(JSON.stringify({command: command}));
+            return true;
         }
 
-        // Fungsi untuk set delta time
-        async function setDeltaTime() {
+        // Fungsi untuk set delta time via WebSocket
+        function setDeltaTime() {
             const deltaTimeInput = document.getElementById('deltaTime');
             const seconds = parseInt(deltaTimeInput.value);
             
@@ -954,139 +1001,128 @@
                 return;
             }
             
-            showLoading(true);
-            
-            try {
-                const response = await fetch(`${ESP32_BASE_URL}/setDeltaTime`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ seconds: seconds })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    deltaTimeInput.value = '';
-                    // Update status
-                    setTimeout(updateESP32Status, 500);
-                } else {
-                    showNotification('Error: ' + data.message, 'error');
-                }
-            } catch (error) {
-                showNotification('ESP32 Connection error', 'error');
-                console.error('Error:', error);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // Fungsi untuk menyimpan konfigurasi WiFi
-        async function saveWiFiConfig() {
-            const ssid = document.getElementById('wifiSSID').value;
-            const password = document.getElementById('wifiPassword').value;
-            
-            if (!ssid) {
-                showNotification('Please enter WiFi SSID', 'error');
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                showNotification("Not connected to ESP32", "error");
                 return;
             }
             
-            showLoading(true);
-            
-            try {
-                const response = await fetch(`${ESP32_BASE_URL}/configWiFi`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ ssid: ssid, password: password })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    document.getElementById('wifiSSID').value = '';
-                    document.getElementById('wifiPassword').value = '';
-                    // ESP32 akan restart, beri waktu
-                    setTimeout(() => {
-                        showNotification('ESP32 is restarting with new WiFi config...', 'info');
-                        // Reset IP untuk koneksi baru
-                        localStorage.removeItem('esp32_ip');
-                        setTimeout(() => {
-                            detectESP32IP().then(() => {
-                                updateESP32Status();
-                            });
-                        }, 10000);
-                    }, 1000);
-                } else {
-                    showNotification('Error: ' + data.message, 'error');
-                }
-            } catch (error) {
-                showNotification('ESP32 Connection error', 'error');
-                console.error('Error:', error);
-            } finally {
-                showLoading(false);
+            ws.send(JSON.stringify({command: "setDeltaTime", seconds: seconds}));
+            deltaTimeInput.value = '';
+            showNotification(`Timer set to ${seconds} seconds`, 'success');
+        }
+
+        // Fungsi untuk enable/disable sensor
+        function enableSensor() {
+            if (sendCommand("sensor_enable")) {
+                showNotification("Sensor enabled", "success");
             }
         }
 
-        // Fungsi untuk start AP mode
-        async function startAPMode() {
-            showLoading(true);
-            
-            try {
-                const response = await fetch(`${ESP32_BASE_URL}/startAP`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    // Update status
-                    setTimeout(updateESP32Status, 2000);
-                } else {
-                    showNotification('Error: ' + data.message, 'error');
-                }
-            } catch (error) {
-                showNotification('ESP32 Connection error', 'error');
-                console.error('Error:', error);
-            } finally {
-                showLoading(false);
+        function disableSensor() {
+            if (sendCommand("sensor_disable")) {
+                showNotification("Sensor disabled", "warning");
             }
         }
 
-        // Fungsi untuk forget WiFi
-        async function forgetWiFi() {
-            showLoading(true);
+        // Fungsi untuk refresh status
+        function refreshStatus() {
+            if (sendCommand("getStatus")) {
+                showNotification("Refreshing status...", "info");
+            }
+        }
+
+        // Fungsi untuk reset koneksi
+        function resetConnection() {
+            localStorage.removeItem('esp32_ip');
+            esp32IP = "";
             
-            try {
-                const response = await fetch(`${ESP32_BASE_URL}/forgetWiFi`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
+            if (ws) {
+                ws.close();
+            }
+            
+            if (reconnectInterval) clearInterval(reconnectInterval);
+            if (pingInterval) clearInterval(pingInterval);
+            
+            showNotification("Connection reset. Reconnecting...", "info");
+            
+            // Reconnect after a short delay
+            setTimeout(connectWebSocket, 1000);
+        }
+
+        // Fungsi untuk set IP manual
+        function setManualIP() {
+            const manualIP = document.getElementById('manualIP').value.trim();
+            if (manualIP) {
+                esp32IP = manualIP;
+                localStorage.setItem('esp32_ip', manualIP);
                 
-                const data = await response.json();
-                
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    // Update status
-                    setTimeout(updateESP32Status, 2000);
-                } else {
-                    showNotification('Error: ' + data.message, 'error');
+                // Close existing connection and reconnect
+                if (ws) {
+                    ws.close();
                 }
-            } catch (error) {
-                showNotification('ESP32 Connection error', 'error');
-                console.error('Error:', error);
-            } finally {
-                showLoading(false);
+                
+                if (reconnectInterval) clearInterval(reconnectInterval);
+                
+                showNotification(`Connecting to ${manualIP}...`, "info");
+                connectWebSocket();
+            } else {
+                showNotification("Please enter a valid IP address", "error");
+            }
+        }
+
+        // Update UI dengan data dari ESP32
+        function updateUIWithData(data) {
+            // Update timestamp
+            lastStatusUpdate = Date.now();
+            
+            // Update conveyor status
+            if (data.conveyorRunning) {
+                document.getElementById('conveyorStatus').textContent = 'RUNNING';
+                document.getElementById('conveyorStatus').className = 'status-value status-conveyor';
+                document.getElementById('conveyorDesc').textContent = 'Conveyor is currently running';
+            } else {
+                document.getElementById('conveyorStatus').textContent = 'STOPPED';
+                document.getElementById('conveyorStatus').className = 'status-value status-conveyor off';
+                document.getElementById('conveyorDesc').textContent = 'Conveyor is currently stopped';
+            }
+            
+            // Update sensor status
+            if (data.objectDetected) {
+                document.getElementById('sensorStatus').textContent = 'OBJECT DETECTED';
+                document.getElementById('sensorStatus').className = 'status-value status-sensor detected';
+                document.getElementById('sensorDesc').textContent = 'Object detected by proximity sensor';
+            } else {
+                document.getElementById('sensorStatus').textContent = 'CLEAR';
+                document.getElementById('sensorStatus').className = 'status-value status-sensor';
+                document.getElementById('sensorDesc').textContent = 'No object detected';
+            }
+            
+            // Update timer status
+            if (data.waitingForDelta && data.deltaTime > 0) {
+                const remaining = Math.max(0, Math.ceil((data.deltaTime - (Date.now() - data.waitStartTime)) / 1000));
+                if (remaining > 0) {
+                    document.getElementById('timerStatus').textContent = remaining + 's';
+                    document.getElementById('timerDesc').textContent = 'Conveyor will start in ' + remaining + ' seconds';
+                } else {
+                    document.getElementById('timerStatus').textContent = '0s';
+                    document.getElementById('timerDesc').textContent = 'Timer completed';
+                }
+            } else {
+                document.getElementById('timerStatus').textContent = '0s';
+                document.getElementById('timerDesc').textContent = 'No active timer';
+            }
+            
+            // Update statistics
+            document.getElementById('totalDetections').textContent = data.totalDetections || 0;
+            document.getElementById('totalRunTime').textContent = data.totalRunTime || 0;
+            document.getElementById('systemUptime').textContent = formatUptime(data.uptime || 0);
+            document.getElementById('freeHeap').textContent = data.freeHeap || 0;
+            
+            // Update sensor active status
+            const sensorActiveStatus = document.getElementById('sensorActiveStatus');
+            if (sensorActiveStatus) {
+                sensorActiveStatus.textContent = data.sensorActive ? 'Enabled' : 'Disabled';
+                sensorActiveStatus.style.color = data.sensorActive ? '#4CAF50' : '#F44336';
             }
         }
 
@@ -1097,22 +1133,23 @@
             const minutes = Math.floor((seconds % 3600) / 60);
             const secs = seconds % 60;
             
-            if (days > 0) return `${days}d ${hours}h ${minutes}m`;
-            if (hours > 0) return `${hours}h ${minutes}m ${secs}s`;
+            if (days > 0) return `${days}d ${hours}h`;
+            if (hours > 0) return `${hours}h ${minutes}m`;
             if (minutes > 0) return `${minutes}m ${secs}s`;
             return `${secs}s`;
         }
 
-        // Inisialisasi
+        // Inisialisasi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', async function() {
-            // Auto-detect ESP32 IP
-            await detectESP32IP();
+            // Setup manual IP input value
+            const savedIP = localStorage.getItem('esp32_ip');
+            if (savedIP) {
+                document.getElementById('manualIP').value = savedIP;
+                esp32IP = savedIP;
+            }
             
-            // Cek koneksi ESP32 pertama kali
-            updateESP32Status();
-            
-            // Update status setiap 3 detik
-            setInterval(updateESP32Status, 3000);
+            // Coba koneksi WebSocket
+            await connectWebSocket();
             
             // Smooth scrolling untuk anchor links
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1138,40 +1175,14 @@
                 });
             }
             
-            // Tambahkan manual IP input di footer
-            addManualIPInput();
+            // Check connection status periodically
+            setInterval(() => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    // Send ping to keep connection alive
+                    ws.send(JSON.stringify({command: "ping"}));
+                }
+            }, 20000);
         });
-        
-        // Fungsi untuk menambahkan input IP manual di footer
-        function addManualIPInput() {
-            const footer = document.querySelector('.footer');
-            if (!footer) return;
-            
-            const ipInputHTML = `
-                <div style="margin-top: 10px;">
-                    <input type="text" id="manualIP" placeholder="Enter ESP32 IP" 
-                           style="padding: 5px; width: 150px; border: 1px solid #ccc; border-radius: 4px;">
-                    <button onclick="setManualIP()" style="padding: 5px 10px; background: #667eea; color: white; border: none; border-radius: 4px; margin-left: 5px;">
-                        <i class="fas fa-plug"></i> Connect
-                    </button>
-                </div>
-            `;
-            
-            footer.innerHTML += ipInputHTML;
-        }
-        
-        // Fungsi untuk set IP manual
-        function setManualIP() {
-            const manualIP = document.getElementById('manualIP').value;
-            if (manualIP && manualIP.trim() !== '') {
-                ESP32_BASE_URL = `http://${manualIP.trim()}`;
-                localStorage.setItem('esp32_ip', manualIP.trim());
-                showNotification(`Manual IP set to: ${manualIP.trim()}`, 'success');
-                updateESP32Status();
-            } else {
-                showNotification('Please enter a valid IP address', 'error');
-            }
-        }
     </script>
 </body>
 </html>
