@@ -137,7 +137,16 @@
             gap: 10px;
         }
         
-        .wifi-status {
+        .mqtt-config-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+            border-left: 5px solid #9C27B0;
+        }
+        
+        .mqtt-status {
             background: #f8f9fa;
             padding: 15px;
             border-radius: 10px;
@@ -146,17 +155,17 @@
             transition: all 0.3s ease;
         }
         
-        .wifi-status.connected {
+        .mqtt-status.connected {
             border-left-color: #4CAF50;
             background: linear-gradient(to right, #e8f5e9, #f1f8e9);
         }
         
-        .wifi-status.ap {
-            border-left-color: #2196F3;
-            background: linear-gradient(to right, #e3f2fd, #e1f5fe);
+        .mqtt-status.connecting {
+            border-left-color: #FF9800;
+            background: linear-gradient(to right, #fff3e0, #ffecb3);
         }
         
-        .wifi-status.disconnected {
+        .mqtt-status.disconnected {
             border-left-color: #F44336;
             background: linear-gradient(to right, #ffebee, #ffcdd2);
         }
@@ -432,6 +441,11 @@
             background-color: #F44336;
         }
         
+        .connection-indicator.connecting {
+            background-color: #FF9800;
+            animation: pulse 1s infinite;
+        }
+        
         @keyframes pulse {
             0% { opacity: 1; }
             50% { opacity: 0.5; }
@@ -457,21 +471,6 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-        
-        .manual-ip-input {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .manual-ip-input input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            width: 150px;
         }
         
         @media (max-width: 768px) {
@@ -525,7 +524,7 @@
         <header class="header">
             <img src="cvr1.png" width="150" height="150" style="border-radius: 10%; margin-bottom: 20px;" />
             <h1><i class="fas fa-seedling"></i> Conveyor Plant Seed Detector</h1>
-            <p class="lead" style="color: rgba(255,255,255,0.9);">Real-time Control & Monitoring System</p>
+            <p class="lead" style="color: rgba(255,255,255,0.9);">MQTT-Based Real-time Control & Monitoring System</p>
         </header>
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -555,29 +554,73 @@
         </nav>
 
         <div class="jumbotron">
-            <h1 class="display-4">Welcome to Conveyor Control System</h1>
-            <p class="lead">A comprehensive platform for real-time monitoring and control of your conveyor system with proximity sensor technology.</p>
+            <h1 class="display-4">Welcome to MQTT Conveyor Control System</h1>
+            <p class="lead">A comprehensive platform for real-time monitoring and control of your conveyor system using MQTT protocol.</p>
             <hr class="my-4">
             <div class="d-flex align-items-center">
-                <div class="connection-indicator disconnected" id="connectionIndicator"></div>
-                <p class="mb-0" id="connectionStatusText">Connecting to ESP32...</p>
+                <div class="connection-indicator disconnected" id="mqttIndicator"></div>
+                <p class="mb-0" id="mqttStatusText">Connecting to MQTT Broker...</p>
             </div>
         </div>
 
-        <!-- ESP32 Connection Status -->
-        <div class="wifi-status" id="wifiStatus">
-            <h3 id="wifiStatusTitle"><i class="fas fa-microchip"></i> ESP32 Status: <span id="statusText">Checking...</span></h3>
-            <p id="wifiStatusDetail">Attempting to connect to ESP32...</p>
-            <p id="wifiIP">Device IP: <span id="ipAddress">Auto-detecting...</span></p>
-            <div class="manual-ip-input">
-                <input type="text" id="manualIP" placeholder="Enter ESP32 IP" value="192.168.1.100">
-                <button class="btn btn-sm btn-info" onclick="setManualIP()">
-                    <i class="fas fa-plug"></i> Connect
-                </button>
-                <button class="btn btn-sm btn-warning" onclick="resetConnection()">
-                    <i class="fas fa-sync-alt"></i> Reset
-                </button>
+        <!-- MQTT Configuration Panel -->
+        <div class="mqtt-config-panel">
+            <h3><i class="fas fa-server"></i> MQTT Configuration</h3>
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="mqttBroker">Broker URL</label>
+                        <input type="text" class="form-control" id="mqttBroker" 
+                               value="ws://broker.emqx.io:8083/mqtt" placeholder="ws://broker:port">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="mqttPort">Port</label>
+                        <input type="number" class="form-control" id="mqttPort" value="8083">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="clientId">Client ID</label>
+                        <input type="text" class="form-control" id="clientId" 
+                               value="web-client-" + Math.random().toString(16).substr(2, 8)">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" placeholder="Optional">
+                    </div>
+                </div>
             </div>
+            
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <button class="btn btn-success mr-2" onclick="connectMQTT()">
+                        <i class="fas fa-plug"></i> Connect
+                    </button>
+                    <button class="btn btn-danger mr-2" onclick="disconnectMQTT()">
+                        <i class="fas fa-power-off"></i> Disconnect
+                    </button>
+                    <button class="btn btn-info" onclick="saveMQTTSettings()">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MQTT Connection Status -->
+        <div class="mqtt-status disconnected" id="mqttStatus">
+            <h3 id="mqttStatusTitle"><i class="fas fa-satellite-dish"></i> MQTT Status: <span id="mqttStatusText">Disconnected</span></h3>
+            <p id="mqttStatusDetail">Not connected to broker</p>
+            <p id="mqttTopics">Subscribed Topics: <span id="topicsList">None</span></p>
         </div>
 
         <div class="container mt-5">
@@ -626,13 +669,13 @@
             <div class="status-card conveyor">
                 <h3><i class="fas fa-conveyor-belt"></i> Conveyor Status</h3>
                 <div class="status-value status-conveyor" id="conveyorStatus">OFFLINE</div>
-                <p id="conveyorDesc">Waiting for connection...</p>
+                <p id="conveyorDesc">Waiting for MQTT connection...</p>
             </div>
             
             <div class="status-card sensor">
                 <h3><i class="fas fa-sensor"></i> Proximity Sensor</h3>
                 <div class="status-value status-sensor" id="sensorStatus">OFFLINE</div>
-                <p id="sensorDesc">Waiting for connection...</p>
+                <p id="sensorDesc">Waiting for MQTT connection...</p>
             </div>
             
             <div class="status-card timer">
@@ -659,20 +702,21 @@
                     <div class="stat-label">System Uptime</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="freeHeap">0</div>
-                    <div class="stat-label">Free Memory</div>
+                    <div class="stat-value" id="messagesCount">0</div>
+                    <div class="stat-label">MQTT Messages</div>
                 </div>
             </div>
         </div>
 
-        <!-- ESP32 Control Panel -->
+        <!-- MQTT Control Panel -->
         <div class="control-panel">
             <h2><i class="fas fa-conveyor-belt"></i> Conveyor Control System</h2>
-            <p>ESP32-Based Industrial Conveyor Control with Proximity Detection</p>
+            <p>MQTT-Based Industrial Conveyor Control with Proximity Detection</p>
             
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('control')">Control Panel</button>
                 <button class="tab" onclick="switchTab('sensor')">Sensor Settings</button>
+                <button class="tab" onclick="switchTab('mqtt')">MQTT Topics</button>
             </div>
             
             <div id="control-tab" class="tab-content active">
@@ -694,23 +738,23 @@
                 </div>
                 
                 <div class="btn-group mt-3">
-                    <button class="btn btn-success" onclick="sendCommand('start')">
+                    <button class="btn btn-success" onclick="sendCommand('START')">
                         <i class="fas fa-power-off"></i> Start Conveyor
                     </button>
-                    <button class="btn btn-danger" onclick="sendCommand('stop')">
+                    <button class="btn btn-danger" onclick="sendCommand('STOP')">
                         <i class="fas fa-stop"></i> Stop Conveyor
                     </button>
-                    <button class="btn btn-warning" onclick="sendCommand('emergency_stop')">
+                    <button class="btn btn-warning" onclick="sendCommand('EMERGENCY_STOP')">
                         <i class="fas fa-exclamation-triangle"></i> Emergency Stop
                     </button>
                 </div>
                 
                 <div class="btn-group mt-3">
-                    <button class="btn btn-info" onclick="sendCommand('reset')">
+                    <button class="btn btn-info" onclick="sendCommand('RESET')">
                         <i class="fas fa-redo"></i> Reset System
                     </button>
                     <button class="btn btn-secondary" onclick="refreshStatus()">
-                        <i class="fas fa-sync"></i> Refresh Status
+                        <i class="fas fa-sync"></i> Request Status
                     </button>
                 </div>
             </div>
@@ -721,10 +765,10 @@
                 <div class="form-group">
                     <label><i class="fas fa-toggle-on"></i> Sensor State</label>
                     <div class="btn-group w-100">
-                        <button class="btn btn-success" onclick="enableSensor()">
+                        <button class="btn btn-success" onclick="sendCommand('ENABLE_SENSOR')">
                             <i class="fas fa-check"></i> Enable Sensor
                         </button>
-                        <button class="btn btn-warning" onclick="disableSensor()">
+                        <button class="btn btn-warning" onclick="sendCommand('DISABLE_SENSOR')">
                             <i class="fas fa-times"></i> Disable Sensor
                         </button>
                     </div>
@@ -741,11 +785,61 @@
                     <p><strong>Current State:</strong> <span id="sensorActiveStatus">Unknown</span></p>
                 </div>
             </div>
+            
+            <div id="mqtt-tab" class="tab-content">
+                <h4><i class="fas fa-network-wired"></i> MQTT Topic Configuration</h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="commandTopic">Command Topic</label>
+                            <input type="text" class="form-control" id="commandTopic" 
+                                   value="conveyor/control">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="statusTopic">Status Topic</label>
+                            <input type="text" class="form-control" id="statusTopic" 
+                                   value="conveyor/status">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="sensorTopic">Sensor Topic</label>
+                            <input type="text" class="form-control" id="sensorTopic" 
+                                   value="conveyor/sensor">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="timerTopic">Timer Topic</label>
+                            <input type="text" class="form-control" id="timerTopic" 
+                                   value="conveyor/timer">
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-info" onclick="updateTopics()">
+                    <i class="fas fa-sync-alt"></i> Update Topics
+                </button>
+                
+                <div class="alert alert-info mt-3">
+                    <h5><i class="fas fa-info-circle"></i> Current Topics</h5>
+                    <p><strong>Publishing to:</strong> <span id="currentCommandTopic">conveyor/control</span></p>
+                    <p><strong>Subscribed to:</strong> <span id="currentStatusTopic">conveyor/status</span>, 
+                    <span id="currentSensorTopic">conveyor/sensor</span>, 
+                    <span id="currentTimerTopic">conveyor/timer</span></p>
+                </div>
+            </div>
         </div>
 
         <div class="footer">
-            <p>Conveyor Plant Seed Detector | Version 3.0 | © 2026 Agricultural Technology</p>
-            <p>Connection: <span id="connectionType">Disconnected</span> | Status: <span id="currentStatus">Offline</span></p>
+            <p>Conveyor Plant Seed Detector | Version 4.0 (MQTT) | © 2026 Agricultural Technology</p>
+            <p>Connection: <span id="connectionType">MQTT (Disconnected)</span> | Status: <span id="currentStatus">Offline</span></p>
         </div>
     </div>
 
@@ -758,198 +852,308 @@
         <p>Processing...</p>
     </div>
 
+    <!-- MQTT Library -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     
-<script>
-// ====================== KONFIGURASI DASAR ======================
-let esp32IP = localStorage.getItem('esp32_ip') || "192.168.1.100";
-let statusUpdateInterval = null;
-let isConnected = false;
-
-// ====================== FUNGSI UTAMA ======================
-
-// 1. Fungsi untuk menampilkan notifikasi
-function showNotification(message, type = 'info') {
-    const notification = document.getElementById('notification');
-    notification.textContent = message;
-    notification.className = 'notification ' + type;
-    notification.classList.add('show');
+    <script>
+    // ====================== KONFIGURASI MQTT ======================
+    let mqttClient = null;
+    let isConnected = false;
+    let messageCount = 0;
     
-    setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
-}
+    // Topik MQTT
+    let topics = {
+        command: "conveyor/control",
+        status: "conveyor/status",
+        sensor: "conveyor/sensor",
+        timer: "conveyor/timer"
+    };
+    
+    // Status konveyor
+    let conveyorState = {
+        running: false,
+        sensorDetected: false,
+        timerActive: false,
+        timerSeconds: 0,
+        sensorEnabled: true,
+        uptime: 0,
+        detections: 0,
+        totalRuntime: 0
+    };
 
-// 2. Fungsi untuk mengirim perintah ke ESP32
-async function sendCommand(command) {
-    try {
-        showLoading(true);
+    // ====================== FUNGSI UTAMA MQTT ======================
+
+    // 1. Fungsi untuk menampilkan notifikasi
+    function showNotification(message, type = 'info') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = 'notification ' + type;
+        notification.classList.add('show');
         
-        const response = await fetch(`http://${esp32IP}/control`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ command: command })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showNotification(data.message, 'success');
-            // Update status setelah perintah
-            setTimeout(updateESP32Status, 500);
-        } else {
-            showNotification('Error: ' + data.message, 'error');
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    // 2. Fungsi untuk menghubungkan ke broker MQTT
+    function connectMQTT() {
+        if (mqttClient && mqttClient.connected) {
+            showNotification('Already connected to MQTT broker', 'info');
+            return;
         }
-    } catch (error) {
-        showNotification('ESP32 Connection error', 'error');
-        console.error('Error:', error);
-    } finally {
-        showLoading(false);
-    }
-}
 
-// 3. Fungsi untuk set delta time
-async function setDeltaTime() {
-    const deltaTimeInput = document.getElementById('deltaTime');
-    const seconds = parseInt(deltaTimeInput.value);
-    
-    if (isNaN(seconds) || seconds < 1 || seconds > 3600) {
-        showNotification('Please enter a valid number between 1 and 3600', 'error');
-        return;
-    }
-    
-    try {
-        showLoading(true);
-        
-        const response = await fetch(`http://${esp32IP}/setDeltaTime`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ seconds: seconds })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showNotification(data.message, 'success');
-            deltaTimeInput.value = '';
-            // Update status
-            setTimeout(updateESP32Status, 500);
-        } else {
-            showNotification('Error: ' + data.message, 'error');
+        const broker = document.getElementById('mqttBroker').value;
+        const port = document.getElementById('mqttPort').value;
+        const clientId = document.getElementById('clientId').value;
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        // Update UI status
+        updateMQTTStatus('connecting', 'Connecting to broker...');
+
+        // Konfigurasi koneksi MQTT
+        const options = {
+            clientId: clientId,
+            clean: true,
+            reconnectPeriod: 1000,
+            connectTimeout: 30000
+        };
+
+        // Tambahkan kredensial jika ada
+        if (username) {
+            options.username = username;
+            options.password = password;
         }
-    } catch (error) {
-        showNotification('ESP32 Connection error', 'error');
-        console.error('Error:', error);
-    } finally {
-        showLoading(false);
-    }
-}
 
-// 4. Fungsi untuk auto-detect IP ESP32
-async function detectESP32IP() {
-    // Coba beberapa kemungkinan IP
-    const possibleIPs = [
-        "192.168.1.100",        // IP default untuk REDMINOTE8 network
-        "192.168.1.101",
-        "192.168.1.102",
-        "192.168.4.1",          // AP mode default
-        "192.168.0.100",
-        "192.168.0.101"
-    ];
-    
-    // Tambahkan IP dari local storage jika ada
-    const savedIP = localStorage.getItem('esp32_ip');
-    if (savedIP && !possibleIPs.includes(savedIP)) {
-        possibleIPs.unshift(savedIP);
-    }
-    
-    for (const ip of possibleIPs) {
+        // Buat URL koneksi
+        const mqttUrl = `${broker}`;
+        
         try {
-            const testUrl = `http://${ip}/status`;
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
-            
-            const response = await fetch(testUrl, {
-                method: 'GET',
-                signal: controller.signal
+            mqttClient = mqtt.connect(mqttUrl, options);
+
+            // Event handler untuk koneksi berhasil
+            mqttClient.on('connect', function () {
+                console.log('Connected to MQTT broker');
+                isConnected = true;
+                updateMQTTStatus('connected', `Connected to ${broker}`);
+                subscribeToTopics();
+                showNotification('Successfully connected to MQTT broker', 'success');
             });
-            
-            clearTimeout(timeoutId);
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data.conveyorRunning !== undefined) {
-                    esp32IP = ip;
-                    localStorage.setItem('esp32_ip', ip);
-                    console.log(`ESP32 ditemukan di: ${ip}`);
-                    showNotification(`Connected to ESP32 at ${ip}`, 'success');
-                    return true;
+
+            // Event handler untuk menerima pesan
+            mqttClient.on('message', function (topic, message) {
+                messageCount++;
+                document.getElementById('messagesCount').textContent = messageCount;
+                handleMQTTMessage(topic, message.toString());
+            });
+
+            // Event handler untuk error
+            mqttClient.on('error', function (error) {
+                console.error('MQTT Error:', error);
+                updateMQTTStatus('disconnected', `Connection error: ${error.message}`);
+                showNotification(`MQTT Error: ${error.message}`, 'error');
+            });
+
+            // Event handler untuk disconnect
+            mqttClient.on('close', function () {
+                console.log('Disconnected from MQTT broker');
+                isConnected = false;
+                updateMQTTStatus('disconnected', 'Disconnected from broker');
+            });
+
+            // Event handler untuk reconnect
+            mqttClient.on('reconnect', function () {
+                console.log('Reconnecting to MQTT broker...');
+                updateMQTTStatus('connecting', 'Reconnecting to broker...');
+            });
+
+        } catch (error) {
+            console.error('Failed to connect to MQTT:', error);
+            updateMQTTStatus('disconnected', `Connection failed: ${error.message}`);
+            showNotification(`Failed to connect: ${error.message}`, 'error');
+        }
+    }
+
+    // 3. Fungsi untuk disconnect dari MQTT
+    function disconnectMQTT() {
+        if (mqttClient) {
+            mqttClient.end();
+            mqttClient = null;
+            isConnected = false;
+            updateMQTTStatus('disconnected', 'Disconnected manually');
+            showNotification('Disconnected from MQTT broker', 'info');
+        }
+    }
+
+    // 4. Fungsi untuk subscribe ke topik
+    function subscribeToTopics() {
+        if (!mqttClient || !mqttClient.connected) {
+            console.error('MQTT client not connected');
+            return;
+        }
+
+        // Subscribe ke semua topik
+        Object.values(topics).forEach(topic => {
+            mqttClient.subscribe(topic, { qos: 0 }, function (err) {
+                if (!err) {
+                    console.log(`Subscribed to ${topic}`);
+                } else {
+                    console.error(`Failed to subscribe to ${topic}:`, err);
                 }
+            });
+        });
+
+        // Update UI dengan topik yang disubscribe
+        const topicsList = Object.values(topics).join(', ');
+        document.getElementById('topicsList').textContent = topicsList;
+    }
+
+    // 5. Fungsi untuk menangani pesan MQTT
+    function handleMQTTMessage(topic, message) {
+        console.log(`Received message on ${topic}: ${message}`);
+        
+        try {
+            const data = JSON.parse(message);
+            
+            switch(topic) {
+                case topics.status:
+                    updateConveyorStatus(data);
+                    break;
+                case topics.sensor:
+                    updateSensorStatus(data);
+                    break;
+                case topics.timer:
+                    updateTimerStatus(data);
+                    break;
+                default:
+                    console.log(`Unhandled topic: ${topic}`);
             }
         } catch (error) {
-            // Lanjut ke IP berikutnya
-            console.log(`IP ${ip} tidak merespon`);
+            // Jika bukan JSON, tangani sebagai string message
+            console.log(`Raw message on ${topic}: ${message}`);
+            
+            // Update berdasarkan topik
+            if (topic === topics.status) {
+                updateSimpleStatus(message);
+            }
         }
     }
-    
-    return false;
-}
 
-// 5. Fungsi untuk mengupdate status dari ESP32
-async function updateESP32Status() {
-    try {
-        const response = await fetch(`http://${esp32IP}/status`);
+    // 6. Fungsi untuk mengirim perintah via MQTT
+    function sendCommand(command) {
+        if (!mqttClient || !mqttClient.connected) {
+            showNotification('Not connected to MQTT broker', 'error');
+            return;
+        }
+
+        const commandTopic = topics.command;
+        const payload = JSON.stringify({
+            command: command,
+            timestamp: new Date().toISOString(),
+            client: 'web-control-panel'
+        });
+
+        mqttClient.publish(commandTopic, payload, { qos: 0 }, function (err) {
+            if (err) {
+                console.error('Failed to publish command:', err);
+                showNotification(`Failed to send command: ${err.message}`, 'error');
+            } else {
+                console.log(`Command sent: ${command}`);
+                showNotification(`Command "${command}" sent successfully`, 'success');
+            }
+        });
+    }
+
+    // 7. Fungsi untuk set delta time via MQTT
+    function setDeltaTime() {
+        const deltaTimeInput = document.getElementById('deltaTime');
+        const seconds = parseInt(deltaTimeInput.value);
         
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (isNaN(seconds) || seconds < 1 || seconds > 3600) {
+            showNotification('Please enter a valid number between 1 and 3600', 'error');
+            return;
+        }
+
+        if (!mqttClient || !mqttClient.connected) {
+            showNotification('Not connected to MQTT broker', 'error');
+            return;
+        }
+
+        const payload = JSON.stringify({
+            command: 'SET_TIMER',
+            seconds: seconds,
+            timestamp: new Date().toISOString()
+        });
+
+        mqttClient.publish(topics.command, payload, { qos: 0 }, function (err) {
+            if (err) {
+                console.error('Failed to set timer:', err);
+                showNotification(`Failed to set timer: ${err.message}`, 'error');
+            } else {
+                console.log(`Timer set to ${seconds} seconds`);
+                showNotification(`Timer set to ${seconds} seconds`, 'success');
+                deltaTimeInput.value = '';
+            }
+        });
+    }
+
+    // 8. Fungsi untuk update status konveyor
+    function updateConveyorStatus(data) {
+        // Update conveyor state
+        if (data.running !== undefined) conveyorState.running = data.running;
+        if (data.sensorDetected !== undefined) conveyorState.sensorDetected = data.sensorDetected;
+        if (data.timerActive !== undefined) conveyorState.timerActive = data.timerActive;
+        if (data.timerSeconds !== undefined) conveyorState.timerSeconds = data.timerSeconds;
+        if (data.sensorEnabled !== undefined) conveyorState.sensorEnabled = data.sensorEnabled;
+        if (data.uptime !== undefined) conveyorState.uptime = data.uptime;
+        if (data.detections !== undefined) conveyorState.detections = data.detections;
+        if (data.totalRuntime !== undefined) conveyorState.totalRuntime = data.totalRuntime;
+
+        // Update UI
+        updateConveyorUI();
+    }
+
+    // 9. Fungsi untuk update status sensor
+    function updateSensorStatus(data) {
+        if (data.detected !== undefined) conveyorState.sensorDetected = data.detected;
+        if (data.enabled !== undefined) conveyorState.sensorEnabled = data.enabled;
+        
+        updateConveyorUI();
+    }
+
+    // 10. Fungsi untuk update status timer
+    function updateTimerStatus(data) {
+        if (data.active !== undefined) conveyorState.timerActive = data.active;
+        if (data.seconds !== undefined) conveyorState.timerSeconds = data.seconds;
+        if (data.remaining !== undefined) conveyorState.timerSeconds = data.remaining;
+        
+        updateConveyorUI();
+    }
+
+    // 11. Fungsi untuk update status sederhana (string message)
+    function updateSimpleStatus(message) {
+        const lowerMsg = message.toLowerCase();
+        
+        if (lowerMsg.includes('running') || lowerMsg.includes('start')) {
+            conveyorState.running = true;
+        } else if (lowerMsg.includes('stopped') || lowerMsg.includes('stop')) {
+            conveyorState.running = false;
+        } else if (lowerMsg.includes('detected')) {
+            conveyorState.sensorDetected = true;
+        } else if (lowerMsg.includes('clear')) {
+            conveyorState.sensorDetected = false;
         }
         
-        const data = await response.json();
-        
-        // Update WiFi status
-        const wifiStatusElement = document.getElementById('wifiStatus');
-        wifiStatusElement.className = 'wifi-status ' + data.wifiStatus;
-        
-        if (data.wifiStatus === 'connected') {
-            document.getElementById('wifiStatusTitle').innerHTML = '<i class="fas fa-wifi"></i> ESP32 Status: Connected';
-            document.getElementById('statusText').textContent = 'Connected';
-            document.getElementById('wifiStatusDetail').textContent = `Connected to: ${data.ssid || 'WiFi Network'}`;
-            document.getElementById('ipAddress').textContent = data.ipAddress;
-            document.getElementById('connectionIndicator').className = 'connection-indicator connected';
-            document.getElementById('connectionStatusText').textContent = 'Connected to ESP32';
-            document.getElementById('connectionType').textContent = 'WiFi';
-            document.getElementById('currentStatus').textContent = 'Online';
-            isConnected = true;
-        } else if (data.wifiStatus === 'ap') {
-            document.getElementById('wifiStatusTitle').innerHTML = '<i class="fas fa-broadcast-tower"></i> ESP32 Status: AP Mode';
-            document.getElementById('statusText').textContent = 'AP Mode';
-            document.getElementById('wifiStatusDetail').textContent = 'ESP32 is in Access Point mode';
-            document.getElementById('ipAddress').textContent = data.ipAddress || '192.168.4.1';
-            document.getElementById('connectionIndicator').className = 'connection-indicator connected';
-            document.getElementById('connectionStatusText').textContent = 'Connected to ESP32 (AP Mode)';
-            document.getElementById('connectionType').textContent = 'AP Mode';
-            document.getElementById('currentStatus').textContent = 'Online';
-            isConnected = true;
-        } else {
-            document.getElementById('wifiStatusTitle').innerHTML = '<i class="fas fa-wifi-slash"></i> ESP32 Status: Disconnected';
-            document.getElementById('statusText').textContent = 'Disconnected';
-            document.getElementById('wifiStatusDetail').textContent = 'Unable to connect to ESP32';
-            document.getElementById('ipAddress').textContent = 'Not available';
-            document.getElementById('connectionIndicator').className = 'connection-indicator disconnected';
-            document.getElementById('connectionStatusText').textContent = 'Disconnected from ESP32';
-            document.getElementById('connectionType').textContent = 'Disconnected';
-            document.getElementById('currentStatus').textContent = 'Offline';
-            isConnected = false;
-        }
-        
+        updateConveyorUI();
+    }
+
+    // 12. Fungsi untuk update UI conveyor
+    function updateConveyorUI() {
         // Update conveyor status
-        if (data.conveyorRunning) {
+        if (conveyorState.running) {
             document.getElementById('conveyorStatus').textContent = 'RUNNING';
             document.getElementById('conveyorStatus').className = 'status-value status-conveyor';
             document.getElementById('conveyorDesc').textContent = 'Conveyor is currently running';
@@ -960,7 +1164,7 @@ async function updateESP32Status() {
         }
         
         // Update sensor status
-        if (data.objectDetected) {
+        if (conveyorState.sensorDetected) {
             document.getElementById('sensorStatus').textContent = 'OBJECT DETECTED';
             document.getElementById('sensorStatus').className = 'status-value status-sensor detected';
             document.getElementById('sensorDesc').textContent = 'Object detected by proximity sensor';
@@ -971,243 +1175,275 @@ async function updateESP32Status() {
         }
         
         // Update timer status
-        if (data.waitingForDelta && data.deltaTime > 0) {
-            const remaining = Math.max(0, Math.ceil((data.deltaTime - (Date.now() - data.waitStartTime)) / 1000));
-            if (remaining > 0) {
-                document.getElementById('timerStatus').textContent = remaining + 's';
-                document.getElementById('timerDesc').textContent = 'Conveyor will start in ' + remaining + ' seconds';
-            } else {
-                document.getElementById('timerStatus').textContent = '0s';
-                document.getElementById('timerDesc').textContent = 'Timer completed';
-            }
+        if (conveyorState.timerActive && conveyorState.timerSeconds > 0) {
+            document.getElementById('timerStatus').textContent = conveyorState.timerSeconds + 's';
+            document.getElementById('timerDesc').textContent = 'Conveyor will start in ' + conveyorState.timerSeconds + ' seconds';
         } else {
             document.getElementById('timerStatus').textContent = '0s';
             document.getElementById('timerDesc').textContent = 'No active timer';
         }
         
         // Update statistics
-        document.getElementById('totalDetections').textContent = data.totalDetections || 0;
-        document.getElementById('totalRunTime').textContent = data.totalRunTime || 0;
-        document.getElementById('systemUptime').textContent = formatUptime(data.uptime || 0);
-        document.getElementById('freeHeap').textContent = data.freeHeap ? Math.round(data.freeHeap / 1024) + ' KB' : '0 KB';
+        document.getElementById('totalDetections').textContent = conveyorState.detections;
+        document.getElementById('totalRunTime').textContent = conveyorState.totalRuntime;
+        document.getElementById('systemUptime').textContent = formatUptime(conveyorState.uptime);
         
         // Update sensor active status
         const sensorActiveStatus = document.getElementById('sensorActiveStatus');
         if (sensorActiveStatus) {
-            sensorActiveStatus.textContent = data.sensorActive ? 'Enabled' : 'Disabled';
-            sensorActiveStatus.style.color = data.sensorActive ? '#4CAF50' : '#F44336';
+            sensorActiveStatus.textContent = conveyorState.sensorEnabled ? 'Enabled' : 'Disabled';
+            sensorActiveStatus.style.color = conveyorState.sensorEnabled ? '#4CAF50' : '#F44336';
         }
         
-        return data;
+        // Update connection status
+        document.getElementById('connectionType').textContent = 'MQTT';
+        document.getElementById('currentStatus').textContent = isConnected ? 'Online' : 'Offline';
+    }
+
+    // 13. Fungsi untuk update MQTT status UI
+    function updateMQTTStatus(status, message) {
+        const statusElement = document.getElementById('mqttStatus');
+        const indicator = document.getElementById('mqttIndicator');
+        const statusText = document.getElementById('mqttStatusText');
+        const statusDetail = document.getElementById('mqttStatusDetail');
         
-    } catch (error) {
-        console.error('Error fetching ESP32 status:', error);
+        statusElement.className = 'mqtt-status ' + status;
+        indicator.className = 'connection-indicator ' + status;
         
-        // Update UI untuk status error
-        document.getElementById('wifiStatus').className = 'wifi-status disconnected';
-        document.getElementById('wifiStatusTitle').innerHTML = '<i class="fas fa-exclamation-triangle"></i> ESP32 Status: Connection Failed';
-        document.getElementById('statusText').textContent = 'Failed';
-        document.getElementById('wifiStatusDetail').textContent = 'Cannot connect to ESP32. Please check connection.';
-        document.getElementById('ipAddress').textContent = 'Not available';
-        document.getElementById('connectionIndicator').className = 'connection-indicator disconnected';
-        document.getElementById('connectionStatusText').textContent = 'Cannot connect to ESP32';
-        document.getElementById('connectionType').textContent = 'Disconnected';
-        document.getElementById('currentStatus').textContent = 'Offline';
-        isConnected = false;
-        
-        // Coba auto-detect IP baru
-        if (error.name === 'AbortError' || error.message.includes('Failed to fetch')) {
-            showNotification('Trying to reconnect to ESP32...', 'info');
-            const detected = await detectESP32IP();
-            if (detected) {
-                showNotification('ESP32 found!', 'success');
+        switch(status) {
+            case 'connected':
+                statusElement.querySelector('h3').innerHTML = '<i class="fas fa-satellite-dish"></i> MQTT Status: <span>Connected</span>';
+                statusText.textContent = 'Connected';
+                statusDetail.textContent = message;
+                document.getElementById('mqttStatusText').textContent = 'Connected to MQTT Broker';
+                break;
+            case 'connecting':
+                statusElement.querySelector('h3').innerHTML = '<i class="fas fa-sync-alt"></i> MQTT Status: <span>Connecting</span>';
+                statusText.textContent = 'Connecting';
+                statusDetail.textContent = message;
+                document.getElementById('mqttStatusText').textContent = 'Connecting to MQTT Broker...';
+                break;
+            case 'disconnected':
+                statusElement.querySelector('h3').innerHTML = '<i class="fas fa-exclamation-triangle"></i> MQTT Status: <span>Disconnected</span>';
+                statusText.textContent = 'Disconnected';
+                statusDetail.textContent = message;
+                document.getElementById('mqttStatusText').textContent = 'Disconnected from MQTT Broker';
+                break;
+        }
+    }
+
+    // 14. Fungsi untuk refresh status (request update dari ESP32)
+    function refreshStatus() {
+        if (!mqttClient || !mqttClient.connected) {
+            showNotification('Not connected to MQTT broker', 'error');
+            return;
+        }
+
+        const payload = JSON.stringify({
+            command: 'GET_STATUS',
+            timestamp: new Date().toISOString()
+        });
+
+        mqttClient.publish(topics.command, payload, { qos: 0 }, function (err) {
+            if (err) {
+                console.error('Failed to request status:', err);
+                showNotification(`Failed to request status: ${err.message}`, 'error');
+            } else {
+                console.log('Status request sent');
+                showNotification('Status request sent', 'info');
             }
-        }
-        
-        return null;
-    }
-}
-
-// 6. Fungsi untuk enable/disable sensor
-async function enableSensor() {
-    try {
-        showLoading(true);
-        
-        const response = await fetch(`http://${esp32IP}/sensorControl`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ command: "enable" })
         });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showNotification(data.message, 'success');
-            // Update status
-            setTimeout(updateESP32Status, 500);
-        } else {
-            showNotification('Error: ' + data.message, 'error');
-        }
-    } catch (error) {
-        showNotification('ESP32 Connection error', 'error');
-        console.error('Error:', error);
-    } finally {
-        showLoading(false);
     }
-}
 
-async function disableSensor() {
-    try {
-        showLoading(true);
-        
-        const response = await fetch(`http://${esp32IP}/sensorControl`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ command: "disable" })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showNotification(data.message, 'success');
-            // Update status
-            setTimeout(updateESP32Status, 500);
-        } else {
-            showNotification('Error: ' + data.message, 'error');
-        }
-    } catch (error) {
-        showNotification('ESP32 Connection error', 'error');
-        console.error('Error:', error);
-    } finally {
-        showLoading(false);
-    }
-}
-
-// 7. Fungsi untuk refresh status
-function refreshStatus() {
-    updateESP32Status();
-    showNotification('Refreshing status...', 'info');
-}
-
-// 8. Fungsi untuk set IP manual
-function setManualIP() {
-    const manualIP = document.getElementById('manualIP').value.trim();
-    if (manualIP) {
-        esp32IP = manualIP;
-        localStorage.setItem('esp32_ip', manualIP);
-        showNotification(`Manual IP set to: ${manualIP}`, 'success');
+    // 15. Fungsi untuk update topik MQTT
+    function updateTopics() {
+        topics.command = document.getElementById('commandTopic').value;
+        topics.status = document.getElementById('statusTopic').value;
+        topics.sensor = document.getElementById('sensorTopic').value;
+        topics.timer = document.getElementById('timerTopic').value;
         
         // Update UI
-        document.getElementById('ipAddress').textContent = manualIP;
-        document.getElementById('currentStatus').textContent = 'Connecting...';
+        document.getElementById('currentCommandTopic').textContent = topics.command;
+        document.getElementById('currentStatusTopic').textContent = topics.status;
+        document.getElementById('currentSensorTopic').textContent = topics.sensor;
+        document.getElementById('currentTimerTopic').textContent = topics.timer;
         
-        // Test connection with new IP
-        updateESP32Status();
-    } else {
-        showNotification('Please enter a valid IP address', 'error');
+        // Resubscribe jika sudah connected
+        if (mqttClient && mqttClient.connected) {
+            subscribeToTopics();
+        }
+        
+        showNotification('MQTT topics updated', 'success');
     }
-}
 
-// 9. Fungsi untuk reset koneksi
-function resetConnection() {
-    localStorage.removeItem('esp32_ip');
-    esp32IP = "192.168.1.100";
-    document.getElementById('manualIP').value = esp32IP;
-    showNotification('Connection reset. Reconnecting...', 'info');
-    
-    // Hentikan interval lama
-    if (statusUpdateInterval) {
-        clearInterval(statusUpdateInterval);
+    // 16. Fungsi untuk save MQTT settings
+    function saveMQTTSettings() {
+        const settings = {
+            broker: document.getElementById('mqttBroker').value,
+            port: document.getElementById('mqttPort').value,
+            clientId: document.getElementById('clientId').value,
+            username: document.getElementById('username').value,
+            commandTopic: document.getElementById('commandTopic').value,
+            statusTopic: document.getElementById('statusTopic').value,
+            sensorTopic: document.getElementById('sensorTopic').value,
+            timerTopic: document.getElementById('timerTopic').value
+        };
+        
+        localStorage.setItem('mqttSettings', JSON.stringify(settings));
+        showNotification('MQTT settings saved to local storage', 'success');
     }
-    
-    // Mulai interval baru
-    updateESP32Status();
-    statusUpdateInterval = setInterval(updateESP32Status, 3000);
-}
 
-// 10. Fungsi untuk format uptime
-function formatUptime(seconds) {
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    if (minutes > 0) return `${minutes}m ${secs}s`;
-    return `${secs}s`;
-}
-
-// 11. Fungsi untuk menampilkan/menyembunyikan loading
-function showLoading(show) {
-    document.getElementById('loading').style.display = show ? 'block' : 'none';
-}
-
-// 12. Fungsi untuk mengganti tab
-function switchTab(tabName) {
-    // Sembunyikan semua tab
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    
-    // Hapus active class dari semua tombol tab
-    document.querySelectorAll('.tab').forEach(tabBtn => {
-        tabBtn.classList.remove('active');
-    });
-    
-    // Tampilkan tab yang dipilih
-    document.getElementById(tabName + '-tab').classList.add('active');
-    
-    // Aktifkan tombol tab yang dipilih
-    event.currentTarget.classList.add('active');
-}
-
-// ====================== INISIALISASI ======================
-document.addEventListener('DOMContentLoaded', async function() {
-    // Setup manual IP input value
-    const savedIP = localStorage.getItem('esp32_ip');
-    if (savedIP) {
-        document.getElementById('manualIP').value = savedIP;
-        esp32IP = savedIP;
+    // 17. Fungsi untuk load MQTT settings
+    function loadMQTTSettings() {
+        const saved = localStorage.getItem('mqttSettings');
+        if (saved) {
+            try {
+                const settings = JSON.parse(saved);
+                document.getElementById('mqttBroker').value = settings.broker || 'ws://broker.emqx.io:8083/mqtt';
+                document.getElementById('mqttPort').value = settings.port || '8083';
+                document.getElementById('clientId').value = settings.clientId || 
+                    'web-client-' + Math.random().toString(16).substr(2, 8);
+                document.getElementById('username').value = settings.username || '';
+                document.getElementById('commandTopic').value = settings.commandTopic || 'conveyor/control';
+                document.getElementById('statusTopic').value = settings.statusTopic || 'conveyor/status';
+                document.getElementById('sensorTopic').value = settings.sensorTopic || 'conveyor/sensor';
+                document.getElementById('timerTopic').value = settings.timerTopic || 'conveyor/timer';
+                
+                // Update topics object
+                topics.command = settings.commandTopic || 'conveyor/control';
+                topics.status = settings.statusTopic || 'conveyor/status';
+                topics.sensor = settings.sensorTopic || 'conveyor/sensor';
+                topics.timer = settings.timerTopic || 'conveyor/timer';
+                
+                // Update UI
+                updateTopics();
+                
+            } catch (error) {
+                console.error('Failed to load saved settings:', error);
+            }
+        }
     }
-    
-    // Auto-detect ESP32 IP
-    await detectESP32IP();
-    
-    // Cek koneksi ESP32 pertama kali
-    updateESP32Status();
-    
-    // Update status setiap 3 detik
-    statusUpdateInterval = setInterval(updateESP32Status, 3000);
-    
-    // Smooth scrolling untuk anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth'
-                });
+
+    // 18. Fungsi untuk format uptime
+    function formatUptime(seconds) {
+        if (!seconds) return '0s';
+        
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        
+        if (days > 0) return `${days}d ${hours}h`;
+        if (hours > 0) return `${hours}h ${minutes}m`;
+        if (minutes > 0) return `${minutes}m ${secs}s`;
+        return `${secs}s`;
+    }
+
+    // 19. Fungsi untuk menampilkan/menyembunyikan loading
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+
+    // 20. Fungsi untuk mengganti tab
+    function switchTab(tabName) {
+        // Sembunyikan semua tab
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Hapus active class dari semua tombol tab
+        document.querySelectorAll('.tab').forEach(tabBtn => {
+            tabBtn.classList.remove('active');
+        });
+        
+        // Tampilkan tab yang dipilih
+        document.getElementById(tabName + '-tab').classList.add('active');
+        
+        // Aktifkan tombol tab yang dipilih
+        event.currentTarget.classList.add('active');
+    }
+
+    // ====================== INISIALISASI ======================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load saved settings
+        loadMQTTSettings();
+        
+        // Set random client ID jika kosong
+        if (!document.getElementById('clientId').value) {
+            document.getElementById('clientId').value = 
+                'web-client-' + Math.random().toString(16).substr(2, 8);
+        }
+        
+        // Auto-connect jika ada saved connection
+        const autoConnect = localStorage.getItem('mqttAutoConnect');
+        if (autoConnect === 'true') {
+            setTimeout(connectMQTT, 1000);
+        }
+        
+        // Update topics display
+        updateTopics();
+        
+        // Smooth scrolling untuk anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Tambahkan event listener untuk navbar toggle di mobile
+        const navbarToggler = document.querySelector('.navbar-toggler');
+        if (navbarToggler) {
+            navbarToggler.addEventListener('click', function() {
+                const navbarNav = document.querySelector('#navbarNav');
+                if (navbarNav) {
+                    navbarNav.classList.toggle('show');
+                }
+            });
+        }
+        
+        // Tambahkan event listener untuk Enter key pada input fields
+        document.getElementById('deltaTime').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                setDeltaTime();
             }
         });
-    });
-    
-    // Tambahkan event listener untuk navbar toggle di mobile
-    const navbarToggler = document.querySelector('.navbar-toggler');
-    if (navbarToggler) {
-        navbarToggler.addEventListener('click', function() {
-            const navbarNav = document.querySelector('#navbarNav');
-            if (navbarNav) {
-                navbarNav.classList.toggle('show');
+        
+        document.getElementById('mqttBroker').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                connectMQTT();
             }
         });
-    }
-});
-</script>
+        
+        // Simulasi data untuk testing jika tidak ada koneksi MQTT
+        setTimeout(() => {
+            if (!isConnected) {
+                document.getElementById('mqttStatusText').textContent = 'Click Connect to start';
+            }
+        }, 2000);
+    });
+    
+    // Fungsi untuk handle window unload
+    window.addEventListener('beforeunload', function() {
+        if (mqttClient && mqttClient.connected) {
+            // Send disconnect message
+            const payload = JSON.stringify({
+                command: 'WEB_DISCONNECT',
+                timestamp: new Date().toISOString()
+            });
+            
+            try {
+                mqttClient.publish(topics.command, payload, { qos: 0 });
+            } catch (error) {
+                console.error('Error sending disconnect message:', error);
+            }
+        }
+    });
+    </script>
 </body>
 </html>
