@@ -337,6 +337,17 @@
             color: white;
         }
         
+        .btn-outline-primary {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #667eea;
+            color: white;
+        }
+        
         .btn-group {
             display: flex;
             gap: 15px;
@@ -559,7 +570,7 @@
             <hr class="my-4">
             <div class="d-flex align-items-center">
                 <div class="connection-indicator disconnected" id="mqttIndicator"></div>
-                <p class="mb-0" id="mqttStatusText">Connecting to MQTT Broker...</p>
+                <p class="mb-0" id="connectionStatusText">Connecting to MQTT Broker...</p>
             </div>
         </div>
 
@@ -571,13 +582,13 @@
                     <div class="form-group">
                         <label for="mqttBroker">Broker URL</label>
                         <input type="text" class="form-control" id="mqttBroker" 
-                               value="ws://broker.emqx.io:8083/mqtt" placeholder="ws://broker:port">
+                               placeholder="ws:// or wss:// broker">
                     </div>
                 </div>
                 <div class="col-md-2">
                     <div class="form-group">
                         <label for="mqttPort">Port</label>
-                        <input type="number" class="form-control" id="mqttPort" value="8083">
+                        <input type="number" class="form-control" id="mqttPort">
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -611,6 +622,28 @@
                     </button>
                     <button class="btn btn-info" onclick="saveMQTTSettings()">
                         <i class="fas fa-save"></i> Save Settings
+                    </button>
+                    <button class="btn btn-warning" onclick="autoDetectBroker()">
+                        <i class="fas fa-search"></i> Auto Detect
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Broker Quick Selection -->
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <h5><i class="fas fa-bolt"></i> Quick Connect:</h5>
+                    <button class="btn btn-outline-primary btn-sm mr-2" onclick="setBroker('public', 'wss')">
+                        Public Broker (WSS)
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm mr-2" onclick="setBroker('public', 'ws')">
+                        Public Broker (WS)
+                    </button>
+                    <button class="btn btn-outline-info btn-sm mr-2" onclick="setBroker('local', 'ws')">
+                        Local Broker (WS)
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="setBroker('local', 'wss')">
+                        Local Broker (WSS)
                     </button>
                 </div>
             </div>
@@ -884,7 +917,7 @@
         totalRuntime: 0
     };
 
-    // ====================== FUNGSI UTAMA MQTT ======================
+    // ====================== FUNGSI UTAMA ======================
 
     // 1. Fungsi untuk menampilkan notifikasi
     function showNotification(message, type = 'info') {
@@ -898,7 +931,127 @@
         }, 3000);
     }
 
-    // 2. Fungsi untuk menghubungkan ke broker MQTT
+    // 2. Fungsi untuk auto-detect protocol yang digunakan
+    function getProtocol() {
+        const protocol = window.location.protocol;
+        return protocol === 'https:' ? 'wss' : 'ws';
+    }
+
+    // 3. Fungsi untuk set broker berdasarkan tipe
+    function setBroker(type, protocol = null) {
+        const useProtocol = protocol || getProtocol();
+        
+        const brokers = {
+            'public': {
+                'ws': 'ws://broker.emqx.io:8083/mqtt',
+                'wss': 'wss://broker.emqx.io:8084/mqtt'
+            },
+            'local': {
+                'ws': 'ws://localhost:9001',
+                'wss': 'wss://localhost:9001'
+            },
+            'hivemq': {
+                'ws': 'ws://broker.hivemq.com:8000/mqtt',
+                'wss': 'wss://broker.hivemq.com:8884/mqtt'
+            },
+            'mosquitto': {
+                'ws': 'ws://test.mosquitto.org:8080',
+                'wss': 'wss://test.mosquitto.org:8081'
+            }
+        };
+        
+        if (brokers[type] && brokers[type][useProtocol]) {
+            const url = brokers[type][useProtocol];
+            document.getElementById('mqttBroker').value = url;
+            
+            // Set port otomatis berdasarkan URL
+            if (url.includes(':8083')) {
+                document.getElementById('mqttPort').value = '8083';
+            } else if (url.includes(':8084')) {
+                document.getElementById('mqttPort').value = '8084';
+            } else if (url.includes(':8000')) {
+                document.getElementById('mqttPort').value = '8000';
+            } else if (url.includes(':8884')) {
+                document.getElementById('mqttPort').value = '8884';
+            } else if (url.includes(':9001')) {
+                document.getElementById('mqttPort').value = '9001';
+            } else if (url.includes(':8080')) {
+                document.getElementById('mqttPort').value = '8080';
+            } else if (url.includes(':8081')) {
+                document.getElementById('mqttPort').value = '8081';
+            }
+            
+            showNotification(`Set ${type} broker with ${useProtocol} protocol`, 'success');
+        } else {
+            showNotification(`Configuration not found for ${type} with ${useProtocol}`, 'error');
+        }
+    }
+
+    // 4. Fungsi untuk auto-detect broker yang tersedia
+    function autoDetectBroker() {
+        showNotification('Auto-detecting available brokers...', 'info');
+        
+        const testBrokers = [
+            { url: 'wss://broker.emqx.io:8084/mqtt', name: 'EMQX WSS' },
+            { url: 'ws://broker.emqx.io:8083/mqtt', name: 'EMQX WS' },
+            { url: 'wss://test.mosquitto.org:8081', name: 'Mosquitto WSS' },
+            { url: 'ws://test.mosquitto.org:8080', name: 'Mosquitto WS' },
+            { url: 'wss://broker.hivemq.com:8884', name: 'HiveMQ WSS' },
+            { url: 'ws://broker.hivemq.com:8000', name: 'HiveMQ WS' },
+            { url: 'ws://localhost:9001', name: 'Local WS' }
+        ];
+        
+        let found = false;
+        let tested = 0;
+        
+        testBrokers.forEach(broker => {
+            if (!found) {
+                setTimeout(() => {
+                    try {
+                        // Coba koneksi sederhana
+                        const testClient = mqtt.connect(broker.url, {
+                            clientId: 'test-' + Math.random().toString(16).substr(2, 8),
+                            connectTimeout: 2000,
+                            keepalive: 5
+                        });
+                        
+                        testClient.on('connect', () => {
+                            if (!found) {
+                                found = true;
+                                document.getElementById('mqttBroker').value = broker.url;
+                                showNotification(`Found ${broker.name}`, 'success');
+                                testClient.end();
+                            }
+                        });
+                        
+                        testClient.on('error', () => {
+                            testClient.end();
+                            tested++;
+                            if (tested === testBrokers.length && !found) {
+                                showNotification('No brokers found. Please configure manually.', 'warning');
+                            }
+                        });
+                        
+                        setTimeout(() => {
+                            if (!found) {
+                                testClient.end();
+                                tested++;
+                                if (tested === testBrokers.length && !found) {
+                                    showNotification('No brokers found. Please configure manually.', 'warning');
+                                }
+                            }
+                        }, 2000);
+                        
+                    } catch (e) {
+                        console.log(`Broker ${broker.name} not available`);
+                        tested++;
+                    }
+                }, tested * 500); // Stagger connection attempts
+            }
+        });
+    }
+
+    // 5. Fungsi untuk menghubungkan ke broker MQTT
     function connectMQTT() {
         if (mqttClient && mqttClient.connected) {
             showNotification('Already connected to MQTT broker', 'info');
@@ -911,28 +1064,49 @@
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
 
+        // Validasi URL
+        if (!broker) {
+            showNotification('Please enter broker URL', 'error');
+            return;
+        }
+
+        // Check jika halaman HTTPS tapi menggunakan WS
+        if (window.location.protocol === 'https:' && broker.startsWith('ws://')) {
+            showNotification('HTTPS pages cannot use insecure WebSocket (ws://). Please use wss://', 'error');
+            
+            // Coba auto-convert ke WSS
+            const wssBroker = broker.replace('ws://', 'wss://').replace(':8083', ':8084');
+            showNotification(`Trying secure connection: ${wssBroker}`, 'warning');
+            document.getElementById('mqttBroker').value = wssBroker;
+            document.getElementById('mqttPort').value = '8084';
+            
+            // Coba koneksi ulang setelah 2 detik
+            setTimeout(connectMQTT, 2000);
+            return;
+        }
+
         // Update UI status
         updateMQTTStatus('connecting', 'Connecting to broker...');
 
         // Konfigurasi koneksi MQTT
         const options = {
-            clientId: clientId,
+            clientId: clientId || 'web-client-' + Math.random().toString(16).substr(2, 8),
             clean: true,
             reconnectPeriod: 1000,
-            connectTimeout: 30000
+            connectTimeout: 30000,
+            keepalive: 60
         };
 
         // Tambahkan kredensial jika ada
         if (username) {
             options.username = username;
-            options.password = password;
+            if (password) {
+                options.password = password;
+            }
         }
 
-        // Buat URL koneksi
-        const mqttUrl = `${broker}`;
-        
         try {
-            mqttClient = mqtt.connect(mqttUrl, options);
+            mqttClient = mqtt.connect(broker, options);
 
             // Event handler untuk koneksi berhasil
             mqttClient.on('connect', function () {
@@ -977,7 +1151,7 @@
         }
     }
 
-    // 3. Fungsi untuk disconnect dari MQTT
+    // 6. Fungsi untuk disconnect dari MQTT
     function disconnectMQTT() {
         if (mqttClient) {
             mqttClient.end();
@@ -988,7 +1162,7 @@
         }
     }
 
-    // 4. Fungsi untuk subscribe ke topik
+    // 7. Fungsi untuk subscribe ke topik
     function subscribeToTopics() {
         if (!mqttClient || !mqttClient.connected) {
             console.error('MQTT client not connected');
@@ -1002,6 +1176,7 @@
                     console.log(`Subscribed to ${topic}`);
                 } else {
                     console.error(`Failed to subscribe to ${topic}:`, err);
+                    showNotification(`Failed to subscribe to ${topic}`, 'error');
                 }
             });
         });
@@ -1009,9 +1184,14 @@
         // Update UI dengan topik yang disubscribe
         const topicsList = Object.values(topics).join(', ');
         document.getElementById('topicsList').textContent = topicsList;
+        
+        // Request status awal
+        setTimeout(() => {
+            sendCommand('GET_STATUS');
+        }, 1000);
     }
 
-    // 5. Fungsi untuk menangani pesan MQTT
+    // 8. Fungsi untuk menangani pesan MQTT
     function handleMQTTMessage(topic, message) {
         console.log(`Received message on ${topic}: ${message}`);
         
@@ -1042,7 +1222,7 @@
         }
     }
 
-    // 6. Fungsi untuk mengirim perintah via MQTT
+    // 9. Fungsi untuk mengirim perintah via MQTT
     function sendCommand(command) {
         if (!mqttClient || !mqttClient.connected) {
             showNotification('Not connected to MQTT broker', 'error');
@@ -1067,7 +1247,7 @@
         });
     }
 
-    // 7. Fungsi untuk set delta time via MQTT
+    // 10. Fungsi untuk set delta time via MQTT
     function setDeltaTime() {
         const deltaTimeInput = document.getElementById('deltaTime');
         const seconds = parseInt(deltaTimeInput.value);
@@ -1100,7 +1280,7 @@
         });
     }
 
-    // 8. Fungsi untuk update status konveyor
+    // 11. Fungsi untuk update status konveyor
     function updateConveyorStatus(data) {
         // Update conveyor state
         if (data.running !== undefined) conveyorState.running = data.running;
@@ -1116,7 +1296,7 @@
         updateConveyorUI();
     }
 
-    // 9. Fungsi untuk update status sensor
+    // 12. Fungsi untuk update status sensor
     function updateSensorStatus(data) {
         if (data.detected !== undefined) conveyorState.sensorDetected = data.detected;
         if (data.enabled !== undefined) conveyorState.sensorEnabled = data.enabled;
@@ -1124,7 +1304,7 @@
         updateConveyorUI();
     }
 
-    // 10. Fungsi untuk update status timer
+    // 13. Fungsi untuk update status timer
     function updateTimerStatus(data) {
         if (data.active !== undefined) conveyorState.timerActive = data.active;
         if (data.seconds !== undefined) conveyorState.timerSeconds = data.seconds;
@@ -1133,7 +1313,7 @@
         updateConveyorUI();
     }
 
-    // 11. Fungsi untuk update status sederhana (string message)
+    // 14. Fungsi untuk update status sederhana (string message)
     function updateSimpleStatus(message) {
         const lowerMsg = message.toLowerCase();
         
@@ -1150,7 +1330,7 @@
         updateConveyorUI();
     }
 
-    // 12. Fungsi untuk update UI conveyor
+    // 15. Fungsi untuk update UI conveyor
     function updateConveyorUI() {
         // Update conveyor status
         if (conveyorState.running) {
@@ -1200,62 +1380,47 @@
         document.getElementById('currentStatus').textContent = isConnected ? 'Online' : 'Offline';
     }
 
-    // 13. Fungsi untuk update MQTT status UI
+    // 16. Fungsi untuk update MQTT status UI
     function updateMQTTStatus(status, message) {
         const statusElement = document.getElementById('mqttStatus');
         const indicator = document.getElementById('mqttIndicator');
-        const statusText = document.getElementById('mqttStatusText');
-        const statusDetail = document.getElementById('mqttStatusDetail');
         
         statusElement.className = 'mqtt-status ' + status;
         indicator.className = 'connection-indicator ' + status;
         
         switch(status) {
             case 'connected':
-                statusElement.querySelector('h3').innerHTML = '<i class="fas fa-satellite-dish"></i> MQTT Status: <span>Connected</span>';
-                statusText.textContent = 'Connected';
-                statusDetail.textContent = message;
-                document.getElementById('mqttStatusText').textContent = 'Connected to MQTT Broker';
+                document.getElementById('mqttStatusTitle').innerHTML = '<i class="fas fa-satellite-dish"></i> MQTT Status: <span>Connected</span>';
+                document.getElementById('mqttStatusText').textContent = 'Connected';
+                document.getElementById('mqttStatusDetail').textContent = message;
+                document.getElementById('connectionStatusText').textContent = 'Connected to MQTT Broker';
                 break;
             case 'connecting':
-                statusElement.querySelector('h3').innerHTML = '<i class="fas fa-sync-alt"></i> MQTT Status: <span>Connecting</span>';
-                statusText.textContent = 'Connecting';
-                statusDetail.textContent = message;
-                document.getElementById('mqttStatusText').textContent = 'Connecting to MQTT Broker...';
+                document.getElementById('mqttStatusTitle').innerHTML = '<i class="fas fa-sync-alt"></i> MQTT Status: <span>Connecting</span>';
+                document.getElementById('mqttStatusText').textContent = 'Connecting';
+                document.getElementById('mqttStatusDetail').textContent = message;
+                document.getElementById('connectionStatusText').textContent = 'Connecting to MQTT Broker...';
                 break;
             case 'disconnected':
-                statusElement.querySelector('h3').innerHTML = '<i class="fas fa-exclamation-triangle"></i> MQTT Status: <span>Disconnected</span>';
-                statusText.textContent = 'Disconnected';
-                statusDetail.textContent = message;
-                document.getElementById('mqttStatusText').textContent = 'Disconnected from MQTT Broker';
+                document.getElementById('mqttStatusTitle').innerHTML = '<i class="fas fa-exclamation-triangle"></i> MQTT Status: <span>Disconnected</span>';
+                document.getElementById('mqttStatusText').textContent = 'Disconnected';
+                document.getElementById('mqttStatusDetail').textContent = message;
+                document.getElementById('connectionStatusText').textContent = 'Disconnected from MQTT Broker';
                 break;
         }
     }
 
-    // 14. Fungsi untuk refresh status (request update dari ESP32)
+    // 17. Fungsi untuk refresh status (request update dari ESP32)
     function refreshStatus() {
         if (!mqttClient || !mqttClient.connected) {
             showNotification('Not connected to MQTT broker', 'error');
             return;
         }
 
-        const payload = JSON.stringify({
-            command: 'GET_STATUS',
-            timestamp: new Date().toISOString()
-        });
-
-        mqttClient.publish(topics.command, payload, { qos: 0 }, function (err) {
-            if (err) {
-                console.error('Failed to request status:', err);
-                showNotification(`Failed to request status: ${err.message}`, 'error');
-            } else {
-                console.log('Status request sent');
-                showNotification('Status request sent', 'info');
-            }
-        });
+        sendCommand('GET_STATUS');
     }
 
-    // 15. Fungsi untuk update topik MQTT
+    // 18. Fungsi untuk update topik MQTT
     function updateTopics() {
         topics.command = document.getElementById('commandTopic').value;
         topics.status = document.getElementById('statusTopic').value;
@@ -1276,7 +1441,7 @@
         showNotification('MQTT topics updated', 'success');
     }
 
-    // 16. Fungsi untuk save MQTT settings
+    // 19. Fungsi untuk save MQTT settings
     function saveMQTTSettings() {
         const settings = {
             broker: document.getElementById('mqttBroker').value,
@@ -1293,14 +1458,17 @@
         showNotification('MQTT settings saved to local storage', 'success');
     }
 
-    // 17. Fungsi untuk load MQTT settings
+    // 20. Fungsi untuk load MQTT settings
     function loadMQTTSettings() {
         const saved = localStorage.getItem('mqttSettings');
+        const protocol = getProtocol();
+        
         if (saved) {
             try {
                 const settings = JSON.parse(saved);
-                document.getElementById('mqttBroker').value = settings.broker || 'ws://broker.emqx.io:8083/mqtt';
-                document.getElementById('mqttPort').value = settings.port || '8083';
+                document.getElementById('mqttBroker').value = settings.broker || 
+                    (protocol === 'wss' ? 'wss://broker.emqx.io:8084/mqtt' : 'ws://broker.emqx.io:8083/mqtt');
+                document.getElementById('mqttPort').value = settings.port || (protocol === 'wss' ? '8084' : '8083');
                 document.getElementById('clientId').value = settings.clientId || 
                     'web-client-' + Math.random().toString(16).substr(2, 8);
                 document.getElementById('username').value = settings.username || '';
@@ -1315,16 +1483,32 @@
                 topics.sensor = settings.sensorTopic || 'conveyor/sensor';
                 topics.timer = settings.timerTopic || 'conveyor/timer';
                 
-                // Update UI
-                updateTopics();
-                
             } catch (error) {
                 console.error('Failed to load saved settings:', error);
+                setDefaultSettings();
             }
+        } else {
+            setDefaultSettings();
         }
+        
+        // Update topics display
+        updateTopics();
     }
 
-    // 18. Fungsi untuk format uptime
+    // 21. Fungsi untuk set default settings
+    function setDefaultSettings() {
+        const protocol = getProtocol();
+        document.getElementById('mqttBroker').value = 
+            protocol === 'wss' ? 'wss://broker.emqx.io:8084/mqtt' : 'ws://broker.emqx.io:8083/mqtt';
+        document.getElementById('mqttPort').value = protocol === 'wss' ? '8084' : '8083';
+        document.getElementById('clientId').value = 'web-client-' + Math.random().toString(16).substr(2, 8);
+        document.getElementById('commandTopic').value = 'conveyor/control';
+        document.getElementById('statusTopic').value = 'conveyor/status';
+        document.getElementById('sensorTopic').value = 'conveyor/sensor';
+        document.getElementById('timerTopic').value = 'conveyor/timer';
+    }
+
+    // 22. Fungsi untuk format uptime
     function formatUptime(seconds) {
         if (!seconds) return '0s';
         
@@ -1339,12 +1523,12 @@
         return `${secs}s`;
     }
 
-    // 19. Fungsi untuk menampilkan/menyembunyikan loading
+    // 23. Fungsi untuk menampilkan/menyembunyikan loading
     function showLoading(show) {
         document.getElementById('loading').style.display = show ? 'block' : 'none';
     }
 
-    // 20. Fungsi untuk mengganti tab
+    // 24. Fungsi untuk mengganti tab
     function switchTab(tabName) {
         // Sembunyikan semua tab
         document.querySelectorAll('.tab-content').forEach(tab => {
@@ -1368,7 +1552,7 @@
         // Load saved settings
         loadMQTTSettings();
         
-        // Set random client ID jika kosong
+        // Set client ID random jika kosong
         if (!document.getElementById('clientId').value) {
             document.getElementById('clientId').value = 
                 'web-client-' + Math.random().toString(16).substr(2, 8);
@@ -1423,7 +1607,7 @@
         // Simulasi data untuk testing jika tidak ada koneksi MQTT
         setTimeout(() => {
             if (!isConnected) {
-                document.getElementById('mqttStatusText').textContent = 'Click Connect to start';
+                document.getElementById('connectionStatusText').textContent = 'Click Connect to start MQTT connection';
             }
         }, 2000);
     });
