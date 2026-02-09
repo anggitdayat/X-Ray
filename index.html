@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS sebelumnya tetap di sini, saya singkat untuk hemat ruang */
         * {
             margin: 0;
             padding: 0;
@@ -338,17 +337,6 @@
             color: white;
         }
         
-        .btn-outline-primary {
-            background: transparent;
-            border: 2px solid #667eea;
-            color: #667eea;
-        }
-        
-        .btn-outline-primary:hover {
-            background: #667eea;
-            color: white;
-        }
-        
         .btn-group {
             display: flex;
             gap: 15px;
@@ -485,36 +473,12 @@
             100% { transform: rotate(360deg); }
         }
         
-        .debug-panel {
-            background: #f8f9fa;
-            padding: 15px;
+        .auto-restart-panel {
+            background: #e8f5e9;
+            padding: 20px;
             border-radius: 10px;
             margin: 20px;
-            border-left: 4px solid #9C27B0;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .debug-entry {
-            padding: 5px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .debug-entry.error {
-            color: #d32f2f;
-            background: #ffebee;
-        }
-        
-        .debug-entry.info {
-            color: #1976d2;
-            background: #e3f2fd;
-        }
-        
-        .debug-entry.success {
-            color: #388e3c;
-            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
         }
         
         @media (max-width: 768px) {
@@ -568,7 +532,7 @@
         <header class="header">
             <img src="cvr1.png" width="150" height="150" style="border-radius: 10%; margin-bottom: 20px;" />
             <h1><i class="fas fa-seedling"></i> Conveyor Plant Seed Detector</h1>
-            <p class="lead" style="color: rgba(255,255,255,0.9);">MQTT-Based Real-time Control & Monitoring System</p>
+            <p class="lead" style="color: rgba(255,255,255,0.9);">Real-time Control & Monitoring System</p>
         </header>
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -579,7 +543,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="camera.html">Camera</a>
@@ -598,45 +562,42 @@
         </nav>
 
         <div class="jumbotron">
-            <h1 class="display-4">Welcome to MQTT Conveyor Control System</h1>
-            <p class="lead">A comprehensive platform for real-time monitoring and control of your conveyor system using MQTT protocol.</p>
+            <h1 class="display-4">Welcome to Conveyor Control System</h1>
+            <p class="lead">A comprehensive platform for real-time monitoring and control of your conveyor system with MQTT technology.</p>
             <hr class="my-4">
             <div class="d-flex align-items-center">
-                <div class="connection-indicator disconnected" id="mqttIndicator"></div>
-                <p class="mb-0" id="connectionStatusText">Auto-connecting to MQTT broker...</p>
+                <div class="connection-indicator disconnected" id="connectionIndicator"></div>
+                <p class="mb-0" id="connectionStatusText">Click Connect to start MQTT connection</p>
             </div>
         </div>
 
         <!-- MQTT Configuration Panel -->
         <div class="mqtt-config-panel">
-            <h3><i class="fas fa-server"></i> MQTT Configuration</h3>
+            <h3><i class="fas fa-server"></i> MQTT Configuration (Fixed)</h3>
             <div class="row mt-3">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="form-group">
-                        <label for="mqttBroker"><i class="fas fa-link"></i> Broker URL</label>
-                        <input type="text" class="form-control" id="mqttBroker" 
-                               placeholder="wss://broker.emqx.io:8084/mqtt">
-                        <small class="form-text text-muted">Auto-selected based on your protocol (HTTPS uses WSS)</small>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-group">
-                        <label for="mqttPort"><i class="fas fa-plug"></i> Port</label>
-                        <input type="number" class="form-control" id="mqttPort" value="8084">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="clientId"><i class="fas fa-id-card"></i> Client ID</label>
-                        <input type="text" class="form-control" id="clientId">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label><i class="fas fa-user"></i> Authentication (Optional)</label>
+                        <label>Broker Configuration</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="username" placeholder="Username">
-                            <input type="password" class="form-control" id="password" placeholder="Password">
+                            <input type="text" class="form-control" value="wss://broker.emqx.io:8084/mqtt" readonly>
+                            <div class="input-group-append">
+                                <span class="input-group-text" style="background: #4CAF50; color: white;">
+                                    <i class="fas fa-check"></i> Fixed
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Client ID</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="clientId" readonly>
+                            <div class="input-group-append">
+                                <button class="btn btn-sm btn-info" onclick="generateClientId()">
+                                    <i class="fas fa-sync-alt"></i> New ID
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -645,31 +606,14 @@
             <div class="row mt-2">
                 <div class="col-md-12">
                     <button class="btn btn-success mr-2" onclick="connectMQTT()">
-                        <i class="fas fa-plug"></i> Connect
+                        <i class="fas fa-plug"></i> Connect to MQTT
                     </button>
                     <button class="btn btn-danger mr-2" onclick="disconnectMQTT()">
                         <i class="fas fa-power-off"></i> Disconnect
                     </button>
-                    <button class="btn btn-info mr-2" onclick="saveMQTTSettings()">
-                        <i class="fas fa-save"></i> Save Settings
+                    <button class="btn btn-info" onclick="refreshStatus()">
+                        <i class="fas fa-sync-alt"></i> Refresh Status
                     </button>
-                    <button class="btn btn-warning" onclick="testAllBrokers()">
-                        <i class="fas fa-search"></i> Test Brokers
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Broker Quick Selection -->
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <h5><i class="fas fa-bolt"></i> Quick Connect (Click to try):</h5>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-outline-primary" onclick="quickConnect('emqx-wss')">EMQX (WSS)</button>
-                        <button type="button" class="btn btn-outline-secondary" onclick="quickConnect('emqx-ws')">EMQX (WS)</button>
-                        <button type="button" class="btn btn-outline-info" onclick="quickConnect('mosquitto-wss')">Mosquitto (WSS)</button>
-                        <button type="button" class="btn btn-outline-success" onclick="quickConnect('mosquitto-ws')">Mosquitto (WS)</button>
-                        <button type="button" class="btn btn-outline-warning" onclick="quickConnect('hivemq-wss')">HiveMQ (WSS)</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -679,20 +623,56 @@
             <h3 id="mqttStatusTitle"><i class="fas fa-satellite-dish"></i> MQTT Status: <span id="mqttStatusText">Disconnected</span></h3>
             <p id="mqttStatusDetail">Not connected to broker</p>
             <p id="mqttTopics">Subscribed Topics: <span id="topicsList">None</span></p>
-            <p id="mqttDebug">Last Error: <span id="lastError">None</span></p>
         </div>
 
-        <!-- Debug Panel -->
-        <div class="debug-panel" id="debugPanel">
-            <h6><i class="fas fa-bug"></i> Connection Debug Log</h6>
-            <div id="debugLog"></div>
+        <!-- Auto Restart Timer Panel -->
+        <div class="auto-restart-panel">
+            <h4><i class="fas fa-redo"></i> Auto-Restart Timer Configuration</h4>
+            <p class="mb-3">Set timer for automatic conveyor restart after sensor detection</p>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label><i class="fas fa-clock"></i> Auto-Restart Timer (seconds)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="autoRestartTime" 
+                                   min="1" max="3600" placeholder="1-3600" value="5">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" onclick="setAutoRestartTimer()">
+                                    <i class="fas fa-save"></i> Set Timer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label><i class="fas fa-toggle-on"></i> Auto-Restart Status</label>
+                        <div class="btn-group w-100">
+                            <button class="btn btn-success" onclick="enableAutoRestart()">
+                                <i class="fas fa-check"></i> Enable
+                            </button>
+                            <button class="btn btn-warning" onclick="disableAutoRestart()">
+                                <i class="fas fa-times"></i> Disable
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Current Status</label>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> 
+                            Auto-restart: <span id="autoRestartStatus">Disabled</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Sisanya sama dengan kode sebelumnya -->
-        <!-- Feature Cards -->
         <div class="container mt-5">
             <h3 class="mb-4" style="text-align: center; color: #333;">Features Menu</h3>
             <div class="row">
+                <!-- Camera Card -->
                 <div class="col-md-3">
                     <a href="camera.html" class="feature-card camera">
                         <h3><i class="fas fa-camera"></i> Camera</h3>
@@ -701,6 +681,7 @@
                     </a>
                 </div>
                 
+                <!-- Library Card -->
                 <div class="col-md-3">
                     <a href="library.html" class="feature-card library">
                         <h3><i class="fas fa-photo-video"></i> Library</h3>
@@ -709,6 +690,7 @@
                     </a>
                 </div>
                 
+                <!-- Result Card -->
                 <div class="col-md-3">
                     <a href="result.html" class="feature-card result">
                         <h3><i class="fas fa-chart-bar"></i> Result</h3>
@@ -717,6 +699,7 @@
                     </a>
                 </div>
                 
+                <!-- History Card -->
                 <div class="col-md-3">
                     <a href="history.html" class="feature-card history">
                         <h3><i class="fas fa-history"></i> History</h3>
@@ -774,24 +757,23 @@
         <!-- MQTT Control Panel -->
         <div class="control-panel">
             <h2><i class="fas fa-conveyor-belt"></i> Conveyor Control System</h2>
-            <p>MQTT-Based Industrial Conveyor Control with Proximity Detection</p>
+            <p>MQTT-Based Industrial Conveyor Control with Auto-Restart Feature</p>
             
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('control')">Control Panel</button>
                 <button class="tab" onclick="switchTab('sensor')">Sensor Settings</button>
-                <button class="tab" onclick="switchTab('mqtt')">MQTT Topics</button>
-                <button class="tab" onclick="switchTab('debug')">Debug</button>
+                <button class="tab" onclick="switchTab('timer')">Timer Control</button>
             </div>
             
             <div id="control-tab" class="tab-content active">
                 <h4><i class="fas fa-sliders-h"></i> Control Panel</h4>
                 
                 <div class="form-group">
-                    <label for="deltaTime"><i class="fas fa-hourglass-half"></i> Set Timer (seconds)</label>
+                    <label for="manualTimer"><i class="fas fa-hourglass-half"></i> Manual Start Timer (seconds)</label>
                     <div class="input-group">
-                        <input type="number" class="form-control" id="deltaTime" min="1" max="3600" placeholder="Enter seconds (1-3600)">
+                        <input type="number" class="form-control" id="manualTimer" min="1" max="3600" placeholder="Enter seconds (1-3600)">
                         <div class="input-group-append">
-                            <button class="btn btn-primary" onclick="setDeltaTime()">
+                            <button class="btn btn-primary" onclick="setManualTimer()">
                                 <i class="fas fa-play"></i> Start Timer
                             </button>
                         </div>
@@ -820,9 +802,6 @@
                     <button class="btn btn-secondary" onclick="refreshStatus()">
                         <i class="fas fa-sync"></i> Request Status
                     </button>
-                    <button class="btn btn-warning" onclick="testConnection()">
-                        <i class="fas fa-vial"></i> Test Connection
-                    </button>
                 </div>
             </div>
             
@@ -850,98 +829,57 @@
                     <p><strong>Detection:</strong> Active LOW (LOW when object detected)</p>
                     <p><strong>Function:</strong> Stops conveyor when object detected (safety feature)</p>
                     <p><strong>Current State:</strong> <span id="sensorActiveStatus">Unknown</span></p>
+                    <p><strong>Auto-restart:</strong> <span id="autoRestartInfo">Disabled</span></p>
                 </div>
             </div>
             
-            <div id="mqtt-tab" class="tab-content">
-                <h4><i class="fas fa-network-wired"></i> MQTT Topic Configuration</h4>
+            <div id="timer-tab" class="tab-content">
+                <h4><i class="fas fa-clock"></i> Timer Control</h4>
                 
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="commandTopic">Command Topic</label>
-                            <input type="text" class="form-control" id="commandTopic" 
-                                   value="conveyor/control">
+                            <label><i class="fas fa-redo"></i> Auto-Restart Timer</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="restartTimerInput" 
+                                       min="1" max="3600" placeholder="Seconds" value="5">
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" onclick="setAutoRestartTimer()">
+                                        <i class="fas fa-save"></i> Set
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Timer untuk restart otomatis setelah sensor detect
+                            </small>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="statusTopic">Status Topic</label>
-                            <input type="text" class="form-control" id="statusTopic" 
-                                   value="conveyor/status">
+                            <label><i class="fas fa-cogs"></i> Timer Control</label>
+                            <div class="btn-group w-100">
+                                <button class="btn btn-success" onclick="enableAutoRestart()">
+                                    <i class="fas fa-play"></i> Enable Auto-Restart
+                                </button>
+                                <button class="btn btn-danger" onclick="disableAutoRestart()">
+                                    <i class="fas fa-stop"></i> Disable Auto-Restart
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="sensorTopic">Sensor Topic</label>
-                            <input type="text" class="form-control" id="sensorTopic" 
-                                   value="conveyor/sensor">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="timerTopic">Timer Topic</label>
-                            <input type="text" class="form-control" id="timerTopic" 
-                                   value="conveyor/timer">
-                        </div>
-                    </div>
-                </div>
-                
-                <button class="btn btn-info" onclick="updateTopics()">
-                    <i class="fas fa-sync-alt"></i> Update Topics
-                </button>
-                
-                <div class="alert alert-info mt-3">
-                    <h5><i class="fas fa-info-circle"></i> Current Topics</h5>
-                    <p><strong>Publishing to:</strong> <span id="currentCommandTopic">conveyor/control</span></p>
-                    <p><strong>Subscribed to:</strong> <span id="currentStatusTopic">conveyor/status</span>, 
-                    <span id="currentSensorTopic">conveyor/sensor</span>, 
-                    <span id="currentTimerTopic">conveyor/timer</span></p>
-                </div>
-            </div>
-            
-            <div id="debug-tab" class="tab-content">
-                <h4><i class="fas fa-bug"></i> Debug & Troubleshooting</h4>
-                
-                <div class="alert alert-warning">
-                    <h5><i class="fas fa-exclamation-triangle"></i> Common Issues</h5>
-                    <p>1. <strong>CORS Error:</strong> Run website via HTTP server (not file://)</p>
-                    <p>2. <strong>HTTPS/WS Mismatch:</strong> Use WSS for HTTPS sites</p>
-                    <p>3. <strong>Firewall:</strong> Check if ports are blocked</p>
-                    <p>4. <strong>Broker Down:</strong> Try different broker</p>
-                </div>
-                
-                <div class="btn-group mt-3">
-                    <button class="btn btn-info" onclick="clearDebugLog()">
-                        <i class="fas fa-trash"></i> Clear Debug Log
-                    </button>
-                    <button class="btn btn-warning" onclick="exportDebugLog()">
-                        <i class="fas fa-download"></i> Export Log
-                    </button>
-                    <button class="btn btn-danger" onclick="resetAllSettings()">
-                        <i class="fas fa-redo"></i> Reset All Settings
-                    </button>
-                </div>
-                
-                <div class="mt-3">
-                    <h5>Connection Test</h5>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="testBrokerUrl" placeholder="Broker URL to test">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" onclick="testSpecificBroker()">
-                                <i class="fas fa-vial"></i> Test
-                            </button>
-                        </div>
-                    </div>
+                <div class="alert alert-warning mt-3">
+                    <h5><i class="fas fa-info-circle"></i> Timer Information</h5>
+                    <p><strong>Manual Timer:</strong> Start conveyor setelah waktu tertentu</p>
+                    <p><strong>Auto-Restart Timer:</strong> Restart conveyor otomatis setelah sensor detect</p>
+                    <p><strong>Current Timer:</strong> <span id="currentTimerInfo">No active timer</span></p>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>Conveyor Plant Seed Detector | Version 4.0 (MQTT) | © 2026 Agricultural Technology</p>
+            <p>Conveyor Plant Seed Detector | Version 5.0 (Auto-Restart) | © 2026 Agricultural Technology</p>
             <p>Connection: <span id="connectionType">MQTT (Disconnected)</span> | Status: <span id="currentStatus">Offline</span></p>
         </div>
     </div>
@@ -962,278 +900,54 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     
     <script>
-    // ====================== KONFIGURASI MQTT ======================
+    // ====================== KONFIGURASI TETAP ======================
+    const CONFIG = {
+        BROKER_URL: 'wss://broker.emqx.io:8084/mqtt',
+        TOPICS: {
+            COMMAND: 'conveyor/control',
+            STATUS: 'conveyor/status',
+            SENSOR: 'conveyor/sensor',
+            TIMER: 'conveyor/timer'
+        }
+    };
+    
+    // ====================== VARIABEL GLOBAL ======================
     let mqttClient = null;
     let isConnected = false;
     let messageCount = 0;
-    let debugLog = [];
-    let autoConnectAttempted = false;
-    
-    // Topik MQTT
-    let topics = {
-        command: "conveyor/control",
-        status: "conveyor/status",
-        sensor: "conveyor/sensor",
-        timer: "conveyor/timer"
-    };
-    
-    // Status konveyor
-    let conveyorState = {
-        running: false,
+    let systemState = {
+        conveyorRunning: false,
         sensorDetected: false,
+        sensorEnabled: true,
         timerActive: false,
         timerSeconds: 0,
-        sensorEnabled: true,
+        autoRestartEnabled: false,
         uptime: 0,
         detections: 0,
         totalRuntime: 0
     };
-
-    // Broker yang tersedia
-    const brokers = {
-        'emqx-wss': { url: 'wss://broker.emqx.io:8084/mqtt', port: '8084', desc: 'EMQX Public WSS' },
-        'emqx-ws': { url: 'ws://broker.emqx.io:8083/mqtt', port: '8083', desc: 'EMQX Public WS' },
-        'mosquitto-wss': { url: 'wss://test.mosquitto.org:8081', port: '8081', desc: 'Mosquitto WSS' },
-        'mosquitto-ws': { url: 'ws://test.mosquitto.org:8080', port: '8080', desc: 'Mosquitto WS' },
-        'hivemq-wss': { url: 'wss://broker.hivemq.com:8884/mqtt', port: '8884', desc: 'HiveMQ WSS' }
-    };
-
+    
     // ====================== FUNGSI UTAMA ======================
-
-    // 1. Fungsi untuk menampilkan notifikasi
-    function showNotification(message, type = 'info') {
-        const notification = document.getElementById('notification');
-        notification.textContent = message;
-        notification.className = 'notification ' + type;
-        notification.classList.add('show');
-        
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 3000);
+    
+    // 1. Generate Client ID
+    function generateClientId() {
+        const clientId = 'web-client-' + Math.random().toString(16).substr(2, 8);
+        document.getElementById('clientId').value = clientId;
+        return clientId;
     }
-
-    // 2. Fungsi untuk log debug
-    function addDebugLog(message, type = 'info') {
-        const timestamp = new Date().toLocaleTimeString();
-        const logEntry = {
-            time: timestamp,
-            message: message,
-            type: type
-        };
-        
-        debugLog.push(logEntry);
-        
-        // Batasi log sebanyak 50 entri
-        if (debugLog.length > 50) {
-            debugLog.shift();
-        }
-        
-        // Update UI
-        updateDebugDisplay();
-        
-        // Untuk error, simpan ke lastError
-        if (type === 'error') {
-            document.getElementById('lastError').textContent = `${timestamp}: ${message}`;
-            document.getElementById('lastError').style.color = '#d32f2f';
-        }
-        
-        console.log(`[${timestamp}] ${type.toUpperCase()}: ${message}`);
-    }
-
-    // 3. Update debug display
-    function updateDebugDisplay() {
-        const debugLogElement = document.getElementById('debugLog');
-        debugLogElement.innerHTML = '';
-        
-        debugLog.forEach(log => {
-            const entry = document.createElement('div');
-            entry.className = `debug-entry ${log.type}`;
-            entry.innerHTML = `<strong>[${log.time}]</strong> ${log.message}`;
-            debugLogElement.appendChild(entry);
-        });
-        
-        // Scroll ke bawah
-        debugLogElement.scrollTop = debugLogElement.scrollHeight;
-    }
-
-    // 4. Quick connect function
-    function quickConnect(brokerKey) {
-        if (brokers[brokerKey]) {
-            const broker = brokers[brokerKey];
-            document.getElementById('mqttBroker').value = broker.url;
-            document.getElementById('mqttPort').value = broker.port;
-            
-            // Auto-generate client ID
-            const clientId = `web-client-${brokerKey}-${Math.random().toString(16).substr(2, 8)}`;
-            document.getElementById('clientId').value = clientId;
-            
-            addDebugLog(`Setting broker: ${broker.desc}`, 'info');
-            showNotification(`Setting ${broker.desc}`, 'info');
-            
-            // Auto-connect setelah 500ms
-            setTimeout(connectMQTT, 500);
-        }
-    }
-
-    // 5. Test all brokers
-    async function testAllBrokers() {
-        addDebugLog('Testing all available brokers...', 'info');
-        showNotification('Testing all brokers, please wait...', 'info');
-        
-        const results = [];
-        
-        for (const [key, broker] of Object.entries(brokers)) {
-            try {
-                const result = await testBrokerConnection(broker.url);
-                results.push({
-                    broker: broker.desc,
-                    url: broker.url,
-                    success: result.success,
-                    message: result.message,
-                    time: result.time
-                });
-                
-                addDebugLog(`${broker.desc}: ${result.success ? '✓' : '✗'} (${result.time}ms)`, 
-                          result.success ? 'success' : 'error');
-                
-            } catch (error) {
-                results.push({
-                    broker: broker.desc,
-                    url: broker.url,
-                    success: false,
-                    message: error.message,
-                    time: 0
-                });
-                
-                addDebugLog(`${broker.desc}: ✗ ${error.message}`, 'error');
-            }
-            
-            // Delay antar test
-            await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        
-        // Tampilkan hasil
-        const successful = results.filter(r => r.success);
-        if (successful.length > 0) {
-            const bestBroker = successful.sort((a, b) => a.time - b.time)[0];
-            addDebugLog(`Best broker: ${bestBroker.broker} (${bestBroker.time}ms)`, 'success');
-            
-            // Auto-set best broker
-            document.getElementById('mqttBroker').value = bestBroker.url;
-            showNotification(`Found ${successful.length} working brokers. Best: ${bestBroker.broker}`, 'success');
-            
-            // Auto-connect ke broker terbaik
-            setTimeout(connectMQTT, 1000);
-        } else {
-            addDebugLog('No working brokers found. Please check network/firewall.', 'error');
-            showNotification('No working brokers found. Try different network.', 'error');
-        }
-    }
-
-    // 6. Test single broker connection
-    function testBrokerConnection(brokerUrl) {
-        return new Promise((resolve, reject) => {
-            const startTime = Date.now();
-            const testClientId = `test-${Math.random().toString(16).substr(2, 8)}`;
-            
-            const testClient = mqtt.connect(brokerUrl, {
-                clientId: testClientId,
-                connectTimeout: 3000,
-                keepalive: 5
-            });
-            
-            testClient.on('connect', () => {
-                const time = Date.now() - startTime;
-                testClient.end();
-                resolve({
-                    success: true,
-                    message: 'Connected successfully',
-                    time: time
-                });
-            });
-            
-            testClient.on('error', (error) => {
-                const time = Date.now() - startTime;
-                testClient.end();
-                resolve({
-                    success: false,
-                    message: error.message,
-                    time: time
-                });
-            });
-            
-            // Timeout
-            setTimeout(() => {
-                testClient.end();
-                resolve({
-                    success: false,
-                    message: 'Connection timeout',
-                    time: 3000
-                });
-            }, 3000);
-        });
-    }
-
-    // 7. Connect to MQTT broker
+    
+    // 2. Connect to MQTT
     function connectMQTT() {
-        // Jika sudah connected, disconnect dulu
         if (mqttClient && mqttClient.connected) {
-            disconnectMQTT();
-            setTimeout(connectMQTT, 500);
+            showNotification('Already connected to MQTT broker', 'info');
             return;
         }
-
-        const broker = document.getElementById('mqttBroker').value.trim();
-        const port = document.getElementById('mqttPort').value;
-        let clientId = document.getElementById('clientId').value.trim();
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-
-        // Validasi input
-        if (!broker) {
-            addDebugLog('Broker URL is required', 'error');
-            showNotification('Please enter broker URL', 'error');
-            return;
-        }
-
-        // Generate client ID jika kosong
-        if (!clientId) {
-            clientId = `web-client-${Date.now().toString(16)}`;
-            document.getElementById('clientId').value = clientId;
-        }
-
-        // Check protocol compatibility
-        const isHttps = window.location.protocol === 'https:';
-        const isWs = broker.startsWith('ws://');
         
-        if (isHttps && isWs) {
-            addDebugLog('HTTPS cannot use insecure WS. Trying to convert to WSS...', 'warning');
-            
-            // Coba convert ke WSS
-            let wssUrl = broker;
-            if (broker.includes(':8083')) {
-                wssUrl = broker.replace('ws://', 'wss://').replace(':8083', ':8084');
-            } else if (broker.includes(':8080')) {
-                wssUrl = broker.replace('ws://', 'wss://').replace(':8080', ':8081');
-            } else if (broker.includes(':8000')) {
-                wssUrl = broker.replace('ws://', 'wss://').replace(':8000', ':8884');
-            } else {
-                wssUrl = broker.replace('ws://', 'wss://');
-            }
-            
-            document.getElementById('mqttBroker').value = wssUrl;
-            addDebugLog(`Converted to: ${wssUrl}`, 'info');
-            
-            // Coba lagi dengan URL baru
-            setTimeout(connectMQTT, 500);
-            return;
-        }
-
+        const clientId = document.getElementById('clientId').value || generateClientId();
+        
         // Update UI
-        updateMQTTStatus('connecting', `Connecting to ${broker}...`);
-        addDebugLog(`Connecting to ${broker}...`, 'info');
-
-        // Konfigurasi MQTT
+        updateMQTTStatus('connecting', 'Connecting to broker...');
+        
         const options = {
             clientId: clientId,
             clean: true,
@@ -1241,191 +955,322 @@
             connectTimeout: 10000,
             keepalive: 60
         };
-
-        // Authentication
-        if (username) {
-            options.username = username;
-            if (password) {
-                options.password = password;
-            }
-        }
-
+        
         try {
-            mqttClient = mqtt.connect(broker, options);
-
+            mqttClient = mqtt.connect(CONFIG.BROKER_URL, options);
+            
             // Event handlers
             mqttClient.on('connect', () => {
-                addDebugLog(`Connected to broker successfully`, 'success');
+                console.log('Connected to MQTT broker');
                 isConnected = true;
-                updateMQTTStatus('connected', `Connected to ${broker}`);
+                updateMQTTStatus('connected', 'Connected to broker');
                 subscribeToTopics();
-                showNotification('Connected to MQTT broker', 'success');
+                showNotification('Successfully connected to MQTT broker', 'success');
             });
-
+            
             mqttClient.on('message', (topic, message) => {
                 messageCount++;
                 document.getElementById('messagesCount').textContent = messageCount;
                 handleMQTTMessage(topic, message.toString());
             });
-
+            
             mqttClient.on('error', (error) => {
-                addDebugLog(`MQTT Error: ${error.message}`, 'error');
+                console.error('MQTT Error:', error);
                 updateMQTTStatus('disconnected', `Error: ${error.message}`);
                 showNotification(`Connection error: ${error.message}`, 'error');
             });
-
+            
             mqttClient.on('close', () => {
-                addDebugLog('Disconnected from broker', 'warning');
+                console.log('Disconnected from MQTT broker');
                 isConnected = false;
-                updateMQTTStatus('disconnected', 'Disconnected');
+                updateMQTTStatus('disconnected', 'Disconnected from broker');
             });
-
-            mqttClient.on('reconnect', () => {
-                addDebugLog('Reconnecting to broker...', 'info');
-                updateMQTTStatus('connecting', 'Reconnecting...');
-            });
-
-            mqttClient.on('offline', () => {
-                addDebugLog('Client is offline', 'error');
-                isConnected = false;
-                updateMQTTStatus('disconnected', 'Offline');
-            });
-
+            
         } catch (error) {
-            addDebugLog(`Failed to create MQTT client: ${error.message}`, 'error');
+            console.error('Failed to connect to MQTT:', error);
             updateMQTTStatus('disconnected', `Failed: ${error.message}`);
             showNotification(`Failed to connect: ${error.message}`, 'error');
         }
     }
-
-    // 8. Disconnect MQTT
+    
+    // 3. Disconnect from MQTT
     function disconnectMQTT() {
         if (mqttClient) {
             mqttClient.end();
             mqttClient = null;
             isConnected = false;
             updateMQTTStatus('disconnected', 'Disconnected manually');
-            addDebugLog('Disconnected from broker', 'info');
             showNotification('Disconnected from MQTT broker', 'info');
         }
     }
-
-    // 9. Subscribe to topics
+    
+    // 4. Subscribe to topics
     function subscribeToTopics() {
         if (!mqttClient || !mqttClient.connected) {
-            addDebugLog('Cannot subscribe: Not connected', 'error');
+            console.error('MQTT client not connected');
             return;
         }
-
-        Object.entries(topics).forEach(([key, topic]) => {
+        
+        Object.values(CONFIG.TOPICS).forEach(topic => {
             mqttClient.subscribe(topic, { qos: 0 }, (err) => {
-                if (err) {
-                    addDebugLog(`Failed to subscribe to ${topic}: ${err.message}`, 'error');
-                } else {
-                    addDebugLog(`Subscribed to ${topic}`, 'success');
+                if (!err) {
+                    console.log(`Subscribed to ${topic}`);
                 }
             });
         });
-
+        
         // Update UI
-        const topicsList = Object.values(topics).join(', ');
-        document.getElementById('topicsList').textContent = topicsList;
+        document.getElementById('topicsList').textContent = Object.values(CONFIG.TOPICS).join(', ');
         
         // Request initial status
         setTimeout(() => {
             sendCommand('GET_STATUS');
         }, 1000);
     }
-
-    // 10. Handle MQTT messages
+    
+    // 5. Handle MQTT messages
     function handleMQTTMessage(topic, message) {
-        addDebugLog(`Received on ${topic}: ${message}`, 'info');
+        console.log(`Received on ${topic}: ${message}`);
         
         try {
             const data = JSON.parse(message);
             
             switch(topic) {
-                case topics.status:
-                    updateConveyorStatus(data);
+                case CONFIG.TOPICS.STATUS:
+                    updateSystemStatus(data);
                     break;
-                case topics.sensor:
+                case CONFIG.TOPICS.SENSOR:
                     updateSensorStatus(data);
                     break;
-                case topics.timer:
+                case CONFIG.TOPICS.TIMER:
                     updateTimerStatus(data);
                     break;
-                default:
-                    console.log(`Unhandled topic: ${topic}`);
             }
         } catch (error) {
-            // Raw message handling
-            if (topic === topics.status) {
-                updateSimpleStatus(message);
-            }
+            console.error('Failed to parse JSON:', error);
         }
     }
-
-    // 11. Send command
+    
+    // 6. Update system status
+    function updateSystemStatus(data) {
+        if (data.running !== undefined) systemState.conveyorRunning = data.running;
+        if (data.sensorDetected !== undefined) systemState.sensorDetected = data.sensorDetected;
+        if (data.sensorEnabled !== undefined) systemState.sensorEnabled = data.sensorEnabled;
+        if (data.timerActive !== undefined) systemState.timerActive = data.timerActive;
+        if (data.timerSeconds !== undefined) systemState.timerSeconds = data.timerSeconds;
+        if (data.autoRestartEnabled !== undefined) systemState.autoRestartEnabled = data.autoRestartEnabled;
+        if (data.uptime !== undefined) systemState.uptime = data.uptime;
+        if (data.detections !== undefined) systemState.detections = data.detections;
+        if (data.totalRuntime !== undefined) systemState.totalRuntime = data.totalRuntime;
+        
+        updateUI();
+    }
+    
+    // 7. Update sensor status
+    function updateSensorStatus(data) {
+        if (data.detected !== undefined) systemState.sensorDetected = data.detected;
+        if (data.enabled !== undefined) systemState.sensorEnabled = data.enabled;
+        updateUI();
+    }
+    
+    // 8. Update timer status
+    function updateTimerStatus(data) {
+        if (data.active !== undefined) systemState.timerActive = data.active;
+        if (data.remaining !== undefined) systemState.timerSeconds = data.remaining;
+        updateUI();
+    }
+    
+    // 9. Update UI
+    function updateUI() {
+        // Update conveyor status
+        const conveyorEl = document.getElementById('conveyorStatus');
+        const conveyorDesc = document.getElementById('conveyorDesc');
+        
+        if (systemState.conveyorRunning) {
+            conveyorEl.textContent = 'RUNNING';
+            conveyorEl.className = 'status-value status-conveyor';
+            conveyorDesc.textContent = 'Conveyor is running';
+        } else {
+            conveyorEl.textContent = 'STOPPED';
+            conveyorEl.className = 'status-value status-conveyor off';
+            conveyorDesc.textContent = 'Conveyor is stopped';
+        }
+        
+        // Update sensor status
+        const sensorEl = document.getElementById('sensorStatus');
+        const sensorDesc = document.getElementById('sensorDesc');
+        
+        if (systemState.sensorDetected) {
+            sensorEl.textContent = 'DETECTED';
+            sensorEl.className = 'status-value status-sensor detected';
+            sensorDesc.textContent = 'Object detected by sensor';
+        } else {
+            sensorEl.textContent = 'CLEAR';
+            sensorEl.className = 'status-value status-sensor';
+            sensorDesc.textContent = 'No object detected';
+        }
+        
+        // Update timer status
+        const timerEl = document.getElementById('timerStatus');
+        const timerDesc = document.getElementById('timerDesc');
+        
+        if (systemState.timerActive && systemState.timerSeconds > 0) {
+            timerEl.textContent = systemState.timerSeconds + 's';
+            timerDesc.textContent = `Timer active - ${systemState.timerSeconds}s remaining`;
+        } else {
+            timerEl.textContent = '0s';
+            timerDesc.textContent = 'No active timer';
+        }
+        
+        // Update statistics
+        document.getElementById('totalDetections').textContent = systemState.detections;
+        document.getElementById('totalRunTime').textContent = systemState.totalRuntime;
+        document.getElementById('systemUptime').textContent = formatTime(systemState.uptime);
+        
+        // Update sensor active status
+        const sensorActiveStatus = document.getElementById('sensorActiveStatus');
+        if (sensorActiveStatus) {
+            sensorActiveStatus.textContent = systemState.sensorEnabled ? 'Enabled' : 'Disabled';
+            sensorActiveStatus.style.color = systemState.sensorEnabled ? '#4CAF50' : '#F44336';
+        }
+        
+        // Update auto-restart status
+        const autoRestartStatus = document.getElementById('autoRestartStatus');
+        const autoRestartInfo = document.getElementById('autoRestartInfo');
+        if (autoRestartStatus && autoRestartInfo) {
+            autoRestartStatus.textContent = systemState.autoRestartEnabled ? 'Enabled' : 'Disabled';
+            autoRestartInfo.textContent = systemState.autoRestartEnabled ? 'Enabled' : 'Disabled';
+            autoRestartStatus.style.color = systemState.autoRestartEnabled ? '#4CAF50' : '#F44336';
+            autoRestartInfo.style.color = systemState.autoRestartEnabled ? '#4CAF50' : '#F44336';
+        }
+        
+        // Update current timer info
+        const currentTimerInfo = document.getElementById('currentTimerInfo');
+        if (currentTimerInfo) {
+            if (systemState.timerActive) {
+                currentTimerInfo.textContent = `${systemState.timerSeconds}s remaining`;
+                currentTimerInfo.style.color = '#FF9800';
+            } else {
+                currentTimerInfo.textContent = 'No active timer';
+                currentTimerInfo.style.color = '#666';
+            }
+        }
+        
+        // Update connection status
+        document.getElementById('connectionType').textContent = 'MQTT';
+        document.getElementById('currentStatus').textContent = isConnected ? 'Online' : 'Offline';
+    }
+    
+    // 10. Send command
     function sendCommand(command) {
         if (!mqttClient || !mqttClient.connected) {
-            addDebugLog(`Cannot send command ${command}: Not connected`, 'error');
             showNotification('Not connected to MQTT broker', 'error');
             return;
         }
-
+        
         const payload = JSON.stringify({
             command: command,
             timestamp: new Date().toISOString(),
-            client: 'web-control-panel'
+            source: 'web-control-panel'
         });
-
-        mqttClient.publish(topics.command, payload, { qos: 0 }, (err) => {
+        
+        mqttClient.publish(CONFIG.TOPICS.COMMAND, payload, { qos: 0 }, (err) => {
             if (err) {
-                addDebugLog(`Failed to send command ${command}: ${err.message}`, 'error');
+                console.error('Failed to send command:', err);
                 showNotification(`Failed to send command: ${err.message}`, 'error');
             } else {
-                addDebugLog(`Command sent: ${command}`, 'success');
+                console.log(`Command sent: ${command}`);
             }
         });
     }
-
-    // 12. Set delta time
-    function setDeltaTime() {
-        const deltaTimeInput = document.getElementById('deltaTime');
-        const seconds = parseInt(deltaTimeInput.value);
+    
+    // 11. Set manual timer
+    function setManualTimer() {
+        const input = document.getElementById('manualTimer');
+        const seconds = parseInt(input.value);
         
         if (isNaN(seconds) || seconds < 1 || seconds > 3600) {
             showNotification('Please enter a valid number between 1 and 3600', 'error');
             return;
         }
-
+        
         if (!mqttClient || !mqttClient.connected) {
             showNotification('Not connected to MQTT broker', 'error');
             return;
         }
-
+        
         const payload = JSON.stringify({
             command: 'SET_TIMER',
             seconds: seconds,
             timestamp: new Date().toISOString()
         });
-
-        mqttClient.publish(topics.command, payload, { qos: 0 }, (err) => {
+        
+        mqttClient.publish(CONFIG.TOPICS.COMMAND, payload, { qos: 0 }, (err) => {
             if (err) {
-                addDebugLog(`Failed to set timer: ${err.message}`, 'error');
                 showNotification(`Failed to set timer: ${err.message}`, 'error');
             } else {
-                addDebugLog(`Timer set to ${seconds} seconds`, 'success');
-                showNotification(`Timer set to ${seconds} seconds`, 'success');
-                deltaTimeInput.value = '';
+                showNotification(`Manual timer set to ${seconds} seconds`, 'success');
+                input.value = '';
             }
         });
     }
-
-    // 13. Update MQTT status UI
+    
+    // 12. Set auto-restart timer
+    function setAutoRestartTimer() {
+        const input = document.getElementById('autoRestartTime');
+        const seconds = parseInt(input.value);
+        
+        if (isNaN(seconds) || seconds < 1 || seconds > 3600) {
+            showNotification('Please enter a valid number between 1 and 3600', 'error');
+            return;
+        }
+        
+        if (!mqttClient || !mqttClient.connected) {
+            showNotification('Not connected to MQTT broker', 'error');
+            return;
+        }
+        
+        const payload = JSON.stringify({
+            command: 'SET_AUTO_RESTART',
+            seconds: seconds,
+            timestamp: new Date().toISOString()
+        });
+        
+        mqttClient.publish(CONFIG.TOPICS.COMMAND, payload, { qos: 0 }, (err) => {
+            if (err) {
+                showNotification(`Failed to set auto-restart timer: ${err.message}`, 'error');
+            } else {
+                showNotification(`Auto-restart timer set to ${seconds} seconds`, 'success');
+            }
+        });
+    }
+    
+    // 13. Enable auto-restart
+    function enableAutoRestart() {
+        if (!mqttClient || !mqttClient.connected) {
+            showNotification('Not connected to MQTT broker', 'error');
+            return;
+        }
+        
+        sendCommand('ENABLE_AUTO_RESTART');
+        showNotification('Auto-restart enabled', 'success');
+    }
+    
+    // 14. Disable auto-restart
+    function disableAutoRestart() {
+        if (!mqttClient || !mqttClient.connected) {
+            showNotification('Not connected to MQTT broker', 'error');
+            return;
+        }
+        
+        sendCommand('DISABLE_AUTO_RESTART');
+        showNotification('Auto-restart disabled', 'info');
+    }
+    
+    // 15. Update MQTT status UI
     function updateMQTTStatus(status, message) {
         const statusElement = document.getElementById('mqttStatus');
-        const indicator = document.getElementById('mqttIndicator');
+        const indicator = document.getElementById('connectionIndicator');
         
         statusElement.className = 'mqtt-status ' + status;
         indicator.className = 'connection-indicator ' + status;
@@ -1436,8 +1281,6 @@
                 document.getElementById('mqttStatusText').textContent = 'Connected';
                 document.getElementById('mqttStatusDetail').textContent = message;
                 document.getElementById('connectionStatusText').textContent = 'Connected to MQTT Broker';
-                document.getElementById('connectionType').textContent = 'MQTT';
-                document.getElementById('currentStatus').textContent = 'Online';
                 break;
             case 'connecting':
                 document.getElementById('mqttStatusTitle').innerHTML = '<i class="fas fa-sync-alt"></i> MQTT Status: <span>Connecting</span>';
@@ -1450,228 +1293,45 @@
                 document.getElementById('mqttStatusText').textContent = 'Disconnected';
                 document.getElementById('mqttStatusDetail').textContent = message;
                 document.getElementById('connectionStatusText').textContent = 'Disconnected from MQTT Broker';
-                document.getElementById('connectionType').textContent = 'MQTT (Disconnected)';
-                document.getElementById('currentStatus').textContent = 'Offline';
                 break;
         }
     }
-
-    // 14. Update topics
-    function updateTopics() {
-        topics.command = document.getElementById('commandTopic').value || 'conveyor/control';
-        topics.status = document.getElementById('statusTopic').value || 'conveyor/status';
-        topics.sensor = document.getElementById('sensorTopic').value || 'conveyor/sensor';
-        topics.timer = document.getElementById('timerTopic').value || 'conveyor/timer';
+    
+    // 16. Show notification
+    function showNotification(message, type = 'info') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = 'notification ' + type;
+        notification.classList.add('show');
         
-        // Update UI
-        document.getElementById('currentCommandTopic').textContent = topics.command;
-        document.getElementById('currentStatusTopic').textContent = topics.status;
-        document.getElementById('currentSensorTopic').textContent = topics.sensor;
-        document.getElementById('currentTimerTopic').textContent = topics.timer;
-        
-        // Resubscribe jika connected
-        if (mqttClient && mqttClient.connected) {
-            subscribeToTopics();
-        }
-        
-        addDebugLog('MQTT topics updated', 'info');
-        showNotification('MQTT topics updated', 'success');
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
     }
-
-    // 15. Save settings
-    function saveMQTTSettings() {
-        const settings = {
-            broker: document.getElementById('mqttBroker').value,
-            port: document.getElementById('mqttPort').value,
-            clientId: document.getElementById('clientId').value,
-            username: document.getElementById('username').value,
-            commandTopic: document.getElementById('commandTopic').value,
-            statusTopic: document.getElementById('statusTopic').value,
-            sensorTopic: document.getElementById('sensorTopic').value,
-            timerTopic: document.getElementById('timerTopic').value,
-            autoConnect: true
-        };
-        
-        localStorage.setItem('mqttSettings', JSON.stringify(settings));
-        addDebugLog('Settings saved to localStorage', 'success');
-        showNotification('Settings saved', 'success');
+    
+    // 17. Format time
+    function formatTime(seconds) {
+        if (!seconds) return '0s';
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        if (hours > 0) return `${hours}h ${minutes}m`;
+        if (minutes > 0) return `${minutes}m ${secs}s`;
+        return `${secs}s`;
     }
-
-    // 16. Load settings
-    function loadMQTTSettings() {
-        const saved = localStorage.getItem('mqttSettings');
-        
-        if (saved) {
-            try {
-                const settings = JSON.parse(saved);
-                document.getElementById('mqttBroker').value = settings.broker || getDefaultBroker();
-                document.getElementById('mqttPort').value = settings.port || getDefaultPort();
-                document.getElementById('clientId').value = settings.clientId || `web-client-${Date.now().toString(16)}`;
-                document.getElementById('username').value = settings.username || '';
-                document.getElementById('commandTopic').value = settings.commandTopic || 'conveyor/control';
-                document.getElementById('statusTopic').value = settings.statusTopic || 'conveyor/status';
-                document.getElementById('sensorTopic').value = settings.sensorTopic || 'conveyor/sensor';
-                document.getElementById('timerTopic').value = settings.timerTopic || 'conveyor/timer';
-                
-                topics.command = settings.commandTopic || 'conveyor/control';
-                topics.status = settings.statusTopic || 'conveyor/status';
-                topics.sensor = settings.sensorTopic || 'conveyor/sensor';
-                topics.timer = settings.timerTopic || 'conveyor/timer';
-                
-                addDebugLog('Settings loaded from localStorage', 'info');
-                
-            } catch (error) {
-                addDebugLog('Failed to load settings, using defaults', 'error');
-                setDefaultSettings();
-            }
-        } else {
-            setDefaultSettings();
-        }
-        
-        updateTopics();
-    }
-
-    // 17. Get default broker based on protocol
-    function getDefaultBroker() {
-        return window.location.protocol === 'https:' 
-            ? 'wss://broker.emqx.io:8084/mqtt' 
-            : 'ws://broker.emqx.io:8083/mqtt';
-    }
-
-    // 18. Get default port based on protocol
-    function getDefaultPort() {
-        return window.location.protocol === 'https:' ? '8084' : '8083';
-    }
-
-    // 19. Set default settings
-    function setDefaultSettings() {
-        document.getElementById('mqttBroker').value = getDefaultBroker();
-        document.getElementById('mqttPort').value = getDefaultPort();
-        document.getElementById('clientId').value = `web-client-${Date.now().toString(16)}`;
-        document.getElementById('commandTopic').value = 'conveyor/control';
-        document.getElementById('statusTopic').value = 'conveyor/status';
-        document.getElementById('sensorTopic').value = 'conveyor/sensor';
-        document.getElementById('timerTopic').value = 'conveyor/timer';
-        
-        addDebugLog('Using default settings', 'info');
-    }
-
-    // 20. Clear debug log
-    function clearDebugLog() {
-        debugLog = [];
-        updateDebugDisplay();
-        addDebugLog('Debug log cleared', 'info');
-    }
-
-    // 21. Export debug log
-    function exportDebugLog() {
-        const logText = debugLog.map(entry => 
-            `[${entry.time}] ${entry.type.toUpperCase()}: ${entry.message}`
-        ).join('\n');
-        
-        const blob = new Blob([logText], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `mqtt-debug-${new Date().toISOString().slice(0, 10)}.log`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        addDebugLog('Debug log exported', 'success');
-    }
-
-    // 22. Reset all settings
-    function resetAllSettings() {
-        if (confirm('Are you sure you want to reset all settings?')) {
-            localStorage.clear();
-            setDefaultSettings();
-            disconnectMQTT();
-            clearDebugLog();
-            addDebugLog('All settings reset to defaults', 'success');
-            showNotification('All settings reset', 'success');
-        }
-    }
-
-    // 23. Test specific broker
-    function testSpecificBroker() {
-        const url = document.getElementById('testBrokerUrl').value;
-        if (!url) {
-            showNotification('Please enter broker URL to test', 'error');
-            return;
-        }
-        
-        addDebugLog(`Testing broker: ${url}`, 'info');
-        showNotification(`Testing ${url}...`, 'info');
-        
-        testBrokerConnection(url).then(result => {
-            if (result.success) {
-                addDebugLog(`✓ ${url} is accessible (${result.time}ms)`, 'success');
-                showNotification(`Broker is accessible! (${result.time}ms)`, 'success');
-                
-                // Auto-set jika berhasil
-                document.getElementById('mqttBroker').value = url;
-            } else {
-                addDebugLog(`✗ ${url}: ${result.message}`, 'error');
-                showNotification(`Failed: ${result.message}`, 'error');
-            }
-        });
-    }
-
-    // 24. Test connection
-    function testConnection() {
+    
+    // 18. Refresh status
+    function refreshStatus() {
         if (!mqttClient || !mqttClient.connected) {
-            showNotification('Not connected to broker', 'error');
+            showNotification('Not connected to MQTT broker', 'error');
             return;
         }
         
-        addDebugLog('Testing connection with ping...', 'info');
-        
-        // Send test message
-        const testPayload = JSON.stringify({
-            command: 'PING',
-            timestamp: new Date().toISOString(),
-            test: true
-        });
-        
-        mqttClient.publish(topics.command, testPayload, { qos: 0 }, (err) => {
-            if (err) {
-                addDebugLog(`Ping failed: ${err.message}`, 'error');
-                showNotification(`Ping failed: ${err.message}`, 'error');
-            } else {
-                addDebugLog('Ping sent successfully', 'success');
-                showNotification('Ping sent successfully', 'success');
-            }
-        });
+        sendCommand('GET_STATUS');
+        showNotification('Requesting status update...', 'info');
     }
-
-    // 25. Auto-connect to broker
-    function autoConnect() {
-        if (autoConnectAttempted) return;
-        
-        autoConnectAttempted = true;
-        addDebugLog('Starting auto-connect sequence...', 'info');
-        
-        // Coba koneksi ke broker default berdasarkan protocol
-        const defaultBroker = getDefaultBroker();
-        document.getElementById('mqttBroker').value = defaultBroker;
-        document.getElementById('mqttPort').value = getDefaultPort();
-        
-        addDebugLog(`Trying default broker: ${defaultBroker}`, 'info');
-        
-        // Coba koneksi
-        testBrokerConnection(defaultBroker).then(result => {
-            if (result.success) {
-                addDebugLog(`Default broker is accessible, connecting...`, 'success');
-                connectMQTT();
-            } else {
-                addDebugLog(`Default broker failed: ${result.message}. Testing all brokers...`, 'warning');
-                // Coba semua broker
-                testAllBrokers();
-            }
-        });
-    }
-
-    // 26. Switch tab
+    
+    // 19. Switch tab
     function switchTab(tabName) {
         // Hide all tabs
         document.querySelectorAll('.tab-content').forEach(tab => {
@@ -1689,137 +1349,27 @@
         // Activate clicked tab button
         event.currentTarget.classList.add('active');
     }
-
-    // Fungsi-fungsi untuk update conveyor status
-    function updateConveyorStatus(data) {
-        if (data.running !== undefined) conveyorState.running = data.running;
-        if (data.sensorDetected !== undefined) conveyorState.sensorDetected = data.sensorDetected;
-        if (data.timerActive !== undefined) conveyorState.timerActive = data.timerActive;
-        if (data.timerSeconds !== undefined) conveyorState.timerSeconds = data.timerSeconds;
-        if (data.sensorEnabled !== undefined) conveyorState.sensorEnabled = data.sensorEnabled;
-        if (data.uptime !== undefined) conveyorState.uptime = data.uptime;
-        if (data.detections !== undefined) conveyorState.detections = data.detections;
-        if (data.totalRuntime !== undefined) conveyorState.totalRuntime = data.totalRuntime;
-
-        updateConveyorUI();
-    }
-
-    function updateSensorStatus(data) {
-        if (data.detected !== undefined) conveyorState.sensorDetected = data.detected;
-        if (data.enabled !== undefined) conveyorState.sensorEnabled = data.enabled;
-        updateConveyorUI();
-    }
-
-    function updateTimerStatus(data) {
-        if (data.active !== undefined) conveyorState.timerActive = data.active;
-        if (data.seconds !== undefined) conveyorState.timerSeconds = data.seconds;
-        if (data.remaining !== undefined) conveyorState.timerSeconds = data.remaining;
-        updateConveyorUI();
-    }
-
-    function updateSimpleStatus(message) {
-        const lowerMsg = message.toLowerCase();
-        if (lowerMsg.includes('running') || lowerMsg.includes('start')) {
-            conveyorState.running = true;
-        } else if (lowerMsg.includes('stopped') || lowerMsg.includes('stop')) {
-            conveyorState.running = false;
-        } else if (lowerMsg.includes('detected')) {
-            conveyorState.sensorDetected = true;
-        } else if (lowerMsg.includes('clear')) {
-            conveyorState.sensorDetected = false;
-        }
-        updateConveyorUI();
-    }
-
-    function updateConveyorUI() {
-        // Update conveyor status
-        if (conveyorState.running) {
-            document.getElementById('conveyorStatus').textContent = 'RUNNING';
-            document.getElementById('conveyorStatus').className = 'status-value status-conveyor';
-            document.getElementById('conveyorDesc').textContent = 'Conveyor is currently running';
-        } else {
-            document.getElementById('conveyorStatus').textContent = 'STOPPED';
-            document.getElementById('conveyorStatus').className = 'status-value status-conveyor off';
-            document.getElementById('conveyorDesc').textContent = 'Conveyor is currently stopped';
-        }
-        
-        // Update sensor status
-        if (conveyorState.sensorDetected) {
-            document.getElementById('sensorStatus').textContent = 'OBJECT DETECTED';
-            document.getElementById('sensorStatus').className = 'status-value status-sensor detected';
-            document.getElementById('sensorDesc').textContent = 'Object detected by proximity sensor';
-        } else {
-            document.getElementById('sensorStatus').textContent = 'CLEAR';
-            document.getElementById('sensorStatus').className = 'status-value status-sensor';
-            document.getElementById('sensorDesc').textContent = 'No object detected';
-        }
-        
-        // Update timer status
-        if (conveyorState.timerActive && conveyorState.timerSeconds > 0) {
-            document.getElementById('timerStatus').textContent = conveyorState.timerSeconds + 's';
-            document.getElementById('timerDesc').textContent = 'Conveyor will start in ' + conveyorState.timerSeconds + ' seconds';
-        } else {
-            document.getElementById('timerStatus').textContent = '0s';
-            document.getElementById('timerDesc').textContent = 'No active timer';
-        }
-        
-        // Update statistics
-        document.getElementById('totalDetections').textContent = conveyorState.detections;
-        document.getElementById('totalRunTime').textContent = conveyorState.totalRuntime;
-        document.getElementById('systemUptime').textContent = formatUptime(conveyorState.uptime);
-        
-        // Update sensor active status
-        const sensorActiveStatus = document.getElementById('sensorActiveStatus');
-        if (sensorActiveStatus) {
-            sensorActiveStatus.textContent = conveyorState.sensorEnabled ? 'Enabled' : 'Disabled';
-            sensorActiveStatus.style.color = conveyorState.sensorEnabled ? '#4CAF50' : '#F44336';
-        }
-    }
-
-    function formatUptime(seconds) {
-        if (!seconds) return '0s';
-        const days = Math.floor(seconds / 86400);
-        const hours = Math.floor((seconds % 86400) / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-        if (days > 0) return `${days}d ${hours}h`;
-        if (hours > 0) return `${hours}h ${minutes}m`;
-        if (minutes > 0) return `${minutes}m ${secs}s`;
-        return `${secs}s`;
-    }
-
-    function refreshStatus() {
-        if (!mqttClient || !mqttClient.connected) {
-            showNotification('Not connected to MQTT broker', 'error');
-            return;
-        }
-        sendCommand('GET_STATUS');
-    }
-
+    
     // ====================== INISIALISASI ======================
     document.addEventListener('DOMContentLoaded', function() {
-        // Load settings
-        loadMQTTSettings();
+        // Generate client ID
+        generateClientId();
         
-        // Update topics display
-        updateTopics();
+        // Auto-connect after 2 seconds
+        setTimeout(connectMQTT, 2000);
         
-        // Add initial debug message
-        addDebugLog('System initialized. Auto-connecting to MQTT broker...', 'info');
-        addDebugLog(`Protocol: ${window.location.protocol}`, 'info');
-        addDebugLog(`URL: ${window.location.href}`, 'info');
-        
-        // Setup event listeners
-        document.getElementById('deltaTime').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') setDeltaTime();
+        // Add event listeners
+        document.getElementById('manualTimer').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') setManualTimer();
         });
         
-        document.getElementById('mqttBroker').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') connectMQTT();
+        document.getElementById('autoRestartTime').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') setAutoRestartTimer();
         });
         
-        // Auto-connect setelah 1 detik
-        setTimeout(autoConnect, 1000);
+        document.getElementById('restartTimerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') setAutoRestartTimer();
+        });
     });
     </script>
 </body>
