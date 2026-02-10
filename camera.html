@@ -13,51 +13,33 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-       body {
-    background: 
-        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-        url('BG1.png') no-repeat center center fixed;
-    background-size: cover;
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-       }
+        
+        body {
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('BG1.png') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-/* Efek partikel untuk background */
-body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
-        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px);
-    background-size: 50px 50px;
-    z-index: -1;
-    pointer-events: none;
-        }         
-        .X-Ray-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            margin: 20px auto;
-            width: 95%;
-            max-width: 1200px;
+        /* Efek partikel untuk background */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            pointer-events: none;
         }
         
-        .header {
-    text-align: center;
-    padding: 40px 20px;
-    background: 
-        linear-gradient(rgba(0, 0, 0, 0.8), rgba(76, 73, 79, 0.8)),
-        url('BG.png') no-repeat center center;
-    background-size: cover;
-    color: white;
-    border-radius: 20px 20px 0 0;
-}
         .cropinsight-container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -66,6 +48,17 @@ body::after {
             margin: 20px auto;
             width: 95%;
             max-width: 1400px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.8), rgba(76, 73, 79, 0.8)),
+                url('BG.png') no-repeat center center;
+            background-size: cover;
+            color: white;
+            border-radius: 20px 20px 0 0;
         }
         
         .header h1 {
@@ -317,6 +310,55 @@ body::after {
             background: linear-gradient(to right, #FF9800, #EF6C00);
         }
         
+        /* Plant Selection Modal */
+        .plant-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .plant-modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .plant-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .plant-option {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .plant-option:hover {
+            border-color: #4CAF50;
+            background: #f1f8e9;
+        }
+        
+        .plant-option.selected {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        }
+        
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
@@ -334,6 +376,10 @@ body::after {
             
             .video-placeholder {
                 height: 300px;
+            }
+            
+            .plant-options {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -440,6 +486,26 @@ body::after {
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Plant Selection -->
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="plantSelect"><i class="fas fa-seedling"></i> Plant Type</label>
+                                <select class="form-control" id="plantSelect">
+                                    <option value="Not Specified">-- Select Plant Type --</option>
+                                    <option value="Padi (Rice)">Padi (Rice)</option>
+                                    <option value="Jagung (Corn)">Jagung (Corn)</option>
+                                    <option value="Kedelai (Soybean)">Kedelai (Soybean)</option>
+                                    <option value="Cabai (Chili)">Cabai (Chili)</option>
+                                    <option value="Tomat (Tomato)">Tomat (Tomato)</option>
+                                    <option value="Wheat">Wheat</option>
+                                    <option value="Potato">Potato</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Capture Panel -->
@@ -522,6 +588,33 @@ body::after {
 
         <div class="footer">
             <p>Cropinsight Camera Module | Version 2.0 | © 2024 Agricultural Technology</p>
+            <small id="storageInfo" class="text-muted">Loading storage info...</small>
+        </div>
+    </div>
+
+    <!-- Plant Selection Modal -->
+    <div class="plant-modal" id="plantModal">
+        <div class="plant-modal-content">
+            <h4><i class="fas fa-seedling"></i> Select Plant Type</h4>
+            <p class="text-muted">Please select the type of plant for this image</p>
+            
+            <div class="plant-options" id="plantOptions">
+                <!-- Options will be populated by JavaScript -->
+            </div>
+            
+            <div class="form-group mt-3">
+                <label for="customPlant">Or enter custom plant name:</label>
+                <input type="text" class="form-control" id="customPlant" placeholder="Enter plant name">
+            </div>
+            
+            <div class="mt-4">
+                <button class="btn btn-success" onclick="confirmPlantSelection()">
+                    <i class="fas fa-check"></i> Confirm
+                </button>
+                <button class="btn btn-outline-secondary" onclick="cancelPlantSelection()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
         </div>
     </div>
 
@@ -554,11 +647,54 @@ body::after {
         const videoQualitySelect = document.getElementById('videoQuality');
         const flashModeSelect = document.getElementById('flashMode');
         const resolutionBadge = document.getElementById('resolutionBadge');
+        const plantSelect = document.getElementById('plantSelect');
+        const plantModal = document.getElementById('plantModal');
+        const plantOptions = document.getElementById('plantOptions');
+        const customPlantInput = document.getElementById('customPlant');
+        const storageInfo = document.getElementById('storageInfo');
 
         let mediaStream = null;
         let lastCaptureDataUrl = null;
-        let currentFacingMode = 'environment'; // environment = back camera, user = front camera
+        let currentFacingMode = 'environment';
         let captureCount = 0;
+        let selectedPlant = "Not Specified";
+        let pendingSave = false;
+
+        // Plant options data
+        const plantList = [
+            { name: "Padi (Rice)", icon: "fas fa-wheat-awn" },
+            { name: "Jagung (Corn)", icon: "fas fa-corn" },
+            { name: "Kedelai (Soybean)", icon: "fas fa-seedling" },
+            { name: "Cabai (Chili)", icon: "fas fa-pepper-hot" },
+            { name: "Tomat (Tomato)", icon: "fas fa-apple-whole" },
+            { name: "Wheat", icon: "fas fa-wheat-alt" },
+            { name: "Potato", icon: "fas fa-potato" },
+            { name: "Coffee", icon: "fas fa-mug-hot" },
+            { name: "Tea", icon: "fas fa-leaf" },
+            { name: "Sugarcane", icon: "fas fa-candy-cane" }
+        ];
+
+        // Initialize plant options
+        function initializePlantOptions() {
+            plantOptions.innerHTML = '';
+            plantList.forEach(plant => {
+                const option = document.createElement('div');
+                option.className = 'plant-option';
+                option.innerHTML = `
+                    <i class="${plant.icon} fa-2x"></i>
+                    <div class="mt-2">${plant.name}</div>
+                `;
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.plant-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    option.classList.add('selected');
+                    selectedPlant = plant.name;
+                    customPlantInput.value = '';
+                });
+                plantOptions.appendChild(option);
+            });
+        }
 
         // Show notification
         function showNotification(message, type = 'info') {
@@ -571,14 +707,48 @@ body::after {
             }, 3000);
         }
 
+        // Update storage info
+        function updateStorageInfo() {
+            try {
+                const captures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
+                const totalImages = captures.length;
+                
+                // Calculate approximate storage usage
+                let totalBytes = 0;
+                captures.forEach(capture => {
+                    if (capture.dataUrl) {
+                        totalBytes += (capture.dataUrl.length * 3) / 4;
+                    }
+                });
+                
+                const usedMB = (totalBytes / (1024 * 1024)).toFixed(2);
+                const maxMB = 5.0; // localStorage limit approx 5MB
+                const percentage = Math.min((usedMB / maxMB) * 100, 100).toFixed(1);
+                
+                storageInfo.innerHTML = `
+                    Storage: ${usedMB} MB used (${percentage}%) | ${totalImages} images saved
+                `;
+                
+                // Add warning if storage is almost full
+                if (percentage > 80) {
+                    storageInfo.className = "text-danger";
+                    storageInfo.innerHTML += ' <i class="fas fa-exclamation-triangle"></i>';
+                } else if (percentage > 60) {
+                    storageInfo.className = "text-warning";
+                } else {
+                    storageInfo.className = "text-muted";
+                }
+            } catch (error) {
+                storageInfo.textContent = "Error loading storage info";
+            }
+        }
+
         // Update status indicator
         function updateStatus(state, message) {
             statusText.textContent = message;
             
-            // Remove all state classes
             statusIndicator.classList.remove('bg-secondary', 'bg-success', 'bg-danger', 'bg-warning');
             
-            // Add appropriate class
             switch(state) {
                 case 'active':
                     statusIndicator.classList.add('bg-success');
@@ -671,7 +841,7 @@ body::after {
         // Start camera
         async function startCamera() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showNotification('Browser tidak mendukung akses kamera', 'error');
+                showNotification('Browser does not support camera access', 'error');
                 updateStatus('error', 'Unsupported Browser');
                 return;
             }
@@ -767,9 +937,25 @@ body::after {
             canvas.width = videoElement.videoWidth;
             canvas.height = videoElement.videoHeight;
 
-            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            // Draw mirrored image
+            context.save();
+            context.scale(-1, 1);
+            context.drawImage(videoElement, -canvas.width, 0, canvas.width, canvas.height);
+            context.restore();
 
-            lastCaptureDataUrl = canvas.toDataURL('image/png');
+            // Add timestamp to image
+            context.font = '16px Arial';
+            context.fillStyle = 'white';
+            context.strokeStyle = 'black';
+            context.lineWidth = 3;
+            
+            const timestamp = new Date().toLocaleString();
+            const text = `${timestamp} | ${selectedPlant}`;
+            
+            context.strokeText(text, 20, canvas.height - 30);
+            context.fillText(text, 20, canvas.height - 30);
+
+            lastCaptureDataUrl = canvas.toDataURL('image/jpeg', 0.85);
 
             capturedImage.src = lastCaptureDataUrl;
             capturedImage.style.display = 'block';
@@ -786,9 +972,40 @@ body::after {
                 <p>Time: ${now.toLocaleTimeString()}</p>
                 <p>Date: ${now.toLocaleDateString()}</p>
                 <p>Resolution: ${canvas.width} x ${canvas.height}</p>
+                <p>Plant: ${selectedPlant}</p>
             `;
 
             showNotification('Image captured successfully!', 'success');
+        }
+
+        // Show plant selection modal
+        function showPlantSelection() {
+            pendingSave = true;
+            initializePlantOptions();
+            selectedPlant = plantSelect.value;
+            plantModal.style.display = 'flex';
+        }
+
+        // Confirm plant selection
+        function confirmPlantSelection() {
+            if (customPlantInput.value.trim()) {
+                selectedPlant = customPlantInput.value.trim();
+            }
+            
+            plantModal.style.display = 'none';
+            plantSelect.value = selectedPlant;
+            
+            if (pendingSave) {
+                saveImage();
+                pendingSave = false;
+            }
+        }
+
+        // Cancel plant selection
+        function cancelPlantSelection() {
+            plantModal.style.display = 'none';
+            pendingSave = false;
+            showNotification('Plant selection cancelled', 'warning');
         }
 
         // Save image
@@ -798,22 +1015,64 @@ body::after {
                 return;
             }
 
-            // In real implementation, send to server
-            // For demo, simulate save to localStorage
+            // If plant is not specified, show plant selection modal
+            if (selectedPlant === "Not Specified") {
+                showPlantSelection();
+                return;
+            }
+
+            // Data untuk disimpan
             const captureData = {
                 id: 'CAP-' + Date.now(),
                 timestamp: new Date().toISOString(),
                 dataUrl: lastCaptureDataUrl,
-                resolution: capturedImage.naturalWidth + 'x' + capturedImage.naturalHeight
+                resolution: `${capturedImage.naturalWidth}x${capturedImage.naturalHeight}`,
+                name: `Capture_${new Date().toISOString().slice(0,10).replace(/-/g, '')}_${Date.now().toString().slice(-6)}.jpg`,
+                plant: selectedPlant,
+                detection: "Not Analyzed",
+                confidence: 0,
+                location: "Field Camera",
+                camera: currentFacingMode === 'environment' ? 'Back Camera' : 'Front Camera',
+                analyst: "User",
+                summary: "Captured from device camera",
+                tags: ["recent", "unanalyzed"],
+                category: "recent",
+                fileSize: Math.round((lastCaptureDataUrl.length * 3) / 4)
             };
 
-            // Get existing captures
-            let captures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
-            captures.push(captureData);
-            localStorage.setItem('cropinsight_captures', JSON.stringify(captures));
-
-            showNotification('Image saved to library!', 'success');
-            saveBtn.disabled = true;
+            try {
+                // Get existing captures
+                let captures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
+                
+                // Check storage limit (max 50 images)
+                if (captures.length >= 50) {
+                    if (!confirm('Storage limit reached (50 images). Remove oldest image?')) {
+                        showNotification('Save cancelled', 'warning');
+                        return;
+                    }
+                    captures.shift(); // Remove oldest
+                }
+                
+                captures.push(captureData);
+                localStorage.setItem('cropinsight_captures', JSON.stringify(captures));
+                
+                // Show success notification with navigation option
+                if (confirm('Image saved to library! Go to Library now?')) {
+                    window.location.href = 'library.html';
+                } else {
+                    showNotification('Image saved to library!', 'success');
+                }
+                
+                saveBtn.disabled = true;
+                updateStorageInfo();
+                
+                // Update capture info with save confirmation
+                captureInfo.innerHTML += '<p class="text-success"><i class="fas fa-check"></i> Saved to Library</p>';
+                
+            } catch (error) {
+                console.error('Error saving image:', error);
+                showNotification('Error saving image. Storage might be full.', 'error');
+            }
         }
 
         // Analyze image
@@ -827,20 +1086,24 @@ body::after {
             
             // Simulate analysis process
             setTimeout(() => {
-                showNotification('Analysis complete! Redirecting to results...', 'success');
-                
-                // Save analysis result
                 const analysisResult = {
                     imageId: 'CAP-' + Date.now(),
                     timestamp: new Date().toISOString(),
                     status: 'analyzed',
                     defects: ['Healthy', 'Good Growth'],
-                    confidence: Math.floor(Math.random() * 20) + 80 // 80-100%
+                    confidence: Math.floor(Math.random() * 20) + 80
                 };
                 
-                let analyses = JSON.parse(localStorage.getItem('cropinsight_analyses') || '[]');
-                analyses.push(analysisResult);
-                localStorage.setItem('cropinsight_analyses', JSON.stringify(analyses));
+                // Save analysis to localStorage
+                try {
+                    let analyses = JSON.parse(localStorage.getItem('cropinsight_analyses') || '[]');
+                    analyses.push(analysisResult);
+                    localStorage.setItem('cropinsight_analyses', JSON.stringify(analyses));
+                } catch (error) {
+                    console.error('Error saving analysis:', error);
+                }
+                
+                showNotification('Analysis complete! Redirecting to results...', 'success');
                 
                 // Redirect to results page after 1 second
                 setTimeout(() => {
@@ -891,7 +1154,13 @@ body::after {
         startBtn.addEventListener('click', startCamera);
         stopBtn.addEventListener('click', stopCamera);
         captureBtn.addEventListener('click', captureImage);
-        saveBtn.addEventListener('click', saveImage);
+        saveBtn.addEventListener('click', () => {
+            if (selectedPlant === "Not Specified") {
+                showPlantSelection();
+            } else {
+                saveImage();
+            }
+        });
         analyzeBtn.addEventListener('click', analyzeImage);
         toggleBtn.addEventListener('click', toggleCamera);
         clearBtn.addEventListener('click', clearCapture);
@@ -908,14 +1177,41 @@ body::after {
             showNotification(`Flash mode set to: ${this.value}`, 'info');
         });
 
+        // Plant selection change
+        plantSelect.addEventListener('change', function() {
+            selectedPlant = this.value;
+            showNotification(`Plant type set to: ${selectedPlant}`, 'info');
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === plantModal) {
+                plantModal.style.display = 'none';
+                pendingSave = false;
+            }
+        });
+
         // Initialize
-        updateStatus('inactive', 'Camera Ready');
-        
-        // Check if there are previous captures
-        const previousCaptures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
-        if (previousCaptures.length > 0) {
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('inactive', 'Camera Ready');
+            updateStorageInfo();
+            
+            // Load previous captures count
+            const previousCaptures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
             captureCount = previousCaptures.length;
-        }
+            
+            // Update storage info periodically
+            setInterval(updateStorageInfo, 30000);
+        });
+
+        // Warn before leaving if camera is active
+        window.addEventListener('beforeunload', function(e) {
+            if (mediaStream) {
+                e.preventDefault();
+                e.returnValue = '';
+                return 'Camera is still active. Are you sure you want to leave?';
+            }
+        });
     </script>
 </body>
 </html>
