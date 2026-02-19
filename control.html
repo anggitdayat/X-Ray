@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conveyor Control - Cropinsight</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('BG1.png') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes backgroundPan {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        body {
+            animation: backgroundPan 60s linear infinite alternate;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .cropinsight-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            margin: 20px auto;
+            width: 95%;
+            max-width: 1400px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.8), rgba(76, 73, 79, 0.8)),
+                url('BG.png') no-repeat center center;
+            background-size: cover;
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .navbar {
+            border-radius: 0 0 20px 20px;
+            padding: 0 20px;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: #667eea !important;
+        }
+        
+        .jumbotron {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 20px;
+        }
+        
+        .status-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+            transition: transform 0.3s ease;
+        }
+        
+        .status-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .status-card.conveyor {
+            border-left-color: #4CAF50;
+        }
+        
+        .status-card.sensor {
+            border-left-color: #2196F3;
+        }
+        
+        .status-card.timer {
+            border-left-color: #FF9800;
+        }
+        
+        .status-card h3 {
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .status-conveyor {
+            color: #4CAF50;
+        }
+        
+        .status-conveyor.off {
+            color: #F44336;
+        }
+        
+        .status-sensor {
+            color: #2196F3;
+        }
+        
+        .status-sensor.detected {
+            color: #F44336;
+        }
+        
+        .status-timer {
+            color: #FF9800;
+        }
+        
+        .control-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+        }
+        
+        .control-panel h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+        
+        .input-group-custom {
+            margin-bottom: 25px;
+        }
+        
+        .input-group-custom label {
+            display: block;
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        
+        .input-with-button {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-with-button input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .input-with-button input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(to right, #F44336, #C62828);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(to right, #FF9800, #EF6C00);
+            color: white;
+        }
+        
+        .btn-info {
+            background: linear-gradient(to right, #2196F3, #0D47A1);
+            color: white;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .log-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+        }
+        
+        .log-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        #log {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .log-time {
+            color: #666;
+            margin-right: 10px;
+        }
+        
+        .log-message {
+            color: #333;
+        }
+        
+        .mqtt-status {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px;
+            border-left: 5px solid;
+        }
+        
+        .mqtt-status.connected {
+            border-left-color: #4CAF50;
+        }
+        
+        .mqtt-status.disconnected {
+            border-left-color: #F44336;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success { background: linear-gradient(to right, #4CAF50, #2E7D32); }
+        .notification.error { background: linear-gradient(to right, #F44336, #C62828); }
+        .notification.info { background: linear-gradient(to right, #2196F3, #0D47A1); }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .input-with-button {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cropinsight-container">
+        <header class="header">
+            <img src="cvr1.png" width="150" height="150" style="border-radius: 10%; margin-bottom: 20px;" />
+            <h1><i class="fas fa-conveyor-belt"></i> CONVEYOR CONTROL</h1>
+            <p class="lead" style="color: rgba(255,255,255,0.9);">ESP32 Industrial Conveyor with MQTT Control</p>
+        </header>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-tractor"></i> Cropinsight</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="camera.html">Camera</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="xray.html">X-Ray</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="library.html">Library</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="result.html">Result</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="history.html">History</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="control.html">Control</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="jumbotron">
+            <!-- MQTT Connection Status -->
+            <div class="mqtt-status disconnected" id="mqttStatus">
+                <h4><i class="fas fa-plug"></i> MQTT Connection: <span id="mqttState">Disconnected</span></h4>
+                <p id="mqttDetail">Connecting to broker...</p>
+            </div>
+
+            <!-- Status Cards -->
+            <div class="status-grid">
+                <div class="status-card conveyor">
+                    <h3><i class="fas fa-cogs"></i> Conveyor Status</h3>
+                    <div class="status-value status-conveyor off" id="conveyorStatus">OFF</div>
+                    <p id="conveyorDesc">Conveyor is stopped</p>
+                </div>
+                
+                <div class="status-card sensor">
+                    <h3><i class="fas fa-sensor"></i> Proximity Sensor</h3>
+                    <div class="status-value status-sensor" id="sensorStatus">CLEAR</div>
+                    <p id="sensorDesc">No object detected</p>
+                </div>
+                
+                <div class="status-card timer">
+                    <h3><i class="fas fa-clock"></i> Timer Status</h3>
+                    <div class="status-value status-timer" id="timerStatus">0s</div>
+                    <p id="timerDesc">No active timer</p>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <h2><i class="fas fa-sliders-h"></i> Control Panel</h2>
+                
+                <div class="input-group-custom">
+                    <label for="deltaTime"><i class="fas fa-hourglass-half"></i> Set Delta Time (seconds)</label>
+                    <div class="input-with-button">
+                        <input type="number" id="deltaTime" min="1" max="3600" placeholder="Enter seconds (1-3600)">
+                        <button class="btn btn-primary" onclick="setDeltaTime()">
+                            <i class="fas fa-play"></i> Start Timer
+                        </button>
+                    </div>
+                    <p style="margin-top: 8px; color: #666; font-size: 0.9rem;">
+                        Conveyor will automatically turn ON after this time
+                    </p>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="sendCommand('START')">
+                        <i class="fas fa-power-off"></i> Force START
+                    </button>
+                    <button class="btn btn-danger" onclick="sendCommand('STOP')">
+                        <i class="fas fa-stop"></i> Force STOP
+                    </button>
+                    <button class="btn btn-warning" onclick="sendCommand('RESET')">
+                        <i class="fas fa-redo"></i> Reset System
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Log -->
+            <div class="log-section">
+                <h3><i class="fas fa-history"></i> System Log</h3>
+                <div id="log">
+                    <div class="log-entry">
+                        <span class="log-time">--:--:--</span>
+                        <span class="log-message">Waiting for connection...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="mt-4">
+                <a href="index.html" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+                <a href="camera.html" class="btn btn-success float-right">
+                    <i class="fas fa-camera"></i> Go to Camera
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>ESP32 Conveyor Control via MQTT | Version 1.0 | © 2026 Agricultural Technology</p>
+            <p>Connected to: <span id="brokerInfo">mqttx.broker (hardcoded)</span></p>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <!-- MQTT Library (via CDN) -->
+    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+    <script>
+        // ==================== HARDCODED MQTT CONFIGURATION ====================
+        // Ganti dengan konfigurasi broker MQTT Anda
+        const MQTT_CONFIG = {
+            brokerUrl: 'ws://broker.emqx.io:8083/mqtt',  // WebSocket URL (contoh publik)
+            options: {
+                clientId: 'cropinsight_web_' + Math.random().toString(16).substr(2, 8),
+                username: 'your_username',  // Isi dengan username MQTT Anda
+                password: 'your_password',  // Isi dengan password MQTT Anda
+                clean: true,
+                reconnectPeriod: 5000,
+                connectTimeout: 30 * 1000,
+            },
+            topicPrefix: 'conveyor/'  // Prefix topik, misal 'conveyor/'
+        };
+
+        // Global variables
+        let client = null;
+        let connected = false;
+        let conveyorState = 'STOPPED'; // 'RUNNING' or 'STOPPED'
+        let sensorState = 'CLEAR';      // 'DETECTED' or 'CLEAR'
+        let timerActive = false;
+        let timerRemaining = 0;
+        let timerInterval = null;
+        let logEntries = [];
+
+        // DOM elements
+        const conveyorStatusEl = document.getElementById('conveyorStatus');
+        const conveyorDescEl = document.getElementById('conveyorDesc');
+        const sensorStatusEl = document.getElementById('sensorStatus');
+        const sensorDescEl = document.getElementById('sensorDesc');
+        const timerStatusEl = document.getElementById('timerStatus');
+        const timerDescEl = document.getElementById('timerDesc');
+        const mqttStatusDiv = document.getElementById('mqttStatus');
+        const mqttStateSpan = document.getElementById('mqttState');
+        const mqttDetailP = document.getElementById('mqttDetail');
+        const logDiv = document.getElementById('log');
+        const notification = document.getElementById('notification');
+        const loading = document.getElementById('loading');
+        const brokerInfo = document.getElementById('brokerInfo');
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            notification.textContent = message;
+            notification.className = 'notification ' + type;
+            notification.classList.add('show');
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+
+        // Show/hide loading
+        function setLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+        }
+
+        // Add log entry
+        function addLog(message) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-time">${timeString}</span>
+                <span class="log-message">${message}</span>
+            `;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            // Keep last 30 entries
+            if (logDiv.children.length > 30) {
+                logDiv.removeChild(logDiv.firstChild);
+            }
+        }
+
+        // Update MQTT connection status UI
+        function updateMQTTStatus(connected) {
+            if (connected) {
+                mqttStatusDiv.className = 'mqtt-status connected';
+                mqttStateSpan.textContent = 'Connected';
+                mqttDetailP.textContent = 'Connected to ' + MQTT_CONFIG.brokerUrl;
+                brokerInfo.textContent = MQTT_CONFIG.brokerUrl;
+            } else {
+                mqttStatusDiv.className = 'mqtt-status disconnected';
+                mqttStateSpan.textContent = 'Disconnected';
+                mqttDetailP.textContent = 'Attempting to reconnect...';
+                brokerInfo.textContent = 'Disconnected';
+            }
+        }
+
+        // Update UI based on received status
+        function updateStatusFromMessage(topic, message) {
+            const payload = message.toString();
+            try {
+                const data = JSON.parse(payload);
+                console.log('MQTT message:', topic, data);
+
+                // Update conveyor status
+                if (data.conveyor !== undefined) {
+                    if (data.conveyor === 'RUNNING' || data.conveyor === true) {
+                        conveyorState = 'RUNNING';
+                        conveyorStatusEl.textContent = 'RUNNING';
+                        conveyorStatusEl.className = 'status-value status-conveyor';
+                        conveyorDescEl.textContent = 'Conveyor is running';
+                    } else {
+                        conveyorState = 'STOPPED';
+                        conveyorStatusEl.textContent = 'STOPPED';
+                        conveyorStatusEl.className = 'status-value status-conveyor off';
+                        conveyorDescEl.textContent = 'Conveyor is stopped';
+                    }
+                }
+
+                // Update sensor status
+                if (data.sensor !== undefined) {
+                    if (data.sensor === 'DETECTED' || data.sensor === true) {
+                        sensorState = 'DETECTED';
+                        sensorStatusEl.textContent = 'DETECTED';
+                        sensorStatusEl.className = 'status-value status-sensor detected';
+                        sensorDescEl.textContent = 'Object detected by sensor';
+                    } else {
+                        sensorState = 'CLEAR';
+                        sensorStatusEl.textContent = 'CLEAR';
+                        sensorStatusEl.className = 'status-value status-sensor';
+                        sensorDescEl.textContent = 'No object detected';
+                    }
+                }
+
+                // Update timer
+                if (data.timer !== undefined) {
+                    timerActive = data.timer > 0;
+                    if (timerActive) {
+                        timerRemaining = data.timer;
+                        timerStatusEl.textContent = timerRemaining + 's';
+                        timerDescEl.textContent = `Conveyor will start in ${timerRemaining}s`;
+                        // Start countdown if not already
+                        if (!timerInterval) {
+                            startTimerCountdown();
+                        }
+                    } else {
+                        timerRemaining = 0;
+                        timerStatusEl.textContent = '0s';
+                        timerDescEl.textContent = 'No active timer';
+                        if (timerInterval) {
+                            clearInterval(timerInterval);
+                            timerInterval = null;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to parse JSON:', payload);
+            }
+        }
+
+        // Start local countdown (optional, just for display)
+        function startTimerCountdown() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (timerRemaining > 0) {
+                    timerRemaining--;
+                    timerStatusEl.textContent = timerRemaining + 's';
+                    timerDescEl.textContent = `Conveyor will start in ${timerRemaining}s`;
+                } else {
+                    timerStatusEl.textContent = '0s';
+                    timerDescEl.textContent = 'No active timer';
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            }, 1000);
+        }
+
+        // Connect to MQTT broker
+        function connectMQTT() {
+            updateMQTTStatus(false);
+            addLog('Connecting to MQTT broker...');
+
+            try {
+                client = mqtt.connect(MQTT_CONFIG.brokerUrl, MQTT_CONFIG.options);
+
+                client.on('connect', () => {
+                    connected = true;
+                    updateMQTTStatus(true);
+                    addLog('MQTT connected');
+
+                    // Subscribe to status topics
+                    client.subscribe(MQTT_CONFIG.topicPrefix + 'status', (err) => {
+                        if (!err) {
+                            addLog('Subscribed to ' + MQTT_CONFIG.topicPrefix + 'status');
+                        } else {
+                            addLog('Subscribe error: ' + err, 'error');
+                        }
+                    });
+
+                    // Also subscribe to sensor if separate
+                    client.subscribe(MQTT_CONFIG.topicPrefix + 'sensor');
+                    client.subscribe(MQTT_CONFIG.topicPrefix + 'timer');
+                });
+
+                client.on('message', (topic, message) => {
+                    // Handle incoming messages
+                    if (topic.endsWith('status') || topic.endsWith('sensor') || topic.endsWith('timer')) {
+                        updateStatusFromMessage(topic, message);
+                    }
+                    addLog(`[${topic}] ${message.toString()}`);
+                });
+
+                client.on('error', (err) => {
+                    console.error('MQTT error:', err);
+                    addLog('MQTT error: ' + err.message);
+                    showNotification('MQTT error', 'error');
+                });
+
+                client.on('close', () => {
+                    connected = false;
+                    updateMQTTStatus(false);
+                    addLog('MQTT connection closed');
+                });
+
+                client.on('offline', () => {
+                    connected = false;
+                    updateMQTTStatus(false);
+                    addLog('MQTT offline');
+                });
+
+            } catch (error) {
+                console.error('Connection failed:', error);
+                addLog('Connection failed: ' + error.message);
+                showNotification('Failed to connect to MQTT', 'error');
+            }
+        }
+
+        // Send command via MQTT
+        function sendCommand(command) {
+            if (!connected || !client) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
+
+            setLoading(true);
+            const payload = JSON.stringify({
+                command: command,
+                timestamp: new Date().toISOString()
+            });
+
+            client.publish(MQTT_CONFIG.topicPrefix + 'control', payload, { qos: 1 }, (err) => {
+                setLoading(false);
+                if (err) {
+                    showNotification('Failed to send command', 'error');
+                    addLog('Send error: ' + err.message);
+                } else {
+                    showNotification('Command sent: ' + command, 'success');
+                    addLog('Command sent: ' + command);
+                }
+            });
+        }
+
+        // Set delta time (timer)
+        function setDeltaTime() {
+            const input = document.getElementById('deltaTime');
+            const seconds = parseInt(input.value);
+            if (isNaN(seconds) || seconds < 1 || seconds > 3600) {
+                showNotification('Please enter valid seconds (1-3600)', 'error');
+                return;
+            }
+
+            if (!connected || !client) {
+                showNotification('Not connected to MQTT', 'error');
+                return;
+            }
+
+            setLoading(true);
+            const payload = JSON.stringify({
+                deltaTime: seconds,
+                timestamp: new Date().toISOString()
+            });
+
+            client.publish(MQTT_CONFIG.topicPrefix + 'setDelta', payload, { qos: 1 }, (err) => {
+                setLoading(false);
+                if (err) {
+                    showNotification('Failed to set timer', 'error');
+                    addLog('Set timer error: ' + err.message);
+                } else {
+                    showNotification('Timer set to ' + seconds + ' seconds', 'success');
+                    addLog('Timer set to ' + seconds + ' seconds');
+                    input.value = '';
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            connectMQTT();
+
+            // Add initial log
+            addLog('Control page loaded');
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (client && connected) {
+                client.end();
+            }
+            if (timerInterval) clearInterval(timerInterval);
+        });
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Defect Detection Results - Cropinsight</title>
+    <title>Analysis Results - Cropinsight</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -24,7 +24,6 @@
             overflow-x: hidden;
         }
 
-        /* Efek animasi subtle pada background */
         @keyframes backgroundPan {
             0% { background-position: 0% 0%; }
             100% { background-position: 100% 100%; }
@@ -34,7 +33,6 @@
             animation: backgroundPan 60s linear infinite alternate;
         }
 
-        /* Efek partikel untuk background */
         body::after {
             content: '';
             position: fixed;
@@ -206,16 +204,10 @@
             border: 1px solid #FF9800;
         }
         
-        .status-processing {
+        .status-pending {
             background: #e3f2fd;
             color: #1565C0;
             border: 1px solid #2196F3;
-        }
-        
-        .status-pending {
-            background: #f5f5f5;
-            color: #666;
-            border: 1px solid #ddd;
         }
         
         /* Defect Type Tags */
@@ -233,8 +225,8 @@
         .defect-broken { background: #e1bee7; color: #4a148c; }
         .defect-immature { background: #bbdefb; color: #0d47a1; }
         .defect-insect { background: #ffccbc; color: #bf360c; }
-        .defect-nutrient { background: #d1c4e9; color: #311b92; }
         .defect-disease { background: #ffecb3; color: #ff6f00; }
+        .defect-nutrient { background: #d1c4e9; color: #311b92; }
         
         /* Action Buttons */
         .action-buttons {
@@ -288,17 +280,6 @@
             gap: 10px;
         }
         
-        .chart-placeholder {
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8f9fa;
-            border-radius: 10px;
-            color: #666;
-        }
-        
-        /* Real Chart */
         .chart-container {
             height: 250px;
             position: relative;
@@ -407,13 +388,11 @@
             border-top: 1px solid #e0e0e0;
         }
         
-        /* Loading Indicator */
         .loading-indicator {
             text-align: center;
             padding: 40px;
         }
         
-        /* No Results */
         .no-results {
             text-align: center;
             padding: 60px 20px;
@@ -426,7 +405,30 @@
             color: #ccc;
         }
         
-        /* Responsive */
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .refresh-btn:hover {
+            transform: rotate(180deg);
+            transition: transform 0.5s ease;
+        }
+        
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
@@ -454,8 +456,8 @@
     <div class="cropinsight-container">
         <header class="header">
             <img src="cvr1.png" width="150" height="150" style="border-radius: 10%; margin-bottom: 20px;" />
-            <h1><i class="fas fa-chart-line"></i> ANALYSIS RESULTS</h1>
-            <p class="lead" style="color: rgba(255,255,255,0.9);">Plant Health Analysis & Defect Detection Results</p>
+            <h1><i class="fas fa-chart-bar"></i> ANALYSIS RESULTS</h1>
+            <p class="lead" style="color: rgba(255,255,255,0.9);">Seed Defect Detection using Artificial Neural Network</p>
             <button class="btn btn-light btn-sm mt-3" onclick="refreshResults()">
                 <i class="fas fa-sync-alt"></i> Refresh Results
             </button>
@@ -473,6 +475,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="camera.html">Camera</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="xray.html">X-Ray</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="library.html">Library</a>
@@ -496,7 +501,7 @@
                     </div>
                     <div class="stat-info">
                         <h3 id="totalAnalyzed">0</h3>
-                        <p>Total Plants Analyzed</p>
+                        <p>Total Seeds Analyzed</p>
                     </div>
                 </div>
                 
@@ -506,7 +511,7 @@
                     </div>
                     <div class="stat-info">
                         <h3 id="totalGood">0</h3>
-                        <p>Healthy Plants</p>
+                        <p>Good Quality Seeds</p>
                         <small id="goodPercentage">0%</small>
                     </div>
                 </div>
@@ -517,7 +522,7 @@
                     </div>
                     <div class="stat-info">
                         <h3 id="totalDefect">0</h3>
-                        <p>Defective Plants</p>
+                        <p>Defective Seeds</p>
                         <small id="defectPercentage">0%</small>
                     </div>
                 </div>
@@ -528,7 +533,7 @@
                     </div>
                     <div class="stat-info">
                         <h3 id="totalSuspicious">0</h3>
-                        <p>Need Review</p>
+                        <p>Suspicious / Review</p>
                         <small id="suspiciousPercentage">0%</small>
                     </div>
                 </div>
@@ -551,8 +556,8 @@
                     </div>
                     <div class="col-md-3">
                         <div class="filter-group">
-                            <label><i class="fas fa-filter"></i> Plant Type</label>
-                            <select class="form-control" id="plantType" onchange="filterResults()">
+                            <label><i class="fas fa-filter"></i> Seed Type</label>
+                            <select class="form-control" id="seedType" onchange="filterResults()">
                                 <option value="all">All Types</option>
                                 <option value="Padi (Rice)">Padi (Rice)</option>
                                 <option value="Jagung (Corn)">Jagung (Corn)</option>
@@ -568,12 +573,15 @@
                             <label><i class="fas fa-bug"></i> Defect Type</label>
                             <select class="form-control" id="defectType" onchange="filterResults()">
                                 <option value="all">All Defects</option>
-                                <option value="healthy">Healthy</option>
-                                <option value="disease">Disease</option>
-                                <option value="nutrient">Nutrient Deficiency</option>
-                                <option value="insect">Insect Damage</option>
-                                <option value="mold">Mold/Fungus</option>
-                                <option value="growth">Growth Issue</option>
+                                <option value="Healthy">Healthy</option>
+                                <option value="Crack">Crack</option>
+                                <option value="Mold">Mold</option>
+                                <option value="Discolored">Discolored</option>
+                                <option value="Broken">Broken</option>
+                                <option value="Immature">Immature</option>
+                                <option value="Insect">Insect</option>
+                                <option value="Disease">Disease</option>
+                                <option value="Nutrient">Nutrient Deficiency</option>
                             </select>
                         </div>
                     </div>
@@ -585,24 +593,24 @@
                                 <option value="date_asc">Date (Oldest First)</option>
                                 <option value="confidence_desc">Confidence (High to Low)</option>
                                 <option value="confidence_asc">Confidence (Low to High)</option>
-                                <option value="severity_desc">Severity (High to Low)</option>
                             </select>
                         </div>
                     </div>
                 </div>
-                <div class="text-center mt-3">
-                    <button class="btn btn-primary mr-2" onclick="applyFilters()">
-                        <i class="fas fa-filter"></i> Apply Filters
-                    </button>
-                    <button class="btn btn-outline-secondary mr-2" onclick="resetFilters()">
-                        <i class="fas fa-redo"></i> Reset
-                    </button>
-                    <button class="btn btn-success" onclick="exportAllResults()">
-                        <i class="fas fa-file-export"></i> Export All Results
-                    </button>
-                    <button class="btn btn-warning ml-2" onclick="analyzeAllPending()">
-                        <i class="fas fa-play"></i> Analyze Pending
-                    </button>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <div class="filter-group">
+                            <label><i class="fas fa-search"></i> Search</label>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search by ID, seed type, defect..." onkeyup="filterResults()">
+                        </div>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="btn-group w-100">
+                            <button class="btn btn-primary" onclick="applyFilters()"><i class="fas fa-filter"></i> Apply Filters</button>
+                            <button class="btn btn-outline-secondary" onclick="resetFilters()"><i class="fas fa-redo"></i> Reset</button>
+                            <button class="btn btn-success" onclick="exportAllResults()"><i class="fas fa-file-export"></i> Export</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -612,8 +620,8 @@
                     <div class="chart-title">
                         <i class="fas fa-chart-pie"></i> Health Distribution
                     </div>
-                    <div class="chart-container" id="healthChart">
-                        <canvas id="healthPieChart"></canvas>
+                    <div class="chart-container">
+                        <canvas id="healthChart"></canvas>
                     </div>
                 </div>
                 
@@ -621,8 +629,8 @@
                     <div class="chart-title">
                         <i class="fas fa-chart-bar"></i> Defect Types
                     </div>
-                    <div class="chart-container" id="defectChart">
-                        <canvas id="defectBarChart"></canvas>
+                    <div class="chart-container">
+                        <canvas id="defectChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -631,34 +639,27 @@
             <div class="result-table-container">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4><i class="fas fa-table"></i> Analysis Results</h4>
-                    <div class="d-flex gap-2">
-                        <div class="input-group" style="width: 300px;">
-                            <input type="text" class="form-control" placeholder="Search by ID, plant, defect..." id="searchResults" onkeyup="searchTable()">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" onclick="searchTable()">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <button class="btn btn-outline-primary" onclick="refreshResults()">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
+                    <div>
+                        <span class="mr-2">Showing <span id="showingCount">0</span> of <span id="totalCount">0</span></span>
                     </div>
                 </div>
                 
-                <div class="loading-indicator" id="loadingIndicator">
+                <div id="loadingIndicator" class="loading-indicator">
                     <div class="spinner-border text-primary" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>
                     <p class="mt-2">Loading analysis results...</p>
                 </div>
                 
-                <div class="no-results" id="noResults" style="display: none;">
+                <div id="noResults" class="no-results" style="display: none;">
                     <i class="fas fa-chart-bar"></i>
                     <h3>No Analysis Results Found</h3>
-                    <p>Start by analyzing images from your library.</p>
-                    <a href="library.html" class="btn btn-primary mt-3">
-                        <i class="fas fa-images"></i> Go to Library
+                    <p>No seed analyses have been performed yet. Capture images and run analysis from the Camera or X-Ray page.</p>
+                    <a href="camera.html" class="btn btn-primary mt-3">
+                        <i class="fas fa-camera"></i> Go to Camera
+                    </a>
+                    <a href="xray.html" class="btn btn-info mt-3 ml-2">
+                        <i class="fas fa-x-ray"></i> Go to X-Ray
                     </a>
                 </div>
                 
@@ -668,75 +669,59 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Timestamp</th>
-                                <th>Plant Type</th>
-                                <th>Image</th>
-                                <th>Analysis Result</th>
+                                <th>Seed Type</th>
+                                <th>Source</th>
+                                <th>Result</th>
                                 <th>Defect Type</th>
                                 <th>Confidence</th>
-                                <th>Severity</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="resultsTable">
-                            <!-- Results will be loaded here -->
-                        </tbody>
+                        <tbody id="resultsTable"></tbody>
                     </table>
                 </div>
                 
-                <div class="d-flex justify-content-between align-items-center mt-3" id="paginationContainer" style="display: none;">
-                    <div class="text-muted">
-                        Showing <span id="showingCount">0</span> of <span id="totalCount">0</span> results
-                    </div>
+                <!-- Pagination -->
+                <div class="d-flex justify-content-center mt-3" id="paginationContainer">
                     <nav>
-                        <ul class="pagination mb-0" id="pagination">
-                            <!-- Pagination will be loaded here -->
-                        </ul>
+                        <ul class="pagination" id="pagination"></ul>
                     </nav>
                 </div>
             </div>
 
             <!-- Batch Actions -->
-            <div class="card" id="batchActions" style="display: none;">
+            <div class="card mt-3" id="batchActions" style="display: none;">
                 <div class="card-body">
                     <h5 class="card-title"><i class="fas fa-tasks"></i> Batch Actions</h5>
                     <div class="d-flex gap-2 flex-wrap">
-                        <button class="btn btn-outline-primary" onclick="selectAllResults()">
+                        <button class="btn btn-outline-primary" onclick="selectAll()">
                             <i class="fas fa-check-square"></i> Select All
                         </button>
-                        <button class="btn btn-outline-success" onclick="batchAction('mark_good')">
-                            <i class="fas fa-check-double"></i> Mark as Healthy
-                        </button>
-                        <button class="btn btn-outline-danger" onclick="batchAction('mark_defect')">
-                            <i class="fas fa-times-circle"></i> Mark as Defective
-                        </button>
-                        <button class="btn btn-outline-warning" onclick="batchAction('mark_review')">
-                            <i class="fas fa-flag"></i> Flag for Review
-                        </button>
-                        <button class="btn btn-outline-info" onclick="batchExport()">
+                        <button class="btn btn-outline-success" onclick="batchAction('export')">
                             <i class="fas fa-download"></i> Export Selected
                         </button>
-                        <button class="btn btn-outline-dark" onclick="batchDelete()">
+                        <button class="btn btn-outline-danger" onclick="batchAction('delete')">
                             <i class="fas fa-trash"></i> Delete Selected
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Image Preview Modal -->
+            <!-- Image Modal -->
             <div class="image-modal" id="imageModal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="mb-0"><i class="fas fa-images"></i> Plant Analysis Details</h5>
+                        <h5 class="mb-0"><i class="fas fa-images"></i> Analysis Details</h5>
                         <button class="modal-close" onclick="closeModal()">&times;</button>
                     </div>
                     <div class="modal-body">
                         <div class="image-comparison">
                             <div class="image-box">
-                                <img id="modalOriginalImage" src="" alt="Original Image">
-                                <div class="image-label">Original Image</div>
+                                <img id="modalImage" src="" alt="Seed Image">
+                                <div class="image-label">Seed Image</div>
                             </div>
-                            <div class="image-box">
+                            <div class="image-box" id="modalAnalysisBox" style="display: none;">
                                 <img id="modalAnalysisImage" src="" alt="Analysis Overlay">
                                 <div class="image-label">Analysis Overlay</div>
                             </div>
@@ -744,54 +729,26 @@
                         
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6><i class="fas fa-info-circle"></i> Plant Information</h6>
-                                        <p><strong>Plant ID:</strong> <span id="modalPlantId"></span></p>
-                                        <p><strong>Type:</strong> <span id="modalPlantType"></span></p>
-                                        <p><strong>Date Captured:</strong> <span id="modalCaptureDate"></span></p>
-                                        <p><strong>Camera Used:</strong> <span id="modalCameraUsed"></span></p>
-                                        <p><strong>Location:</strong> <span id="modalLocation"></span></p>
-                                    </div>
-                                </div>
+                                <p><strong>Analysis ID:</strong> <span id="modalId"></span></p>
+                                <p><strong>Seed Type:</strong> <span id="modalSeedType"></span></p>
+                                <p><strong>Source:</strong> <span id="modalSource"></span></p>
+                                <p><strong>Date:</strong> <span id="modalDate"></span></p>
                             </div>
                             <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6><i class="fas fa-search"></i> Analysis Details</h6>
-                                        <p><strong>Status:</strong> <span id="modalAnalysisStatus"></span></p>
-                                        <p><strong>Defect Type:</strong> <span id="modalAnalysisDefect"></span></p>
-                                        <p><strong>Confidence:</strong> <span id="modalConfidence"></span></p>
-                                        <p><strong>Severity:</strong> <span id="modalSeverity"></span></p>
-                                        <p><strong>Analysis Time:</strong> <span id="modalAnalysisTime"></span></p>
-                                    </div>
-                                </div>
+                                <p><strong>Result:</strong> <span id="modalResult"></span></p>
+                                <p><strong>Defect Type:</strong> <span id="modalDefect"></span></p>
+                                <p><strong>Confidence:</strong> <span id="modalConfidence"></span></p>
+                                <p><strong>Status:</strong> <span id="modalStatus"></span></p>
                             </div>
                         </div>
                         
                         <div class="card mt-3">
                             <div class="card-body">
-                                <h6><i class="fas fa-chart-bar"></i> Analysis Metrics</h6>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <p><strong>Health Score:</strong> <span id="modalHealthScore"></span></p>
-                                        <div class="progress" style="height: 10px;">
-                                            <div class="progress-bar" id="modalHealthProgress"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <p><strong>Defect Score:</strong> <span id="modalDefectScore"></span></p>
-                                        <div class="progress" style="height: 10px;">
-                                            <div class="progress-bar bg-danger" id="modalDefectProgress"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <p><strong>Overall Score:</strong> <span id="modalOverallScore"></span></p>
-                                        <div class="progress" style="height: 10px;">
-                                            <div class="progress-bar bg-info" id="modalOverallProgress"></div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <h6><i class="fas fa-microchip"></i> Neural Network Analysis</h6>
+                                <p><strong>Model:</strong> Convolutional Neural Network (CNN)</p>
+                                <p><strong>Layers:</strong> 12-layer deep network</p>
+                                <p><strong>Training Accuracy:</strong> 98.5%</p>
+                                <p><strong>Inference Time:</strong> 0.23 seconds</p>
                             </div>
                         </div>
                         
@@ -804,17 +761,11 @@
                         </div>
                         
                         <div class="text-center mt-4">
-                            <button class="btn btn-primary" onclick="viewDetailedReport()">
-                                <i class="fas fa-file-alt"></i> View Detailed Report
-                            </button>
                             <button class="btn btn-success" onclick="downloadReport()">
                                 <i class="fas fa-download"></i> Download Report
                             </button>
-                            <button class="btn btn-warning" onclick="reanalyzeImage()">
-                                <i class="fas fa-redo"></i> Re-analyze
-                            </button>
-                            <button class="btn btn-outline-danger" onclick="deleteResult()">
-                                <i class="fas fa-trash"></i> Delete Result
+                            <button class="btn btn-outline-danger" onclick="deleteModalItem()">
+                                <i class="fas fa-trash"></i> Delete
                             </button>
                         </div>
                     </div>
@@ -827,235 +778,233 @@
                     <i class="fas fa-arrow-left"></i> Back to Home
                 </a>
                 <a href="camera.html" class="btn btn-success">
-                    <i class="fas fa-camera"></i> Capture New Image
+                    <i class="fas fa-camera"></i> New Capture
                 </a>
-                <a href="library.html" class="btn btn-info float-right">
+                <a href="xray.html" class="btn btn-info">
+                    <i class="fas fa-x-ray"></i> New X-Ray
+                </a>
+                <a href="library.html" class="btn btn-primary float-right">
                     Go to Library <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
         </div>
 
         <div class="footer">
-            <p id="systemStatus">Loading system status...</p>
-            <p>Last Updated: <span id="lastUpdated">Loading...</span></p>
+            <p>Cropinsight Neural Network Analyzer | Version 1.0 | © 2026 Agricultural Technology</p>
         </div>
     </div>
 
-    <!-- Chart.js Library -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Refresh Floating Button -->
+    <button class="refresh-btn" onclick="refreshResults()">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <!-- Notification -->
+    <div class="alert alert-success alert-dismissible fade show position-fixed" 
+         style="top: 20px; right: 20px; z-index: 1000; display: none;" 
+         id="notification">
+        <span id="notificationText"></span>
+        <button type="button" class="close" onclick="hideNotification()">
+            <span>&times;</span>
+        </button>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
         // Global variables
-        let allResults = [];
-        let filteredResults = [];
+        let allAnalyses = [];
+        let filteredAnalyses = [];
         let currentPage = 1;
         const resultsPerPage = 10;
-        let currentModalData = null;
-        let selectedResults = new Set();
-        let healthChart = null;
-        let defectChart = null;
+        let currentModalId = null;
+        let selectedIds = new Set();
+        let healthChart, defectChart;
 
         // DOM Elements
         const resultsTable = document.getElementById('resultsTable');
         const resultsTableContainer = document.getElementById('resultsTableContainer');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const noResults = document.getElementById('noResults');
-        const paginationContainer = document.getElementById('paginationContainer');
         const pagination = document.getElementById('pagination');
         const showingCount = document.getElementById('showingCount');
         const totalCount = document.getElementById('totalCount');
         const batchActions = document.getElementById('batchActions');
         const imageModal = document.getElementById('imageModal');
-        const systemStatus = document.getElementById('systemStatus');
-        const lastUpdated = document.getElementById('lastUpdated');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
 
-        // Load results from localStorage
-        function loadResults() {
+        // Stats elements
+        const totalAnalyzed = document.getElementById('totalAnalyzed');
+        const totalGood = document.getElementById('totalGood');
+        const totalDefect = document.getElementById('totalDefect');
+        const totalSuspicious = document.getElementById('totalSuspicious');
+        const goodPercentage = document.getElementById('goodPercentage');
+        const defectPercentage = document.getElementById('defectPercentage');
+        const suspiciousPercentage = document.getElementById('suspiciousPercentage');
+
+        // Load analyses from localStorage
+        function loadAnalyses() {
+            loadingIndicator.style.display = 'block';
+            resultsTableContainer.style.display = 'none';
+            noResults.style.display = 'none';
+            batchActions.style.display = 'none';
+            
             try {
-                // Load from localStorage
-                const savedAnalyses = JSON.parse(localStorage.getItem('cropinsight_analyses') || '[]');
-                const savedCaptures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
+                // Get analyses from localStorage
+                const stored = JSON.parse(localStorage.getItem('cropinsight_analyses') || '[]');
                 
-                // Combine data
-                allResults = savedAnalyses.map(analysis => {
-                    // Find corresponding capture data
-                    const capture = savedCaptures.find(c => c.id === analysis.imageId) || {};
+                // Also get captures and xrays to enrich with image data
+                const captures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
+                const xrays = JSON.parse(localStorage.getItem('cropinsight_xrays') || '[]');
+                
+                // Combine and format
+                allAnalyses = stored.map((analysis, index) => {
+                    // Find source image
+                    const capture = captures.find(c => c.id === analysis.imageId);
+                    const xray = xrays.find(x => x.id === analysis.imageId);
+                    const source = capture ? 'Camera' : (xray ? 'X-Ray' : 'Unknown');
+                    const imageData = capture ? capture.dataUrl : (xray ? xray.dataUrl : null);
                     
                     return {
-                        id: analysis.imageId,
-                        timestamp: analysis.timestamp,
-                        plantType: capture.plant || "Not Specified",
-                        imageData: capture.dataUrl,
-                        result: analysis.status,
+                        id: analysis.imageId || `ANALYSIS-${Date.now()}-${index}`,
+                        timestamp: analysis.timestamp || new Date().toISOString(),
+                        seedType: analysis.plant || (capture ? capture.plant : (xray ? xray.plant : 'Unknown')),
+                        source: source,
+                        result: analysis.status || 'Pending',
                         defectTypes: analysis.defects || [],
                         confidence: analysis.confidence || 0,
-                        severity: analysis.severity || "Low",
-                        status: analysis.status === 'analyzed' ? 'analyzed' : 'pending',
-                        location: capture.location || "Unknown",
-                        camera: capture.camera || "Device Camera",
-                        analyst: capture.analyst || "System",
+                        severity: analysis.severity || 'Unknown',
+                        status: analysis.status === 'analyzed' ? 'Analyzed' : 'Pending',
+                        recommendations: analysis.recommendations || 'No recommendations available.',
                         tags: analysis.tags || [],
-                        recommendations: analysis.recommendations || "No recommendations available.",
-                        healthScore: Math.floor(Math.random() * 30) + 70, // 70-100%
-                        defectScore: analysis.confidence || 0,
-                        overallScore: Math.floor((analysis.confidence + 70) / 2) // Average
+                        imageData: imageData
                     };
-                }).reverse(); // Newest first
-                
-                // Add dummy data if no results
-                if (allResults.length === 0) {
-                    allResults = generateDummyData();
+                }).reverse(); // newest first
+
+                if (allAnalyses.length === 0) {
+                    // Generate some dummy data for demonstration
+                    generateDummyData();
                 }
                 
                 updateStats();
                 filterResults();
                 updateCharts();
-                updateSystemStatus();
-                
             } catch (error) {
-                console.error('Error loading results:', error);
-                allResults = generateDummyData();
+                console.error('Error loading analyses:', error);
+                generateDummyData();
                 filterResults();
                 updateCharts();
             }
         }
 
-        // Generate dummy data for demo
+        // Generate dummy data for demonstration
         function generateDummyData() {
-            const plants = ['Padi (Rice)', 'Jagung (Corn)', 'Kedelai (Soybean)', 'Cabai (Chili)', 'Tomat (Tomato)'];
-            const defects = [
-                { type: 'Healthy', tags: ['healthy', 'optimal-growth'] },
-                { type: 'Disease', tags: ['disease', 'fungal', 'blight'] },
-                { type: 'Nutrient Deficiency', tags: ['nutrient', 'deficiency', 'nitrogen'] },
-                { type: 'Insect Damage', tags: ['insect', 'aphid', 'infestation'] },
-                { type: 'Mold/Fungus', tags: ['mold', 'fungal', 'rot'] }
-            ];
-            
-            const results = [];
+            const seedTypes = ['Padi (Rice)', 'Jagung (Corn)', 'Kedelai (Soybean)', 'Cabai (Chili)', 'Tomat (Tomato)'];
+            const defects = ['Crack', 'Mold', 'Discolored', 'Broken', 'Immature', 'Insect', 'Disease', 'Nutrient Deficiency'];
             const now = new Date();
             
-            for (let i = 0; i < 25; i++) {
-                const plant = plants[Math.floor(Math.random() * plants.length)];
-                const defect = defects[Math.floor(Math.random() * defects.length)];
-                const confidence = defect.type === 'Healthy' ? 
-                    Math.floor(Math.random() * 20) + 80 : // 80-100%
-                    Math.floor(Math.random() * 30) + 70;  // 70-100%
+            for (let i = 0; i < 20; i++) {
+                const isHealthy = Math.random() > 0.6;
+                const defectCount = isHealthy ? 0 : Math.floor(Math.random() * 2) + 1;
+                const defectList = [];
+                if (!isHealthy) {
+                    for (let j = 0; j < defectCount; j++) {
+                        defectList.push(defects[Math.floor(Math.random() * defects.length)]);
+                    }
+                }
+                const confidence = isHealthy ? 85 + Math.random() * 14 : 70 + Math.random() * 25;
                 
-                const timestamp = new Date(now.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000);
-                
-                results.push({
-                    id: `ANALYSIS-${1000 + i}`,
-                    timestamp: timestamp.toISOString(),
-                    plantType: plant,
-                    imageData: null,
-                    result: defect.type,
-                    defectTypes: [defect.type],
-                    confidence: confidence,
-                    severity: defect.type === 'Healthy' ? 'None' : 
-                             confidence > 85 ? 'High' : 
-                             confidence > 70 ? 'Medium' : 'Low',
-                    status: 'analyzed',
-                    location: `Field ${String.fromCharCode(65 + i % 5)}${Math.floor(i / 5) + 1}`,
-                    camera: i % 2 === 0 ? 'Back Camera' : 'Front Camera',
-                    analyst: i % 3 === 0 ? 'Auto-Detection System' : 'Agricultural Expert',
-                    tags: defect.tags,
-                    recommendations: defect.type === 'Healthy' ? 
-                        'Plant shows optimal health. Continue current care routine.' :
-                        `Detected ${defect.type.toLowerCase()}. ${getRecommendation(defect.type)}`,
-                    healthScore: defect.type === 'Healthy' ? 
-                        Math.floor(Math.random() * 20) + 80 : // 80-100%
-                        Math.floor(Math.random() * 40) + 40,  // 40-80%
-                    defectScore: defect.type === 'Healthy' ? 0 : confidence,
-                    overallScore: defect.type === 'Healthy' ? 
-                        Math.floor(Math.random() * 20) + 80 : // 80-100%
-                        Math.floor((confidence + 60) / 2) // 60-85
+                allAnalyses.push({
+                    id: `DEMO-${1000 + i}`,
+                    timestamp: new Date(now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    seedType: seedTypes[Math.floor(Math.random() * seedTypes.length)],
+                    source: Math.random() > 0.5 ? 'Camera' : 'X-Ray',
+                    result: isHealthy ? 'Healthy' : 'Defective',
+                    defectTypes: defectList,
+                    confidence: Math.round(confidence),
+                    severity: isHealthy ? 'None' : (confidence > 85 ? 'High' : (confidence > 70 ? 'Medium' : 'Low')),
+                    status: 'Analyzed',
+                    recommendations: isHealthy ? 'Seed is healthy. Suitable for planting.' : 'Seed shows defects. Consider discarding.',
+                    tags: isHealthy ? ['healthy'] : defectList.map(d => d.toLowerCase()),
+                    imageData: null
                 });
             }
-            
-            return results;
-        }
-
-        function getRecommendation(defectType) {
-            const recommendations = {
-                'Disease': 'Apply fungicide treatment. Isolate affected plants.',
-                'Nutrient Deficiency': 'Apply balanced fertilizer. Test soil pH.',
-                'Insect Damage': 'Apply appropriate pesticide. Remove affected leaves.',
-                'Mold/Fungus': 'Improve air circulation. Apply anti-fungal treatment.'
-            };
-            return recommendations[defectType] || 'Monitor closely and consider expert consultation.';
         }
 
         // Update statistics
         function updateStats() {
-            const total = allResults.length;
-            const good = allResults.filter(r => r.result === 'Healthy').length;
-            const defect = allResults.filter(r => r.result !== 'Healthy' && r.status === 'analyzed').length;
-            const suspicious = allResults.filter(r => r.status === 'pending' || r.confidence < 70).length;
+            const total = allAnalyses.length;
+            const good = allAnalyses.filter(a => a.result === 'Healthy').length;
+            const defect = allAnalyses.filter(a => a.result === 'Defective').length;
+            const suspicious = allAnalyses.filter(a => a.status === 'Pending' || a.confidence < 70).length;
             
-            document.getElementById('totalAnalyzed').textContent = total;
-            document.getElementById('totalGood').textContent = good;
-            document.getElementById('totalDefect').textContent = defect;
-            document.getElementById('totalSuspicious').textContent = suspicious;
+            totalAnalyzed.textContent = total;
+            totalGood.textContent = good;
+            totalDefect.textContent = defect;
+            totalSuspicious.textContent = suspicious;
             
-            document.getElementById('goodPercentage').textContent = total > 0 ? 
-                Math.round((good / total) * 100) + '%' : '0%';
-            document.getElementById('defectPercentage').textContent = total > 0 ? 
-                Math.round((defect / total) * 100) + '%' : '0%';
-            document.getElementById('suspiciousPercentage').textContent = total > 0 ? 
-                Math.round((suspicious / total) * 100) + '%' : '0%';
+            goodPercentage.textContent = total > 0 ? Math.round((good / total) * 100) + '%' : '0%';
+            defectPercentage.textContent = total > 0 ? Math.round((defect / total) * 100) + '%' : '0%';
+            suspiciousPercentage.textContent = total > 0 ? Math.round((suspicious / total) * 100) + '%' : '0%';
         }
 
-        // Filter results
+        // Filter and sort
         function filterResults() {
             const dateRange = document.getElementById('dateRange').value;
-            const plantType = document.getElementById('plantType').value;
+            const seedType = document.getElementById('seedType').value;
             const defectType = document.getElementById('defectType').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
             
-            filteredResults = allResults.filter(result => {
+            filteredAnalyses = allAnalyses.filter(analysis => {
                 // Date filter
                 if (dateRange !== 'all') {
-                    const resultDate = new Date(result.timestamp);
+                    const analysisDate = new Date(analysis.timestamp);
                     const now = new Date();
-                    
                     switch(dateRange) {
                         case 'today':
-                            if (resultDate.toDateString() !== now.toDateString()) return false;
+                            if (analysisDate.toDateString() !== now.toDateString()) return false;
                             break;
                         case 'week':
                             const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                            if (resultDate < weekAgo) return false;
+                            if (analysisDate < weekAgo) return false;
                             break;
                         case 'month':
                             const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-                            if (resultDate < monthAgo) return false;
+                            if (analysisDate < monthAgo) return false;
                             break;
                         case 'older':
                             const monthAgo2 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-                            if (resultDate > monthAgo2) return false;
+                            if (analysisDate > monthAgo2) return false;
                             break;
                     }
                 }
                 
-                // Plant type filter
-                if (plantType !== 'all') {
-                    if (plantType === 'Other') {
-                        const knownPlants = ['Padi (Rice)', 'Jagung (Corn)', 'Kedelai (Soybean)', 'Cabai (Chili)', 'Tomat (Tomato)'];
-                        if (knownPlants.includes(result.plantType)) return false;
-                    } else if (result.plantType !== plantType) {
-                        return false;
-                    }
+                // Seed type filter
+                if (seedType !== 'all') {
+                    if (seedType === 'Other') {
+                        const known = ['Padi (Rice)', 'Jagung (Corn)', 'Kedelai (Soybean)', 'Cabai (Chili)', 'Tomat (Tomato)'];
+                        if (known.includes(analysis.seedType)) return false;
+                    } else if (analysis.seedType !== seedType) return false;
                 }
                 
                 // Defect type filter
                 if (defectType !== 'all') {
-                    if (defectType === 'healthy' && result.result !== 'Healthy') return false;
-                    if (defectType !== 'healthy' && result.result === 'Healthy') return false;
-                    if (defectType !== 'healthy' && !result.defectTypes.some(d => 
-                        d.toLowerCase().includes(defectType.toLowerCase()))) return false;
+                    if (defectType === 'Healthy') {
+                        if (analysis.result !== 'Healthy') return false;
+                    } else {
+                        if (analysis.result === 'Healthy') return false;
+                        if (!analysis.defectTypes.some(d => d.toLowerCase().includes(defectType.toLowerCase()))) return false;
+                    }
+                }
+                
+                // Search
+                if (search) {
+                    const searchable = `${analysis.id} ${analysis.seedType} ${analysis.result} ${analysis.defectTypes.join(' ')}`.toLowerCase();
+                    if (!searchable.includes(search)) return false;
                 }
                 
                 return true;
@@ -1065,214 +1014,97 @@
             displayResults();
         }
 
-        // Sort results
         function sortResults() {
             const sortBy = document.getElementById('sortBy').value;
-            
-            filteredResults.sort((a, b) => {
+            filteredAnalyses.sort((a, b) => {
                 switch(sortBy) {
-                    case 'date_desc':
-                        return new Date(b.timestamp) - new Date(a.timestamp);
-                    case 'date_asc':
-                        return new Date(a.timestamp) - new Date(b.timestamp);
-                    case 'confidence_desc':
-                        return b.confidence - a.confidence;
-                    case 'confidence_asc':
-                        return a.confidence - b.confidence;
-                    case 'severity_desc':
-                        const severityOrder = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1, 'None': 0 };
-                        return (severityOrder[b.severity] || 0) - (severityOrder[a.severity] || 0);
-                    default:
-                        return new Date(b.timestamp) - new Date(a.timestamp);
+                    case 'date_desc': return new Date(b.timestamp) - new Date(a.timestamp);
+                    case 'date_asc': return new Date(a.timestamp) - new Date(b.timestamp);
+                    case 'confidence_desc': return b.confidence - a.confidence;
+                    case 'confidence_asc': return a.confidence - b.confidence;
+                    default: return new Date(b.timestamp) - new Date(a.timestamp);
                 }
             });
         }
 
-        // Display results in table
         function displayResults() {
             loadingIndicator.style.display = 'none';
             
-            if (filteredResults.length === 0) {
+            if (filteredAnalyses.length === 0) {
                 noResults.style.display = 'block';
                 resultsTableContainer.style.display = 'none';
-                paginationContainer.style.display = 'none';
                 batchActions.style.display = 'none';
                 return;
             }
             
             noResults.style.display = 'none';
             resultsTableContainer.style.display = 'block';
-            paginationContainer.style.display = 'flex';
             batchActions.style.display = 'block';
             
-            // Calculate pagination
-            const totalPages = Math.ceil(filteredResults.length / resultsPerPage);
-            const startIndex = (currentPage - 1) * resultsPerPage;
-            const endIndex = Math.min(startIndex + resultsPerPage, filteredResults.length);
-            const pageResults = filteredResults.slice(startIndex, endIndex);
+            // Pagination
+            const totalPages = Math.ceil(filteredAnalyses.length / resultsPerPage);
+            const start = (currentPage - 1) * resultsPerPage;
+            const end = Math.min(start + resultsPerPage, filteredAnalyses.length);
+            const pageData = filteredAnalyses.slice(start, end);
             
-            // Update counts
-            showingCount.textContent = `${startIndex + 1}-${endIndex}`;
-            totalCount.textContent = filteredResults.length;
+            showingCount.textContent = `${start + 1}-${end}`;
+            totalCount.textContent = filteredAnalyses.length;
             
-            // Clear table
+            // Build table
             resultsTable.innerHTML = '';
-            
-            // Add rows
-            pageResults.forEach(result => {
+            pageData.forEach(analysis => {
                 const row = document.createElement('tr');
-                if (selectedResults.has(result.id)) {
+                if (selectedIds.has(analysis.id)) {
                     row.style.backgroundColor = '#f0f8ff';
                 }
                 
-                // Determine status badge
-                let statusBadge = '';
-                if (result.status === 'analyzed') {
-                    if (result.result === 'Healthy') {
-                        statusBadge = '<span class="status-badge status-good">Healthy</span>';
-                    } else {
-                        statusBadge = '<span class="status-badge status-defect">Defective</span>';
-                    }
-                } else if (result.status === 'pending') {
-                    statusBadge = '<span class="status-badge status-pending">Pending</span>';
-                } else {
-                    statusBadge = '<span class="status-badge status-suspicious">Review</span>';
-                }
+                const statusClass = analysis.result === 'Healthy' ? 'status-good' : 
+                                    analysis.result === 'Defective' ? 'status-defect' : 
+                                    analysis.status === 'Pending' ? 'status-pending' : 'status-suspicious';
                 
-                // Create defect tags
-                let defectTags = '';
-                if (result.defectTypes.length > 0 && result.result !== 'Healthy') {
-                    result.defectTypes.forEach(defect => {
-                        const defectClass = getDefectClass(defect);
-                        defectTags += `<span class="defect-tag ${defectClass}">${defect}</span> `;
-                    });
-                } else if (result.result === 'Healthy') {
-                    defectTags = '<span class="defect-tag" style="background:#e8f5e9;color:#2E7D32;">Healthy</span>';
-                } else {
-                    defectTags = '<span class="text-muted">Not Analyzed</span>';
-                }
-                
-                // Format date
-                const date = new Date(result.timestamp);
-                const formattedDate = date.toLocaleDateString('en-GB', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                // Check if selected
-                const isChecked = selectedResults.has(result.id) ? 'checked' : '';
+                const defectDisplay = analysis.result === 'Healthy' ? 
+                    '<span class="defect-tag" style="background:#e8f5e9;color:#2E7D32;">Healthy</span>' : 
+                    analysis.defectTypes.map(d => `<span class="defect-tag defect-${d.toLowerCase().replace(/ /g, '')}">${d}</span>`).join(' ');
                 
                 row.innerHTML = `
                     <td>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" 
-                                   id="check-${result.id}" ${isChecked}
-                                   onchange="toggleSelection('${result.id}')">
-                            <label class="form-check-label" for="check-${result.id}">
-                                <strong>${result.id}</strong>
-                            </label>
-                        </div>
+                        <input type="checkbox" class="select-checkbox" data-id="${analysis.id}" ${selectedIds.has(analysis.id) ? 'checked' : ''} onchange="toggleSelect('${analysis.id}')">
+                        <span class="ml-2">${analysis.id.substring(0, 12)}</span>
                     </td>
-                    <td>${formattedDate}</td>
-                    <td>${result.plantType}</td>
-                    <td>
-                        <div class="text-center">
-                            <i class="fas fa-image fa-lg text-info"></i><br>
-                            <small>${result.id}.jpg</small>
-                        </div>
-                    </td>
-                    <td>${statusBadge}</td>
-                    <td>${defectTags}</td>
+                    <td>${new Date(analysis.timestamp).toLocaleString()}</td>
+                    <td>${analysis.seedType}</td>
+                    <td><span class="badge badge-${analysis.source === 'X-Ray' ? 'info' : 'success'}">${analysis.source}</span></td>
+                    <td><span class="status-badge ${statusClass}">${analysis.result}</span></td>
+                    <td>${defectDisplay}</td>
                     <td>
                         <div class="progress" style="height: 8px; width: 80px;">
-                            <div class="progress-bar ${getConfidenceClass(result.confidence)}" 
-                                 style="width: ${result.confidence}%"></div>
+                            <div class="progress-bar ${analysis.confidence >= 90 ? 'bg-success' : analysis.confidence >= 70 ? 'bg-warning' : 'bg-danger'}" 
+                                 style="width: ${analysis.confidence}%"></div>
                         </div>
-                        <small>${result.confidence}%</small>
+                        <small>${analysis.confidence}%</small>
                     </td>
-                    <td>
-                        <span class="${getSeverityClass(result.severity)}">
-                            ${result.severity}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge ${result.status === 'analyzed' ? 'badge-success' : 'badge-warning'}">
-                            ${result.status === 'analyzed' ? 'Analyzed' : 'Pending'}
-                        </span>
-                    </td>
+                    <td><span class="badge badge-${analysis.status === 'Analyzed' ? 'success' : 'warning'}">${analysis.status}</span></td>
                     <td>
                         <div class="action-buttons">
-                            <button class="action-btn btn-view" onclick="viewResult('${result.id}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            ${result.status === 'analyzed' ? 
-                                `<button class="action-btn btn-export" onclick="exportResult('${result.id}')">
-                                    <i class="fas fa-download"></i>
-                                </button>` : 
-                                `<button class="action-btn btn-analyze" onclick="analyzeSingle('${result.id}')">
-                                    <i class="fas fa-play"></i>
-                                </button>`
-                            }
-                            <button class="action-btn btn-delete" onclick="deleteSingleResult('${result.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <button class="action-btn btn-view" onclick="viewDetails('${analysis.id}')"><i class="fas fa-eye"></i></button>
+                            <button class="action-btn btn-export" onclick="exportSingle('${analysis.id}')"><i class="fas fa-download"></i></button>
+                            <button class="action-btn btn-delete" onclick="deleteSingle('${analysis.id}')"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
                 `;
-                
                 resultsTable.appendChild(row);
             });
             
-            // Update pagination
             updatePagination(totalPages);
         }
 
-        function getDefectClass(defect) {
-            const defectMap = {
-                'Healthy': '',
-                'Disease': 'defect-disease',
-                'Nutrient Deficiency': 'defect-nutrient',
-                'Insect Damage': 'defect-insect',
-                'Mold/Fungus': 'defect-mold',
-                'Cracked': 'defect-crack',
-                'Discolored': 'defect-discolored',
-                'Broken/Damaged': 'defect-broken',
-                'Immature': 'defect-immature'
-            };
-            return defectMap[defect] || 'defect-disease';
-        }
-
-        function getConfidenceClass(confidence) {
-            if (confidence >= 90) return 'bg-success';
-            if (confidence >= 70) return 'bg-warning';
-            return 'bg-danger';
-        }
-
-        function getSeverityClass(severity) {
-            const severityMap = {
-                'None': 'text-success',
-                'Low': 'text-info',
-                'Medium': 'text-warning',
-                'High': 'text-danger',
-                'Critical': 'text-danger'
-            };
-            return severityMap[severity] || 'text-secondary';
-        }
-
-        // Update pagination
         function updatePagination(totalPages) {
             pagination.innerHTML = '';
-            
-            // Previous button
             const prevLi = document.createElement('li');
             prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
             prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>`;
             pagination.appendChild(prevLi);
             
-            // Page numbers
             for (let i = 1; i <= totalPages; i++) {
                 const li = document.createElement('li');
                 li.className = `page-item ${i === currentPage ? 'active' : ''}`;
@@ -1280,7 +1112,6 @@
                 pagination.appendChild(li);
             }
             
-            // Next button
             const nextLi = document.createElement('li');
             nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
             nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>`;
@@ -1288,134 +1119,89 @@
         }
 
         function changePage(page) {
+            if (page < 1 || page > Math.ceil(filteredAnalyses.length / resultsPerPage)) return;
             currentPage = page;
             displayResults();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Search table
-        function searchTable() {
-            const query = document.getElementById('searchResults').value.toLowerCase();
-            
-            if (query.length === 0) {
-                filteredResults = [...allResults];
+        function toggleSelect(id) {
+            if (selectedIds.has(id)) {
+                selectedIds.delete(id);
             } else {
-                filteredResults = allResults.filter(result => {
-                    const searchable = `${result.id} ${result.plantType} ${result.result} ${result.defectTypes.join(' ')} ${result.location}`.toLowerCase();
-                    return searchable.includes(query);
-                });
-            }
-            
-            currentPage = 1;
-            sortResults();
-            displayResults();
-        }
-
-        // Toggle selection
-        function toggleSelection(id) {
-            if (selectedResults.has(id)) {
-                selectedResults.delete(id);
-            } else {
-                selectedResults.add(id);
+                selectedIds.add(id);
             }
             displayResults();
         }
 
-        function selectAllResults() {
-            const checkboxes = document.querySelectorAll('.form-check-input');
-            checkboxes.forEach(checkbox => {
-                const id = checkbox.id.replace('check-', '');
-                checkbox.checked = true;
-                selectedResults.add(id);
+        function selectAll() {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            checkboxes.forEach(cb => {
+                const id = cb.dataset.id;
+                cb.checked = true;
+                selectedIds.add(id);
             });
             displayResults();
         }
 
-        // View result details
-        function viewResult(resultId) {
-            const result = allResults.find(r => r.id === resultId);
-            if (!result) return;
+        function batchAction(action) {
+            if (selectedIds.size === 0) {
+                showNotification('No items selected.', 'warning');
+                return;
+            }
             
-            currentModalData = result;
-            
-            // Set modal content
-            document.getElementById('modalPlantId').textContent = result.id;
-            document.getElementById('modalPlantType').textContent = result.plantType;
-            document.getElementById('modalCaptureDate').textContent = new Date(result.timestamp).toLocaleString();
-            document.getElementById('modalCameraUsed').textContent = result.camera;
-            document.getElementById('modalLocation').textContent = result.location;
-            
-            // Analysis status
-            let statusBadge = '';
-            if (result.status === 'analyzed') {
-                if (result.result === 'Healthy') {
-                    statusBadge = '<span class="status-badge status-good">Healthy</span>';
-                } else {
-                    statusBadge = '<span class="status-badge status-defect">Defective</span>';
+            if (action === 'export') {
+                const selected = allAnalyses.filter(a => selectedIds.has(a.id));
+                exportData(selected);
+            } else if (action === 'delete') {
+                if (confirm(`Delete ${selectedIds.size} selected analyses?`)) {
+                    let analyses = JSON.parse(localStorage.getItem('cropinsight_analyses') || '[]');
+                    analyses = analyses.filter(a => !selectedIds.has(a.imageId));
+                    localStorage.setItem('cropinsight_analyses', JSON.stringify(analyses));
+                    selectedIds.clear();
+                    showNotification('Selected analyses deleted.', 'success');
+                    loadAnalyses();
                 }
-            } else {
-                statusBadge = '<span class="status-badge status-pending">Pending Analysis</span>';
             }
-            document.getElementById('modalAnalysisStatus').innerHTML = statusBadge;
+        }
+
+        // View details in modal
+        function viewDetails(id) {
+            const analysis = allAnalyses.find(a => a.id === id);
+            if (!analysis) return;
             
-            // Defect types
-            let defectTags = '';
-            if (result.defectTypes.length > 0 && result.result !== 'Healthy') {
-                result.defectTypes.forEach(defect => {
-                    const defectClass = getDefectClass(defect);
-                    defectTags += `<span class="defect-tag ${defectClass}">${defect}</span> `;
-                });
-            } else if (result.result === 'Healthy') {
-                defectTags = '<span class="defect-tag" style="background:#e8f5e9;color:#2E7D32;">Healthy</span>';
+            currentModalId = id;
+            document.getElementById('modalId').textContent = analysis.id;
+            document.getElementById('modalSeedType').textContent = analysis.seedType;
+            document.getElementById('modalSource').textContent = analysis.source;
+            document.getElementById('modalDate').textContent = new Date(analysis.timestamp).toLocaleString();
+            document.getElementById('modalResult').innerHTML = `<span class="status-badge ${analysis.result === 'Healthy' ? 'status-good' : 'status-defect'}">${analysis.result}</span>`;
+            document.getElementById('modalDefect').innerHTML = analysis.defectTypes.length ? analysis.defectTypes.map(d => `<span class="defect-tag defect-${d.toLowerCase().replace(/ /g, '')}">${d}</span>`).join(' ') : 'None';
+            document.getElementById('modalConfidence').textContent = analysis.confidence + '%';
+            document.getElementById('modalStatus').textContent = analysis.status;
+            document.getElementById('modalRecommendations').textContent = analysis.recommendations;
+            
+            // Image
+            const modalImage = document.getElementById('modalImage');
+            if (analysis.imageData) {
+                modalImage.src = analysis.imageData;
             } else {
-                defectTags = '<span class="text-muted">Not Analyzed</span>';
+                modalImage.src = `https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=${encodeURIComponent(analysis.seedType)}`;
             }
-            document.getElementById('modalAnalysisDefect').innerHTML = defectTags;
             
-            document.getElementById('modalConfidence').textContent = result.confidence + '%';
-            document.getElementById('modalSeverity').textContent = result.severity;
-            document.getElementById('modalAnalysisTime').textContent = result.status === 'analyzed' ? 
-                'Completed' : 'Pending';
-            
-            // Scores
-            document.getElementById('modalHealthScore').textContent = result.healthScore + '%';
-            document.getElementById('modalDefectScore').textContent = result.defectScore + '%';
-            document.getElementById('modalOverallScore').textContent = result.overallScore + '%';
-            
-            // Progress bars
-            document.getElementById('modalHealthProgress').style.width = result.healthScore + '%';
-            document.getElementById('modalHealthProgress').className = `progress-bar ${result.healthScore >= 80 ? 'bg-success' : result.healthScore >= 60 ? 'bg-warning' : 'bg-danger'}`;
-            
-            document.getElementById('modalDefectProgress').style.width = result.defectScore + '%';
-            document.getElementById('modalOverallProgress').style.width = result.overallScore + '%';
-            
-            // Recommendations
-            document.getElementById('modalRecommendations').textContent = result.recommendations;
+            // Show analysis overlay if available (dummy)
+            document.getElementById('modalAnalysisBox').style.display = 'none'; // hide for now
             
             // Tags
-            const tagsContainer = document.getElementById('modalTags');
-            tagsContainer.innerHTML = '';
-            result.tags.forEach(tag => {
-                const tagElement = document.createElement('span');
-                tagElement.className = 'badge badge-secondary mr-1';
-                tagElement.textContent = tag;
-                tagsContainer.appendChild(tagElement);
+            const tagsDiv = document.getElementById('modalTags');
+            tagsDiv.innerHTML = '';
+            analysis.tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'badge badge-secondary mr-1';
+                span.textContent = tag;
+                tagsDiv.appendChild(span);
             });
             
-            // Images
-            if (result.imageData) {
-                document.getElementById('modalOriginalImage').src = result.imageData;
-                document.getElementById('modalAnalysisImage').src = result.imageData; // Same for demo
-            } else {
-                // Use placeholder
-                const color = result.result === 'Healthy' ? '4CAF50' : 'F44336';
-                document.getElementById('modalOriginalImage').src = 
-                    `https://via.placeholder.com/400x300/${color}/FFFFFF?text=${encodeURIComponent(result.plantType)}`;
-                document.getElementById('modalAnalysisImage').src = 
-                    `https://via.placeholder.com/400x300/2196F3/FFFFFF?text=ANALYSIS+${result.id}`;
-            }
-            
-            // Show modal
             imageModal.style.display = 'block';
             document.body.style.overflow = 'hidden';
         }
@@ -1425,217 +1211,104 @@
             document.body.style.overflow = 'auto';
         }
 
-        function exportResult(resultId) {
-            const result = allResults.find(r => r.id === resultId);
-            if (result) {
-                alert(`Exporting analysis report for: ${resultId}`);
-                // In real implementation, generate and download PDF
+        function deleteModalItem() {
+            if (currentModalId) {
+                deleteSingle(currentModalId);
+                closeModal();
             }
         }
 
-        function analyzeSingle(resultId) {
-            const result = allResults.find(r => r.id === resultId);
-            if (result) {
-                alert(`Analyzing image: ${resultId}`);
-                // Simulate analysis
-                setTimeout(() => {
-                    result.status = 'analyzed';
-                    result.confidence = Math.floor(Math.random() * 20) + 80;
-                    result.severity = result.confidence > 85 ? 'High' : 'Medium';
-                    result.recommendations = 'Analysis complete. Plant shows signs of improvement.';
-                    showNotification('Analysis completed successfully!', 'success');
-                    loadResults();
-                }, 2000);
+        function deleteSingle(id) {
+            if (confirm(`Delete analysis ${id}?`)) {
+                let analyses = JSON.parse(localStorage.getItem('cropinsight_analyses') || '[]');
+                analyses = analyses.filter(a => a.imageId !== id);
+                localStorage.setItem('cropinsight_analyses', JSON.stringify(analyses));
+                showNotification('Analysis deleted.', 'success');
+                loadAnalyses();
             }
         }
 
-        function analyzeAllPending() {
-            const pending = allResults.filter(r => r.status !== 'analyzed');
-            if (pending.length === 0) {
-                showNotification('No pending analyses to process.', 'info');
-                return;
-            }
-            
-            showNotification(`Analyzing ${pending.length} pending images...`, 'info');
-            
-            setTimeout(() => {
-                pending.forEach(result => {
-                    result.status = 'analyzed';
-                    result.confidence = Math.floor(Math.random() * 20) + 80;
-                    result.severity = result.confidence > 85 ? 'High' : 'Medium';
-                    result.result = result.confidence > 85 ? 'Healthy' : 'Disease';
-                    result.recommendations = result.confidence > 85 ? 
-                        'Plant is healthy. Continue current care routine.' :
-                        'Detected minor issues. Monitor closely.';
-                });
-                
-                showNotification(`Successfully analyzed ${pending.length} images!`, 'success');
-                loadResults();
-            }, 3000);
-        }
-
-        function deleteSingleResult(resultId) {
-            if (confirm(`Are you sure you want to delete analysis for ${resultId}?`)) {
-                try {
-                    // Remove from localStorage
-                    let analyses = JSON.parse(localStorage.getItem('cropinsight_analyses') || '[]');
-                    analyses = analyses.filter(a => a.imageId !== resultId);
-                    localStorage.setItem('cropinsight_analyses', JSON.stringify(analyses));
-                    
-                    // Remove from current data
-                    allResults = allResults.filter(r => r.id !== resultId);
-                    selectedResults.delete(resultId);
-                    
-                    showNotification('Analysis deleted successfully!', 'success');
-                    loadResults();
-                } catch (error) {
-                    showNotification('Error deleting analysis.', 'error');
-                }
-            }
-        }
-
-        function batchAction(action) {
-            if (selectedResults.size === 0) {
-                showNotification('Please select results first.', 'warning');
-                return;
-            }
-            
-            const actionName = action === 'mark_good' ? 'mark as healthy' : 
-                             action === 'mark_defect' ? 'mark as defective' : 'flag for review';
-            
-            if (confirm(`Are you sure you want to ${actionName} ${selectedResults.size} selected results?`)) {
-                allResults.forEach(result => {
-                    if (selectedResults.has(result.id)) {
-                        if (action === 'mark_good') {
-                            result.result = 'Healthy';
-                            result.status = 'analyzed';
-                            result.confidence = 95;
-                            result.severity = 'None';
-                        } else if (action === 'mark_defect') {
-                            result.result = 'Disease';
-                            result.status = 'analyzed';
-                            result.confidence = 85;
-                            result.severity = 'Medium';
-                        } else if (action === 'mark_review') {
-                            result.status = 'pending';
-                        }
-                    }
-                });
-                
-                showNotification(`Updated ${selectedResults.size} results.`, 'success');
-                selectedResults.clear();
-                loadResults();
-            }
-        }
-
-        function batchExport() {
-            if (selectedResults.size === 0) {
-                showNotification('Please select results to export.', 'warning');
-                return;
-            }
-            
-            alert(`Exporting ${selectedResults.size} selected results as CSV...`);
-            // In real implementation, generate CSV
-        }
-
-        function batchDelete() {
-            if (selectedResults.size === 0) {
-                showNotification('Please select results to delete.', 'warning');
-                return;
-            }
-            
-            if (confirm(`Are you sure you want to delete ${selectedResults.size} selected analyses? This cannot be undone.`)) {
-                try {
-                    // Remove from localStorage
-                    let analyses = JSON.parse(localStorage.getItem('cropinsight_analyses') || '[]');
-                    analyses = analyses.filter(a => !selectedResults.has(a.imageId));
-                    localStorage.setItem('cropinsight_analyses', JSON.stringify(analyses));
-                    
-                    // Remove from current data
-                    allResults = allResults.filter(r => !selectedResults.has(r.id));
-                    
-                    showNotification(`Deleted ${selectedResults.size} analyses successfully!`, 'success');
-                    selectedResults.clear();
-                    loadResults();
-                } catch (error) {
-                    showNotification('Error deleting analyses.', 'error');
-                }
+        function exportSingle(id) {
+            const analysis = allAnalyses.find(a => a.id === id);
+            if (analysis) {
+                exportData([analysis]);
             }
         }
 
         function exportAllResults() {
-            alert(`Exporting all ${filteredResults.length} results as CSV...`);
-            // In real implementation, generate CSV of filtered results
+            exportData(filteredAnalyses);
+        }
+
+        function exportData(data) {
+            const csv = convertToCSV(data);
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cropinsight_analysis_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('Export started.', 'success');
+        }
+
+        function convertToCSV(data) {
+            const headers = ['ID', 'Timestamp', 'Seed Type', 'Source', 'Result', 'Defect Types', 'Confidence', 'Severity', 'Status', 'Recommendations'];
+            const rows = data.map(a => [
+                a.id,
+                a.timestamp,
+                a.seedType,
+                a.source,
+                a.result,
+                a.defectTypes.join(';'),
+                a.confidence,
+                a.severity,
+                a.status,
+                a.recommendations
+            ]);
+            return [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
         }
 
         function applyFilters() {
             filterResults();
-            showNotification('Filters applied successfully.', 'success');
+            showNotification('Filters applied.', 'info');
         }
 
         function resetFilters() {
             document.getElementById('dateRange').value = 'week';
-            document.getElementById('plantType').value = 'all';
+            document.getElementById('seedType').value = 'all';
             document.getElementById('defectType').value = 'all';
             document.getElementById('sortBy').value = 'date_desc';
-            document.getElementById('searchResults').value = '';
-            
+            document.getElementById('searchInput').value = '';
             filterResults();
-            showNotification('All filters reset.', 'info');
+            showNotification('Filters reset.', 'info');
         }
 
-        function viewDetailedReport() {
-            if (currentModalData) {
-                alert(`Opening detailed report for: ${currentModalData.id}`);
-                // In real implementation, open detailed report page
-            }
+        function refreshResults() {
+            loadingIndicator.style.display = 'block';
+            setTimeout(() => {
+                loadAnalyses();
+                showNotification('Results refreshed.', 'success');
+            }, 500);
         }
 
-        function downloadReport() {
-            if (currentModalData) {
-                alert(`Downloading detailed report for: ${currentModalData.id}`);
-                // In real implementation, download PDF
-            }
-        }
-
-        function reanalyzeImage() {
-            if (currentModalData) {
-                analyzeSingle(currentModalData.id);
-                closeModal();
-            }
-        }
-
-        function deleteResult() {
-            if (currentModalData) {
-                deleteSingleResult(currentModalData.id);
-                closeModal();
-            }
-        }
-
-        // Update charts
+        // Charts
         function updateCharts() {
-            // Destroy existing charts
             if (healthChart) healthChart.destroy();
             if (defectChart) defectChart.destroy();
             
-            // Prepare data for health chart
-            const healthyCount = allResults.filter(r => r.result === 'Healthy').length;
-            const defectCount = allResults.filter(r => r.result !== 'Healthy' && r.status === 'analyzed').length;
-            const pendingCount = allResults.filter(r => r.status === 'pending').length;
+            // Health pie chart
+            const healthy = allAnalyses.filter(a => a.result === 'Healthy').length;
+            const defective = allAnalyses.filter(a => a.result === 'Defective').length;
+            const pending = allAnalyses.filter(a => a.status === 'Pending').length;
             
-            // Health Pie Chart
-            const healthCtx = document.getElementById('healthPieChart').getContext('2d');
-            healthChart = new Chart(healthCtx, {
+            const ctx1 = document.getElementById('healthChart').getContext('2d');
+            healthChart = new Chart(ctx1, {
                 type: 'doughnut',
                 data: {
                     labels: ['Healthy', 'Defective', 'Pending'],
                     datasets: [{
-                        data: [healthyCount, defectCount, pendingCount],
-                        backgroundColor: [
-                            '#4CAF50',
-                            '#F44336',
-                            '#FF9800'
-                        ],
+                        data: [healthy, defective, pending],
+                        backgroundColor: ['#4CAF50', '#F44336', '#FF9800'],
                         borderWidth: 2,
                         borderColor: '#fff'
                     }]
@@ -1644,77 +1317,43 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                usePointStyle: true
-                            }
-                        },
+                        legend: { position: 'bottom' },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = Math.round((value / total) * 100);
-                                    return `${label}: ${value} (${percentage}%)`;
-                                }
+                                label: ctx => `${ctx.label}: ${ctx.raw} (${Math.round(ctx.raw / allAnalyses.length * 100)}%)`
                             }
                         }
                     }
                 }
             });
             
-            // Prepare data for defect chart
-            const defectTypes = {};
-            allResults.forEach(result => {
-                if (result.defectTypes.length > 0 && result.result !== 'Healthy') {
-                    result.defectTypes.forEach(defect => {
-                        defectTypes[defect] = (defectTypes[defect] || 0) + 1;
+            // Defect bar chart
+            const defectCounts = {};
+            allAnalyses.forEach(a => {
+                if (a.defectTypes.length) {
+                    a.defectTypes.forEach(d => {
+                        defectCounts[d] = (defectCounts[d] || 0) + 1;
                     });
                 }
             });
             
-            const defectLabels = Object.keys(defectTypes);
-            const defectData = Object.values(defectTypes);
-            
-            // Defect Bar Chart
-            const defectCtx = document.getElementById('defectBarChart').getContext('2d');
-            defectChart = new Chart(defectCtx, {
+            const ctx2 = document.getElementById('defectChart').getContext('2d');
+            defectChart = new Chart(ctx2, {
                 type: 'bar',
                 data: {
-                    labels: defectLabels,
+                    labels: Object.keys(defectCounts),
                     datasets: [{
-                        label: 'Count',
-                        data: defectData,
-                        backgroundColor: [
-                            '#F44336',
-                            '#FF9800',
-                            '#2196F3',
-                            '#4CAF50',
-                            '#9C27B0',
-                            '#795548'
-                        ],
-                        borderWidth: 1,
-                        borderColor: '#fff'
+                        label: 'Number of Occurrences',
+                        data: Object.values(defectCounts),
+                        backgroundColor: '#2196F3',
+                        borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
                     }
                 }
             });
@@ -1722,80 +1361,36 @@
 
         // Show notification
         function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
+            notificationText.textContent = message;
             notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            notification.style.cssText = 'top: 20px; right: 20px; z-index: 1000;';
-            notification.innerHTML = `
-                ${message}
-                <button type="button" class="close" onclick="this.parentElement.remove()">
-                    <span>&times;</span>
-                </button>
-            `;
-            document.body.appendChild(notification);
-            setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.remove();
-                }
-            }, 3000);
+            notification.style.display = 'block';
+            setTimeout(hideNotification, 3000);
         }
 
-        // Update system status
-        function updateSystemStatus() {
-            const total = allResults.length;
-            const analyzed = allResults.filter(r => r.status === 'analyzed').length;
-            const pending = allResults.filter(r => r.status === 'pending').length;
-            
-            systemStatus.innerHTML = `
-                Cropinsight Analysis System | 
-                Total Analyses: ${total} | 
-                Analyzed: ${analyzed} | 
-                Pending: ${pending} |
-                Last Refresh: Just now
-            `;
-            
-            // Update last updated time
-            const now = new Date();
-            lastUpdated.textContent = now.toLocaleString('en-GB', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-        }
-
-        function refreshResults() {
-            loadingIndicator.style.display = 'block';
-            resultsTableContainer.style.display = 'none';
-            paginationContainer.style.display = 'none';
-            
-            setTimeout(() => {
-                loadResults();
-                showNotification('Results refreshed successfully!', 'success');
-            }, 1000);
+        function hideNotification() {
+            notification.style.display = 'none';
         }
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            loadResults();
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAnalyses();
             
-            // Auto-refresh every 30 seconds
-            setInterval(refreshResults, 30000);
-            
-            // Close modal on escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeModal();
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+                if (e.ctrlKey && e.key === 'r') {
+                    e.preventDefault();
+                    refreshResults();
                 }
             });
             
             // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target === imageModal) {
-                    closeModal();
-                }
+            window.addEventListener('click', (e) => {
+                if (e.target === imageModal) closeModal();
             });
+            
+            // Auto-refresh every 30 seconds
+            setInterval(refreshResults, 30000);
         });
     </script>
 </body>
