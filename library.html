@@ -24,7 +24,6 @@
             overflow-x: hidden;
         }
 
-        /* Efek animasi subtle pada background */
         @keyframes backgroundPan {
             0% { background-position: 0% 0%; }
             100% { background-position: 100% 100%; }
@@ -34,7 +33,6 @@
             animation: backgroundPan 60s linear infinite alternate;
         }
 
-        /* Efek partikel untuk background */
         body::after {
             content: '';
             position: fixed;
@@ -158,6 +156,10 @@
             background: linear-gradient(135deg, #FF9800, #EF6C00);
         }
         
+        .album-icon.xray {
+            background: linear-gradient(135deg, #9C27B0, #6A1B9A);
+        }
+        
         .album-icon.healthy {
             background: linear-gradient(135deg, #4CAF50, #2E7D32);
         }
@@ -266,59 +268,69 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.95);
             z-index: 1000;
-            padding: 20px;
+            padding: 40px;
             overflow-y: auto;
         }
         
         .modal-content {
-            position: relative;
-            max-width: 1000px;
-            margin: auto;
             background: white;
             border-radius: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
         
-        .modal-image-container {
+        .modal-header {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .image-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .image-box {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
             background: #000;
             text-align: center;
-            padding: 20px;
         }
         
-        .modal-image {
-            max-width: 100%;
-            max-height: 60vh;
+        .image-box img {
+            width: 100%;
+            max-height: 300px;
             object-fit: contain;
-            border-radius: 5px;
         }
         
-        .modal-info {
-            background: rgba(255, 255, 255, 0.98);
-            padding: 25px;
+        .image-label {
+            padding: 10px;
+            background: #f8f9fa;
+            text-align: center;
+            font-weight: 600;
             color: #333;
         }
         
         .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
+            background: none;
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
             font-size: 1.5rem;
+            color: #666;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-        }
-        
-        .modal-close:hover {
-            background: rgba(0, 0, 0, 0.9);
+            padding: 0;
+            width: 30px;
+            height: 30px;
         }
         
         /* Detection Tags */
@@ -340,6 +352,12 @@
             background: #fff3e0;
             color: #EF6C00;
             border: 1px solid #FF9800;
+        }
+        
+        .detection-tag.xray {
+            background: #f3e5f5;
+            color: #6A1B9A;
+            border: 1px solid #9C27B0;
         }
         
         .detection-tag.healthy {
@@ -377,6 +395,10 @@
         
         .analysis-card.recent {
             border-left-color: #FF9800;
+        }
+        
+        .analysis-card.xray {
+            border-left-color: #9C27B0;
         }
         
         .analysis-card.healthy {
@@ -495,6 +517,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="camera.html">Camera</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="xray.html">X-Ray</a>
+                    </li>
                     <li class="nav-item active">
                         <a class="nav-link" href="library.html">Library</a>
                     </li>
@@ -537,6 +562,7 @@
                             <select class="form-control" id="filterCategory" onchange="filterAlbums()">
                                 <option value="all">All Categories</option>
                                 <option value="recent">Recent Captures</option>
+                                <option value="xray">X-Ray Scans</option>
                                 <option value="healthy">Healthy Plants</option>
                                 <option value="disease">Disease Detection</option>
                                 <option value="growth">Growth Monitoring</option>
@@ -629,19 +655,30 @@
 
             <!-- Image Modal -->
             <div class="image-modal" id="imageModal">
-                <button class="modal-close" onclick="closeModal()">&times;</button>
                 <div class="modal-content">
-                    <div class="modal-image-container">
-                        <img class="modal-image" id="modalImage" src="" alt="Full Size Image">
+                    <div class="modal-header">
+                        <h5 class="mb-0"><i class="fas fa-images"></i> Image Details</h5>
+                        <button class="modal-close" onclick="closeModal()">&times;</button>
                     </div>
-                    <div class="modal-info">
-                        <h4 id="modalTitle"></h4>
+                    <div class="modal-body">
+                        <div class="image-comparison">
+                            <div class="image-box">
+                                <img class="modal-image" id="modalImage" src="" alt="Full Size Image">
+                                <div class="image-label">Original Image</div>
+                            </div>
+                            <div class="image-box" id="modalEffectBox" style="display: none;">
+                                <img class="modal-image" id="modalEffectImage" src="" alt="Effect Preview">
+                                <div class="image-label" id="modalEffectLabel">Effect</div>
+                            </div>
+                        </div>
+                        
                         <div class="row">
                             <div class="col-md-6">
                                 <p><strong>Filename:</strong> <span id="modalFilename"></span></p>
                                 <p><strong>Date Captured:</strong> <span id="modalDate"></span></p>
                                 <p><strong>Plant Type:</strong> <span id="modalPlant"></span></p>
-                                <p><strong>Camera Used:</strong> <span id="modalCamera"></span></p>
+                                <p><strong>Camera:</strong> <span id="modalCamera"></span></p>
+                                <p><strong>Effect:</strong> <span id="modalEffect"></span></p>
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Resolution:</strong> <span id="modalResolution"></span></p>
@@ -682,6 +719,9 @@
                 <a href="camera.html" class="btn btn-success">
                     <i class="fas fa-camera"></i> Take New Photo
                 </a>
+                <a href="xray.html" class="btn btn-info">
+                    <i class="fas fa-x-ray"></i> X-Ray Scanner
+                </a>
                 <a href="result.html" class="btn btn-primary float-right">
                     View All Results <i class="fas fa-arrow-right"></i>
                 </a>
@@ -690,7 +730,7 @@
 
         <div class="footer">
             <p id="storageInfo">Loading storage information...</p>
-            <p>Cropinsight Image Library | © 2024 Agricultural Technology</p>
+            <p>Cropinsight Image Library | © 2026 Agricultural Technology</p>
         </div>
     </div>
 
@@ -717,18 +757,23 @@
         // Global variables
         let albumsData = [];
         let filteredAlbums = [];
-        let currentAlbum = null;
-        let currentImage = null;
+        let currentPage = 1;
+        const resultsPerPage = 10;
+        let currentModalData = null;
+        let selectedResults = new Set();
 
         // DOM Elements
         const albumContainer = document.getElementById('albumContainer');
         const imageModal = document.getElementById('imageModal');
         const modalImage = document.getElementById('modalImage');
-        const modalTitle = document.getElementById('modalTitle');
+        const modalEffectBox = document.getElementById('modalEffectBox');
+        const modalEffectImage = document.getElementById('modalEffectImage');
+        const modalEffectLabel = document.getElementById('modalEffectLabel');
         const modalFilename = document.getElementById('modalFilename');
         const modalDate = document.getElementById('modalDate');
         const modalPlant = document.getElementById('modalPlant');
         const modalCamera = document.getElementById('modalCamera');
+        const modalEffect = document.getElementById('modalEffect');
         const modalResolution = document.getElementById('modalResolution');
         const modalSize = document.getElementById('modalSize');
         const modalLocation = document.getElementById('modalLocation');
@@ -744,10 +789,10 @@
         const notificationText = document.getElementById('notificationText');
         const summaryCards = document.getElementById('summaryCards');
 
-        // Dummy data for demo
+        // Dummy data for demo (disesuaikan dengan kebutuhan, misalnya tetap ada)
         const dummyAlbums = [
             {
-                id: 1,
+                id: 2,
                 title: "Healthy Plant Collection",
                 category: "healthy",
                 icon: "fas fa-leaf",
@@ -788,7 +833,7 @@
                 ]
             },
             {
-                id: 2,
+                id: 3,
                 title: "Disease Detection Archive",
                 category: "disease",
                 icon: "fas fa-bug",
@@ -815,68 +860,6 @@
             }
         ];
 
-        // Load data from localStorage and combine with dummy data
-        function loadAllAlbums() {
-            // Load from localStorage
-            const savedCaptures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
-            
-            // Convert saved captures to library format
-            const recentImages = savedCaptures.map((capture, index) => {
-                // Calculate file size
-                let size = "Unknown";
-                if (capture.fileSize) {
-                    size = formatBytes(capture.fileSize);
-                } else if (capture.dataUrl) {
-                    const bytes = Math.round((capture.dataUrl.length * 3) / 4);
-                    size = formatBytes(bytes);
-                }
-                
-                return {
-                    id: 1000 + index,
-                    name: capture.name || `capture_${capture.id}.jpg`,
-                    date: new Date(capture.timestamp).toLocaleString('en-GB', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    timestamp: capture.timestamp,
-                    plant: capture.plant || "Not Specified",
-                    detection: capture.detection || "Not Analyzed",
-                    confidence: capture.confidence || 0,
-                    location: capture.location || "Field Camera",
-                    resolution: capture.resolution || "Unknown",
-                    size: size,
-                    camera: capture.camera || "Device Camera",
-                    analyst: capture.analyst || "User",
-                    summary: capture.summary || "Captured from device camera",
-                    tags: capture.tags || ["recent", "unanalyzed"],
-                    category: capture.category || "recent",
-                    dataUrl: capture.dataUrl
-                };
-            }).reverse(); // Newest first
-
-            // Create Recent Captures album
-            const recentCapturesAlbum = {
-                id: 0,
-                title: "Recent Captures",
-                category: "recent",
-                icon: "fas fa-camera",
-                description: "Images captured from your camera",
-                totalImages: recentImages.length,
-                analyzed: recentImages.filter(img => img.confidence > 0).length,
-                images: recentImages
-            };
-
-            // Combine with dummy albums
-            albumsData = [recentCapturesAlbum, ...dummyAlbums];
-            filteredAlbums = [...albumsData];
-            
-            updateSummaryStats();
-            checkStorageWarning();
-        }
-
         // Format bytes to human readable
         function formatBytes(bytes, decimals = 2) {
             if (bytes === 0) return '0 Bytes';
@@ -892,8 +875,6 @@
             notificationText.textContent = message;
             notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
             notification.style.display = 'block';
-            
-            // Auto-hide after 3 seconds
             setTimeout(hideNotification, 3000);
         }
 
@@ -966,38 +947,136 @@
         function checkStorageWarning() {
             try {
                 const captures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
+                const xrays = JSON.parse(localStorage.getItem('cropinsight_xrays') || '[]');
+                const all = [...captures, ...xrays];
                 
-                // Calculate storage usage
                 let totalBytes = 0;
-                captures.forEach(capture => {
-                    if (capture.fileSize) {
-                        totalBytes += capture.fileSize;
-                    } else if (capture.dataUrl) {
-                        totalBytes += (capture.dataUrl.length * 3) / 4;
+                all.forEach(item => {
+                    if (item.fileSize) {
+                        totalBytes += item.fileSize;
+                    } else if (item.dataUrl) {
+                        totalBytes += (item.dataUrl.length * 3) / 4;
                     }
                 });
                 
                 const usedMB = totalBytes / (1024 * 1024);
                 const maxMB = 5.0;
-                
-                // Update storage info
                 const percentage = Math.min((usedMB / maxMB) * 100, 100).toFixed(1);
+                
                 storageInfo.innerHTML = `
                     Total Storage Used: ${usedMB.toFixed(2)} MB (${percentage}%) | 
-                    ${captures.length} captured images
+                    ${captures.length} captures, ${xrays.length} x-rays
                 `;
                 
-                // Show warning if over 70%
                 if (percentage > 70) {
                     storageWarning.style.display = 'block';
                 } else {
                     storageWarning.style.display = 'none';
                 }
-                
             } catch (error) {
                 console.error('Error checking storage:', error);
                 storageInfo.textContent = "Error loading storage information";
             }
+        }
+
+        // Load all albums (captures, x-rays, dummy)
+        function loadAllAlbums() {
+            // Load from localStorage: captures
+            const savedCaptures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
+            
+            const recentImages = savedCaptures.map((capture, index) => {
+                let size = "Unknown";
+                if (capture.fileSize) {
+                    size = formatBytes(capture.fileSize);
+                } else if (capture.dataUrl) {
+                    const bytes = Math.round((capture.dataUrl.length * 3) / 4);
+                    size = formatBytes(bytes);
+                }
+                return {
+                    id: capture.id || `CAP-${Date.now()}-${index}`,
+                    name: capture.name || `capture_${index}.jpg`,
+                    date: new Date(capture.timestamp).toLocaleString('en-GB', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    }),
+                    timestamp: capture.timestamp,
+                    plant: capture.plant || "Not Specified",
+                    detection: capture.detection || "Not Analyzed",
+                    confidence: capture.confidence || 0,
+                    location: capture.location || "Field Camera",
+                    resolution: capture.resolution || "Unknown",
+                    size: size,
+                    camera: capture.camera || "Device Camera",
+                    analyst: capture.analyst || "User",
+                    summary: capture.summary || "Captured from device camera",
+                    tags: capture.tags || ["recent", "unanalyzed"],
+                    category: capture.category || "recent",
+                    dataUrl: capture.dataUrl
+                };
+            }).reverse();
+
+            // Load X-Ray images
+            const xrayImages = JSON.parse(localStorage.getItem('cropinsight_xrays') || '[]').map((xray, index) => {
+                return {
+                    id: xray.id || `XRAY-${Date.now()}-${index}`,
+                    name: xray.name || `xray_${index}.png`,
+                    date: new Date(xray.timestamp).toLocaleString('en-GB', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    }),
+                    timestamp: xray.timestamp,
+                    plant: xray.plant || "Unknown",
+                    detection: xray.detection || "Not Analyzed",
+                    confidence: xray.confidence || 0,
+                    location: xray.location || "X-Ray Scanner",
+                    resolution: xray.resolution || "Unknown",
+                    size: xray.fileSize || "Unknown",
+                    camera: "X-Ray Scanner",
+                    analyst: "System",
+                    summary: xray.summary || "X-Ray scanned image",
+                    tags: xray.tags || ["xray", "unanalyzed"],
+                    category: "xray",
+                    dataUrl: xray.dataUrl,
+                    effect: xray.effect || "xray"
+                };
+            }).reverse();
+
+            // Create Recent Captures album
+            const recentCapturesAlbum = {
+                id: 0,
+                title: "Recent Captures",
+                category: "recent",
+                icon: "fas fa-camera",
+                description: "Images captured from your camera",
+                totalImages: recentImages.length,
+                analyzed: recentImages.filter(img => img.confidence > 0).length,
+                images: recentImages
+            };
+
+            // Create X-Ray album
+            const xrayAlbum = {
+                id: 1,
+                title: "X-Ray Scans",
+                category: "xray",
+                icon: "fas fa-x-ray",
+                description: "Images from X-Ray scanner",
+                totalImages: xrayImages.length,
+                analyzed: xrayImages.filter(img => img.confidence > 0).length,
+                images: xrayImages
+            };
+
+            // Dummy albums (dengan id mulai dari 2)
+            const dummyWithAdjustedIds = dummyAlbums.map((album, idx) => ({
+                ...album,
+                id: idx + 2
+            }));
+
+            // Combine albums: recent, xray, then dummy
+            albumsData = [recentCapturesAlbum, xrayAlbum, ...dummyWithAdjustedIds];
+            filteredAlbums = [...albumsData];
+            
+            updateSummaryStats();
+            checkStorageWarning();
         }
 
         // Load albums into DOM
@@ -1006,7 +1085,7 @@
             albumContainer.innerHTML = '';
             
             setTimeout(() => {
-                if (filteredAlbums.length === 0) {
+                if (filteredAlbums.length === 0 || filteredAlbums.every(a => a.images.length === 0)) {
                     emptyState.style.display = 'block';
                     albumContainer.style.display = 'none';
                     loadingIndicator.style.display = 'none';
@@ -1017,7 +1096,6 @@
                 albumContainer.style.display = 'flex';
                 
                 filteredAlbums.forEach(album => {
-                    // Skip empty albums
                     if (album.images.length === 0) return;
                     
                     const albumCard = document.createElement('div');
@@ -1059,7 +1137,6 @@
                     `;
                     albumContainer.appendChild(albumCard);
                     
-                    // Load thumbnails for this album
                     loadAlbumThumbnails(album.id, album.images);
                 });
                 
@@ -1073,16 +1150,13 @@
             
             thumbnailContainer.innerHTML = '';
             
-            // Show first 6 images as thumbnails
             const displayImages = images.slice(0, 6);
             
-            displayImages.forEach((image, index) => {
+            displayImages.forEach(image => {
                 const thumbnailItem = document.createElement('div');
                 thumbnailItem.className = 'thumbnail-item';
                 
-                // Use actual image data if available, otherwise use placeholder
                 let imgSrc = `https://via.placeholder.com/120x120/${getColorByCategory(image.category)}/FFFFFF?text=${encodeURIComponent(image.plant.substring(0, 8))}`;
-                
                 if (image.dataUrl) {
                     imgSrc = image.dataUrl;
                 }
@@ -1100,7 +1174,6 @@
                 thumbnailContainer.appendChild(thumbnailItem);
             });
             
-            // If there are more images, show a "more" indicator
             if (images.length > 6) {
                 const moreItem = document.createElement('div');
                 moreItem.className = 'thumbnail-item';
@@ -1125,6 +1198,7 @@
         function getColorByCategory(category) {
             const colors = {
                 'recent': 'FF9800',
+                'xray': '9C27B0',
                 'healthy': '4CAF50',
                 'disease': 'F44336',
                 'growth': '2196F3',
@@ -1135,29 +1209,49 @@
             return colors[category] || '666666';
         }
 
+        function getTagClass(tag) {
+            if (tag.includes('healthy')) return 'healthy';
+            if (tag.includes('disease')) return 'disease';
+            if (tag.includes('nutrient')) return 'nutrient';
+            if (tag.includes('insect')) return 'insect';
+            if (tag.includes('recent')) return 'recent';
+            if (tag.includes('xray')) return 'xray';
+            return 'recent';
+        }
+
+        function getAnalysisClass(detection, category) {
+            if (category === 'recent') return 'recent';
+            if (category === 'xray') return 'xray';
+            if (detection.includes('Healthy')) return 'healthy';
+            if (detection.includes('Blight') || detection.includes('Rust') || detection.includes('Infestation')) return 'disease';
+            return 'warning';
+        }
+
         function openImageModal(image, albumId) {
-            currentImage = image;
-            currentAlbum = albumId;
+            currentModalData = image;
             
-            // Use actual image data if available
-            let modalImgSrc = `https://via.placeholder.com/800x600/${getColorByCategory(image.category)}/FFFFFF?text=${encodeURIComponent(image.name)}`;
-            if (image.dataUrl) {
-                modalImgSrc = image.dataUrl;
+            modalImage.src = image.dataUrl || `https://via.placeholder.com/800x600/${getColorByCategory(image.category)}/FFFFFF?text=${encodeURIComponent(image.name)}`;
+            
+            // If it's an X-Ray image, show effect preview (same image for simplicity)
+            if (image.category === 'xray') {
+                modalEffectBox.style.display = 'block';
+                modalEffectImage.src = image.dataUrl || modalImage.src;
+                modalEffectLabel.textContent = `Effect: ${image.effect || 'xray'}`;
+            } else {
+                modalEffectBox.style.display = 'none';
             }
             
-            modalImage.src = modalImgSrc;
-            modalTitle.textContent = `${image.detection} - ${image.plant}`;
             modalFilename.textContent = image.name;
             modalDate.textContent = image.date;
             modalPlant.textContent = image.plant;
             modalCamera.textContent = image.camera;
+            modalEffect.textContent = image.effect || 'None';
             modalResolution.textContent = image.resolution;
             modalSize.textContent = image.size;
             modalLocation.textContent = image.location;
             modalAnalyst.textContent = image.analyst;
             modalSummary.textContent = image.summary;
             
-            // Set detection tags
             modalDetections.innerHTML = '';
             image.tags.forEach(tag => {
                 const tagClass = getTagClass(tag);
@@ -1167,28 +1261,10 @@
                 modalDetections.appendChild(tagElement);
             });
             
-            // Set analysis card class
             modalAnalysis.className = 'analysis-card ' + getAnalysisClass(image.detection, image.category);
             
-            // Show modal
             imageModal.style.display = 'block';
             document.body.style.overflow = 'hidden';
-        }
-
-        function getTagClass(tag) {
-            if (tag.includes('healthy')) return 'healthy';
-            if (tag.includes('disease')) return 'disease';
-            if (tag.includes('nutrient')) return 'nutrient';
-            if (tag.includes('insect')) return 'insect';
-            if (tag.includes('recent')) return 'recent';
-            return 'recent';
-        }
-
-        function getAnalysisClass(detection, category) {
-            if (category === 'recent') return 'recent';
-            if (detection.includes('Healthy')) return 'healthy';
-            if (detection.includes('Blight') || detection.includes('Rust') || detection.includes('Infestation')) return 'disease';
-            return 'warning';
         }
 
         function closeModal() {
@@ -1199,24 +1275,24 @@
         function viewAlbum(albumId) {
             const album = albumsData.find(a => a.id === albumId);
             if (album) {
-                alert(`Viewing all images in: ${album.title}\nTotal images: ${album.images.length}\n\nThis would open a detailed album view in a real application.`);
+                alert(`Viewing all images in: ${album.title}\nTotal images: ${album.images.length}`);
             }
         }
 
         function viewDetailedAnalysis() {
-            if (currentImage) {
+            if (currentModalData) {
                 showNotification('Opening detailed analysis...', 'info');
                 setTimeout(() => {
-                    window.location.href = 'result.html?image=' + currentImage.id;
+                    window.location.href = 'result.html?image=' + currentModalData.id;
                 }, 1000);
             }
         }
 
         function downloadImage() {
-            if (currentImage && currentImage.dataUrl) {
+            if (currentModalData && currentModalData.dataUrl) {
                 const link = document.createElement('a');
-                link.href = currentImage.dataUrl;
-                link.download = currentImage.name;
+                link.href = currentModalData.dataUrl;
+                link.download = currentModalData.name;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -1227,23 +1303,21 @@
         }
 
         function deleteImage() {
-            if (currentImage && confirm(`Are you sure you want to delete "${currentImage.name}"?\nThis action cannot be undone.`)) {
-                // If it's from localStorage (Recent Captures)
-                if (currentAlbum === 0) {
-                    try {
-                        let captures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
-                        captures = captures.filter(capture => 
-                            capture.id !== currentImage.id.replace('CAP-', '')
-                        );
-                        localStorage.setItem('cropinsight_captures', JSON.stringify(captures));
-                        showNotification('Image deleted from library!', 'success');
-                    } catch (error) {
-                        showNotification('Error deleting image', 'error');
-                    }
+            if (!currentModalData) return;
+            if (confirm(`Are you sure you want to delete "${currentModalData.name}"?\nThis action cannot be undone.`)) {
+                // Determine source
+                if (currentModalData.category === 'recent') {
+                    let captures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
+                    captures = captures.filter(c => c.id !== currentModalData.id);
+                    localStorage.setItem('cropinsight_captures', JSON.stringify(captures));
+                } else if (currentModalData.category === 'xray') {
+                    let xrays = JSON.parse(localStorage.getItem('cropinsight_xrays') || '[]');
+                    xrays = xrays.filter(x => x.id !== currentModalData.id);
+                    localStorage.setItem('cropinsight_xrays', JSON.stringify(xrays));
                 } else {
-                    showNotification('Image deleted (demo mode)', 'success');
+                    // Dummy, just close
                 }
-                
+                showNotification('Image deleted successfully!', 'success');
                 closeModal();
                 refreshLibrary();
             }
@@ -1258,16 +1332,12 @@
             const searchTerm = document.getElementById('searchImages').value.toLowerCase();
             
             filteredAlbums = albumsData.map(album => {
-                // Filter images within album
                 const filteredImages = album.images.filter(image => {
-                    // Category filter
                     if (category !== 'all' && album.category !== category) return false;
                     
-                    // Date filter
                     if (date !== 'all') {
                         const imageDate = new Date(image.timestamp || image.date);
                         const now = new Date();
-                        
                         switch(date) {
                             case 'today':
                                 if (imageDate.toDateString() !== now.toDateString()) return false;
@@ -1287,26 +1357,20 @@
                         }
                     }
                     
-                    // Plant filter
                     if (plant !== 'all') {
                         const plantName = image.plant.toLowerCase();
                         if (plant === 'other') {
-                            if (!['padi', 'rice', 'jagung', 'corn', 'kedelai', 'soybean', 'cabai', 'chili', 'tomat', 'tomato'].some(p => plantName.includes(p))) {
-                                // It's one of the known plants, so skip
-                                return false;
-                            }
-                        } else if (!plantName.includes(plant)) {
-                            return false;
-                        }
+                            const known = ['padi', 'rice', 'jagung', 'corn', 'kedelai', 'soybean', 'cabai', 'chili', 'tomat', 'tomato'];
+                            if (known.some(p => plantName.includes(p))) return false;
+                        } else if (!plantName.includes(plant)) return false;
                     }
                     
-                    // Status filter
                     if (status !== 'all') {
                         if (status === 'analyzed' && image.confidence === 0) return false;
                         if (status === 'unanalyzed' && image.confidence > 0) return false;
+                        if (status === 'pending' && image.status !== 'pending') return false;
                     }
                     
-                    // Search filter
                     if (searchTerm) {
                         const searchable = `${image.name} ${image.plant} ${image.detection} ${image.tags.join(' ')}`.toLowerCase();
                         if (!searchable.includes(searchTerm)) return false;
@@ -1315,7 +1379,6 @@
                     return true;
                 });
                 
-                // Return album with filtered images (or null if empty)
                 if (filteredImages.length === 0) return null;
                 
                 return {
@@ -1331,7 +1394,6 @@
         }
 
         function filterAlbums() {
-            // Apply filters as user changes dropdowns
             applyFilters();
         }
 
@@ -1352,10 +1414,11 @@
         }
 
         function clearAllImages() {
-            if (confirm('Are you sure you want to clear ALL images from Recent Captures?\nThis will delete all photos you have taken.\nThis action cannot be undone.')) {
+            if (confirm('Are you sure you want to clear ALL images from Recent Captures and X-Ray?\nThis will delete all photos you have taken.\nThis action cannot be undone.')) {
                 try {
                     localStorage.removeItem('cropinsight_captures');
-                    showNotification('All images cleared from library!', 'success');
+                    localStorage.removeItem('cropinsight_xrays');
+                    showNotification('All images cleared!', 'success');
                     refreshLibrary();
                 } catch (error) {
                     showNotification('Error clearing images', 'error');
@@ -1367,7 +1430,6 @@
             loadingIndicator.style.display = 'block';
             albumContainer.innerHTML = '';
             
-            // Add refresh animation
             const refreshBtn = document.querySelector('.refresh-btn');
             refreshBtn.style.transform = 'rotate(180deg)';
             
@@ -1389,9 +1451,7 @@
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
+            if (e.key === 'Escape') closeModal();
             if (e.key === 'r' && e.ctrlKey) {
                 e.preventDefault();
                 refreshLibrary();
@@ -1400,9 +1460,7 @@
 
         // Refresh when page becomes visible
         document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                refreshLibrary();
-            }
+            if (!document.hidden) refreshLibrary();
         });
 
         // Initialize
@@ -1411,15 +1469,12 @@
             loadAlbums();
             checkStorageWarning();
             
-            // Show welcome message if library was just saved from camera
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('saved')) {
-                showNotification('Image saved to library successfully!', 'success');
-                // Remove the parameter from URL
+                showNotification('Image saved successfully!', 'success');
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
             
-            // Auto-refresh every 30 seconds
             setInterval(refreshLibrary, 30000);
         });
     </script>

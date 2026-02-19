@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-Ray Scanner - Cropinsight</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('BG1.png') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes backgroundPan {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        body {
+            animation: backgroundPan 60s linear infinite alternate;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .cropinsight-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            margin: 20px auto;
+            width: 95%;
+            max-width: 1400px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.8), rgba(76, 73, 79, 0.8)),
+                url('BG.png') no-repeat center center;
+            background-size: cover;
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .navbar {
+            border-radius: 0 0 20px 20px;
+            padding: 0 20px;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: #667eea !important;
+        }
+        
+        .jumbotron {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* X-Ray Scanner Panel */
+        .scanner-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+        }
+        
+        .preview-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 3px dashed #dee2e6;
+            margin-bottom: 25px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            transition: filter 0.3s ease;
+        }
+        
+        .xray-effect {
+            filter: grayscale(100%) brightness(1.2) contrast(2) invert(80%);
+        }
+        
+        .preview-placeholder {
+            text-align: center;
+            color: #666;
+        }
+        
+        .preview-placeholder i {
+            font-size: 5rem;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-item h6 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .info-item p {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 0;
+            word-break: break-all;
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+        
+        .btn-xray {
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 180px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-xray:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+            color: white;
+            border: none;
+        }
+        
+        .btn-info {
+            background: linear-gradient(to right, #2196F3, #0D47A1);
+            color: white;
+            border: none;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(to right, #6c757d, #495057);
+            color: white;
+            border: none;
+        }
+        
+        .effect-toggle {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success { background: linear-gradient(to right, #4CAF50, #2E7D32); }
+        .notification.error { background: linear-gradient(to right, #F44336, #C62828); }
+        .notification.info { background: linear-gradient(to right, #2196F3, #0D47A1); }
+        .notification.warning { background: linear-gradient(to right, #FF9800, #EF6C00); }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .preview-container {
+                min-height: 300px;
+            }
+            
+            .control-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-xray {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cropinsight-container">
+        <header class="header">
+            <img src="cvr1.png" width="150" height="150" style="border-radius: 10%; margin-bottom: 20px;" />
+            <h1><i class="fas fa-x-ray"></i> X-RAY SCANNER</h1>
+            <p class="lead" style="color: rgba(255,255,255,0.9);">Simulated X-Ray Imaging for Seed Analysis</p>
+        </header>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-tractor"></i> Cropinsight</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="camera.html">Camera</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="xray.html">X-Ray</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="library.html">Library</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="result.html">Result</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="history.html">History</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="jumbotron">
+            <h2><i class="fas fa-x-ray"></i> X-Ray Image Scanner</h2>
+            <p class="lead">Upload an image to simulate X-Ray scanning. The image will be processed with X-Ray effect and can be saved to the library for further analysis.</p>
+            <hr>
+        </div>
+
+        <!-- Scanner Panel -->
+        <div class="scanner-panel">
+            <div class="preview-container" id="previewContainer">
+                <img id="previewImage" class="preview-image xray-effect" src="#" alt="X-Ray Preview">
+                <div id="previewPlaceholder" class="preview-placeholder">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h4>No Image Selected</h4>
+                    <p>Click the button below to upload an image for X-Ray scanning</p>
+                </div>
+            </div>
+
+            <!-- File Input (hidden) -->
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+
+            <!-- Control Buttons -->
+            <div class="control-buttons">
+                <button class="btn btn-primary btn-xray" id="selectBtn">
+                    <i class="fas fa-upload"></i> Select Image
+                </button>
+                <button class="btn btn-info btn-xray" id="scanBtn" disabled>
+                    <i class="fas fa-x-ray"></i> Apply X-Ray Effect
+                </button>
+                <button class="btn btn-success btn-xray" id="saveBtn" disabled>
+                    <i class="fas fa-save"></i> Save to Library
+                </button>
+                <button class="btn btn-secondary btn-xray" id="clearBtn">
+                    <i class="fas fa-trash-alt"></i> Clear
+                </button>
+            </div>
+
+            <!-- Effect Toggle -->
+            <div class="effect-toggle">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="effect" id="effectXray" value="xray" checked>
+                    <label class="form-check-label" for="effectXray">X-Ray Effect (Default)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="effect" id="effectOriginal" value="original">
+                    <label class="form-check-label" for="effectOriginal">Original Image</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="effect" id="effectNegative" value="negative">
+                    <label class="form-check-label" for="effectNegative">Negative</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="effect" id="effectGrayscale" value="grayscale">
+                    <label class="form-check-label" for="effectGrayscale">Grayscale</label>
+                </div>
+            </div>
+
+            <!-- Image Information -->
+            <div class="info-grid" id="imageInfo">
+                <div class="info-item">
+                    <h6>File Name</h6>
+                    <p id="fileName">-</p>
+                </div>
+                <div class="info-item">
+                    <h6>File Size</h6>
+                    <p id="fileSize">-</p>
+                </div>
+                <div class="info-item">
+                    <h6>Dimensions</h6>
+                    <p id="dimensions">-</p>
+                </div>
+                <div class="info-item">
+                    <h6>Scan Time</h6>
+                    <p id="scanTime">-</p>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="mt-4">
+                <a href="index.html" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+                <a href="library.html" class="btn btn-primary float-right">
+                    Go to Library <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p id="storageInfo">X-Ray Scanner | Version 1.0 | © 2026 Agricultural Technology</p>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+    <script>
+        // DOM Elements
+        const fileInput = document.getElementById('fileInput');
+        const selectBtn = document.getElementById('selectBtn');
+        const scanBtn = document.getElementById('scanBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const previewImage = document.getElementById('previewImage');
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const dimensions = document.getElementById('dimensions');
+        const scanTime = document.getElementById('scanTime');
+        const effectRadios = document.querySelectorAll('input[name="effect"]');
+        const notification = document.getElementById('notification');
+        const loading = document.getElementById('loading');
+        const storageInfo = document.getElementById('storageInfo');
+
+        let currentFile = null;
+        let currentDataUrl = null; // Original image data URL
+        let currentImage = new Image(); // Untuk mendapatkan dimensi
+
+        // Update storage info
+        function updateStorageInfo() {
+            try {
+                const xrays = JSON.parse(localStorage.getItem('cropinsight_xrays') || '[]');
+                const captures = JSON.parse(localStorage.getItem('cropinsight_captures') || '[]');
+                const total = xrays.length + captures.length;
+                storageInfo.innerHTML = `X-Ray Scanner | Total Saved: ${total} images | Version 1.0 | © 2026 Agricultural Technology`;
+            } catch (e) {
+                storageInfo.innerHTML = `X-Ray Scanner | Version 1.0 | © 2026 Agricultural Technology`;
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            notification.textContent = message;
+            notification.className = 'notification ' + type;
+            notification.classList.add('show');
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+
+        // Show/hide loading
+        function setLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+        }
+
+        // Apply effect based on selected radio
+        function applyEffect() {
+            if (!previewImage.src || previewImage.src === '#' || !currentDataUrl) return;
+
+            const effect = document.querySelector('input[name="effect"]:checked').value;
+            // Hapus semua kelas efek
+            previewImage.classList.remove('xray-effect');
+            // Tambah kelas sesuai efek
+            switch(effect) {
+                case 'xray':
+                    previewImage.classList.add('xray-effect');
+                    break;
+                case 'negative':
+                    previewImage.style.filter = 'invert(100%)';
+                    break;
+                case 'grayscale':
+                    previewImage.style.filter = 'grayscale(100%)';
+                    break;
+                case 'original':
+                    previewImage.style.filter = 'none';
+                    break;
+            }
+        }
+
+        // Handle file selection
+        function handleFileSelect(file) {
+            if (!file) return;
+
+            currentFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / 1024).toFixed(2) + ' KB';
+            scanTime.textContent = new Date().toLocaleString();
+
+            setLoading(true);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentDataUrl = e.target.result;
+                currentImage.src = currentDataUrl;
+                currentImage.onload = () => {
+                    dimensions.textContent = currentImage.width + ' x ' + currentImage.height;
+                    previewImage.src = currentDataUrl;
+                    previewImage.style.display = 'block';
+                    previewPlaceholder.style.display = 'none';
+                    applyEffect();
+                    scanBtn.disabled = false;
+                    saveBtn.disabled = false;
+                    setLoading(false);
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Clear preview
+        function clearPreview() {
+            currentFile = null;
+            currentDataUrl = null;
+            previewImage.src = '#';
+            previewImage.style.display = 'none';
+            previewPlaceholder.style.display = 'block';
+            fileName.textContent = '-';
+            fileSize.textContent = '-';
+            dimensions.textContent = '-';
+            scanTime.textContent = '-';
+            scanBtn.disabled = true;
+            saveBtn.disabled = true;
+            fileInput.value = '';
+        }
+
+        // Save to library
+        function saveToLibrary() {
+            if (!currentDataUrl) {
+                showNotification('No image to save', 'warning');
+                return;
+            }
+
+            // Buat objek data
+            const xrayData = {
+                id: 'XRAY-' + Date.now(),
+                timestamp: new Date().toISOString(),
+                dataUrl: currentDataUrl,
+                name: currentFile ? currentFile.name : 'xray_scan.png',
+                resolution: dimensions.textContent,
+                fileSize: fileSize.textContent,
+                plant: 'Unknown',
+                detection: 'Not Analyzed',
+                confidence: 0,
+                type: 'xray',
+                effect: document.querySelector('input[name="effect"]:checked').value
+            };
+
+            try {
+                let xrays = JSON.parse(localStorage.getItem('cropinsight_xrays') || '[]');
+                if (xrays.length >= 50) {
+                    if (!confirm('Storage limit reached (50 images). Remove oldest image?')) {
+                        return;
+                    }
+                    xrays.shift();
+                }
+                xrays.push(xrayData);
+                localStorage.setItem('cropinsight_xrays', JSON.stringify(xrays));
+
+                showNotification('X-Ray image saved to library!', 'success');
+                updateStorageInfo();
+
+                // Tawarkan untuk ke library
+                if (confirm('Image saved! Go to Library to view it?')) {
+                    window.location.href = 'library.html';
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                showNotification('Failed to save. Storage might be full.', 'error');
+            }
+        }
+
+        // Event Listeners
+        selectBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        scanBtn.addEventListener('click', applyEffect);
+
+        effectRadios.forEach(radio => {
+            radio.addEventListener('change', applyEffect);
+        });
+
+        saveBtn.addEventListener('click', saveToLibrary);
+
+        clearBtn.addEventListener('click', clearPreview);
+
+        // Drag & drop support
+        const previewContainer = document.getElementById('previewContainer');
+        previewContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            previewContainer.style.borderColor = '#667eea';
+        });
+
+        previewContainer.addEventListener('dragleave', () => {
+            previewContainer.style.borderColor = '#dee2e6';
+        });
+
+        previewContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            previewContainer.style.borderColor = '#dee2e6';
+            if (e.dataTransfer.files.length > 0) {
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStorageInfo();
+            // Cek apakah ada parameter di URL? (misal dari camera)
+        });
+
+        // Keyboard shortcut: Ctrl+O untuk upload
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'o') {
+                e.preventDefault();
+                fileInput.click();
+            }
+        });
+    </script>
+</body>
+</html>

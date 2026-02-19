@@ -137,39 +137,6 @@
             gap: 10px;
         }
         
-        .api-config-panel {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin: 20px;
-            border-left: 5px solid #2196F3;
-        }
-        
-        .api-status {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px;
-            border-left: 4px solid;
-            transition: all 0.3s ease;
-        }
-        
-        .api-status.connected {
-            border-left-color: #4CAF50;
-            background: linear-gradient(to right, #e8f5e9, #f1f8e9);
-        }
-        
-        .api-status.connecting {
-            border-left-color: #FF9800;
-            background: linear-gradient(to right, #fff3e0, #ffecb3);
-        }
-        
-        .api-status.disconnected {
-            border-left-color: #F44336;
-            background: linear-gradient(to right, #ffebee, #ffcdd2);
-        }
-        
         .status-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -473,14 +440,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        .auto-restart-panel {
-            background: #e8f5e9;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px;
-            border-left: 4px solid #4CAF50;
-        }
-        
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
@@ -563,104 +522,11 @@
 
         <div class="jumbotron">
             <h1 class="display-4">Welcome to Conveyor Control System</h1>
-            <p class="lead">A comprehensive platform for real-time monitoring and control of your conveyor system with REST API technology.</p>
+            <p class="lead">A comprehensive platform for real-time monitoring and control of your conveyor system.</p>
             <hr class="my-4">
             <div class="d-flex align-items-center">
                 <div class="connection-indicator disconnected" id="connectionIndicator"></div>
-                <p class="mb-0" id="connectionStatusText">Click Connect to start API connection</p>
-            </div>
-        </div>
-
-        <!-- REST API Configuration Panel -->
-        <div class="api-config-panel">
-            <h3><i class="fas fa-server"></i> REST API Configuration</h3>
-            <div class="row mt-3">
-                <div class="col-md-8">
-                    <div class="form-group">
-                        <label>Backend API URL</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="apiUrl" 
-                                   value="https://backend1-2nj6l3u4y-anggitdayats-projects.vercel.app" 
-                                   placeholder="https://backend1-2nj6l3u4y-anggitdayats-projects.vercel.app">
-                            <div class="input-group-append">
-                                <button class="btn btn-sm btn-info" onclick="testApiConnection()">
-                                    <i class="fas fa-test"></i> Test Connection
-                                </button>
-                            </div>
-                        </div>
-                        <small class="form-text text-muted">
-                            URL backend Anda yang sudah di-deploy di Vercel
-                        </small>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Device ID</label>
-                        <input type="text" class="form-control" id="deviceId" value="esp32_conveyor">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row mt-2">
-                <div class="col-md-12">
-                    <button class="btn btn-success mr-2" onclick="connectAPI()">
-                        <i class="fas fa-plug"></i> Connect to API
-                    </button>
-                    <button class="btn btn-info" onclick="refreshStatus()">
-                        <i class="fas fa-sync-alt"></i> Refresh Status
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- API Connection Status -->
-        <div class="api-status disconnected" id="apiStatus">
-            <h3 id="apiStatusTitle"><i class="fas fa-satellite-dish"></i> API Status: <span id="apiStatusText">Disconnected</span></h3>
-            <p id="apiStatusDetail">Not connected to backend API</p>
-            <p id="apiEndpoints">API Endpoints: <span id="endpointsList">Not connected</span></p>
-        </div>
-
-        <!-- Auto Restart Timer Panel -->
-        <div class="auto-restart-panel">
-            <h4><i class="fas fa-redo"></i> Auto-Restart Timer Configuration</h4>
-            <p class="mb-3">Set timer for automatic conveyor restart after sensor detection</p>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label><i class="fas fa-clock"></i> Auto-Restart Timer (seconds)</label>
-                        <div class="input-group">
-                            <input type="number" class="form-control" id="autoRestartTime" 
-                                   min="1" max="3600" placeholder="1-3600" value="5">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" onclick="setAutoRestartTimer()">
-                                    <i class="fas fa-save"></i> Set Timer
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label><i class="fas fa-toggle-on"></i> Auto-Restart Status</label>
-                        <div class="btn-group w-100">
-                            <button class="btn btn-success" onclick="enableAutoRestart()">
-                                <i class="fas fa-check"></i> Enable
-                            </button>
-                            <button class="btn btn-warning" onclick="disableAutoRestart()">
-                                <i class="fas fa-times"></i> Disable
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>Current Status</label>
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i> 
-                            Auto-restart: <span id="autoRestartStatus">Disabled</span>
-                        </div>
-                    </div>
-                </div>
+                <p class="mb-0" id="connectionStatusText">System is in demo mode (static data)</p>
             </div>
         </div>
 
@@ -709,14 +575,14 @@
         <div class="status-grid">
             <div class="status-card conveyor">
                 <h3><i class="fas fa-conveyor-belt"></i> Conveyor Status</h3>
-                <div class="status-value status-conveyor" id="conveyorStatus">OFFLINE</div>
-                <p id="conveyorDesc">Waiting for API connection...</p>
+                <div class="status-value status-conveyor off" id="conveyorStatus">STOPPED</div>
+                <p id="conveyorDesc">Conveyor is stopped</p>
             </div>
             
             <div class="status-card sensor">
                 <h3><i class="fas fa-sensor"></i> Proximity Sensor</h3>
-                <div class="status-value status-sensor" id="sensorStatus">OFFLINE</div>
-                <p id="sensorDesc">Waiting for API connection...</p>
+                <div class="status-value status-sensor" id="sensorStatus">CLEAR</div>
+                <p id="sensorDesc">No object detected</p>
             </div>
             
             <div class="status-card timer">
@@ -749,10 +615,10 @@
             </div>
         </div>
 
-        <!-- REST API Control Panel -->
+        <!-- REST API Control Panel (static, buttons do nothing) -->
         <div class="control-panel">
             <h2><i class="fas fa-conveyor-belt"></i> Conveyor Control System</h2>
-            <p>REST API-Based Industrial Conveyor Control with Auto-Restart Feature</p>
+            <p>Demo Mode – Controls are disabled (static display only)</p>
             
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('control')">Control Panel</button>
@@ -766,35 +632,35 @@
                 <div class="form-group">
                     <label for="manualTimer"><i class="fas fa-hourglass-half"></i> Manual Start Timer (seconds)</label>
                     <div class="input-group">
-                        <input type="number" class="form-control" id="manualTimer" min="1" max="3600" placeholder="Enter seconds (1-3600)">
+                        <input type="number" class="form-control" id="manualTimer" min="1" max="3600" placeholder="Enter seconds (1-3600)" disabled>
                         <div class="input-group-append">
-                            <button class="btn btn-primary" onclick="setManualTimer()">
+                            <button class="btn btn-primary" onclick="alert('Demo mode – no API connection')" disabled>
                                 <i class="fas fa-play"></i> Start Timer
                             </button>
                         </div>
                     </div>
                     <small class="form-text text-muted">
-                        Conveyor will automatically start after this time
+                        Conveyor will automatically start after this time (demo)
                     </small>
                 </div>
                 
                 <div class="btn-group mt-3">
-                    <button class="btn btn-success" onclick="sendCommand('conveyor', 'START')">
+                    <button class="btn btn-success" onclick="alert('Demo mode – no API connection')">
                         <i class="fas fa-power-off"></i> Start Conveyor
                     </button>
-                    <button class="btn btn-danger" onclick="sendCommand('conveyor', 'STOP')">
+                    <button class="btn btn-danger" onclick="alert('Demo mode – no API connection')">
                         <i class="fas fa-stop"></i> Stop Conveyor
                     </button>
-                    <button class="btn btn-warning" onclick="sendCommand('conveyor', 'EMERGENCY_STOP')">
+                    <button class="btn btn-warning" onclick="alert('Demo mode – no API connection')">
                         <i class="fas fa-exclamation-triangle"></i> Emergency Stop
                     </button>
                 </div>
                 
                 <div class="btn-group mt-3">
-                    <button class="btn btn-info" onclick="sendCommand('system', 'RESET')">
+                    <button class="btn btn-info" onclick="alert('Demo mode – no API connection')">
                         <i class="fas fa-redo"></i> Reset System
                     </button>
-                    <button class="btn btn-secondary" onclick="refreshStatus()">
+                    <button class="btn btn-secondary" onclick="alert('Demo mode – no API connection')">
                         <i class="fas fa-sync"></i> Request Status
                     </button>
                 </div>
@@ -806,15 +672,15 @@
                 <div class="form-group">
                     <label><i class="fas fa-toggle-on"></i> Sensor State</label>
                     <div class="btn-group w-100">
-                        <button class="btn btn-success" onclick="sendCommand('sensor', 'ENABLE')">
+                        <button class="btn btn-success" onclick="alert('Demo mode – no API connection')">
                             <i class="fas fa-check"></i> Enable Sensor
                         </button>
-                        <button class="btn btn-warning" onclick="sendCommand('sensor', 'DISABLE')">
+                        <button class="btn btn-warning" onclick="alert('Demo mode – no API connection')">
                             <i class="fas fa-times"></i> Disable Sensor
                         </button>
                     </div>
                     <small class="form-text text-muted">
-                        Enable or disable proximity sensor detection
+                        Enable or disable proximity sensor detection (demo)
                     </small>
                 </div>
                 
@@ -823,7 +689,7 @@
                     <p><strong>Sensor Type:</strong> Proximity/IR Sensor</p>
                     <p><strong>Detection:</strong> Active LOW (LOW when object detected)</p>
                     <p><strong>Function:</strong> Stops conveyor when object detected (safety feature)</p>
-                    <p><strong>Current State:</strong> <span id="sensorActiveStatus">Unknown</span></p>
+                    <p><strong>Current State:</strong> <span id="sensorActiveStatus">Enabled</span></p>
                     <p><strong>Auto-restart:</strong> <span id="autoRestartInfo">Disabled</span></p>
                 </div>
             </div>
@@ -837,15 +703,15 @@
                             <label><i class="fas fa-redo"></i> Auto-Restart Timer</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="restartTimerInput" 
-                                       min="1" max="3600" placeholder="Seconds" value="5">
+                                       min="1" max="3600" placeholder="Seconds" value="5" disabled>
                                 <div class="input-group-append">
-                                    <button class="btn btn-primary" onclick="setAutoRestartTimer()">
+                                    <button class="btn btn-primary" onclick="alert('Demo mode – no API connection')" disabled>
                                         <i class="fas fa-save"></i> Set
                                     </button>
                                 </div>
                             </div>
                             <small class="form-text text-muted">
-                                Timer untuk restart otomatis setelah sensor detect
+                                Timer untuk restart otomatis setelah sensor detect (demo)
                             </small>
                         </div>
                     </div>
@@ -853,10 +719,10 @@
                         <div class="form-group">
                             <label><i class="fas fa-cogs"></i> Timer Control</label>
                             <div class="btn-group w-100">
-                                <button class="btn btn-success" onclick="enableAutoRestart()">
+                                <button class="btn btn-success" onclick="alert('Demo mode – no API connection')">
                                     <i class="fas fa-play"></i> Enable Auto-Restart
                                 </button>
-                                <button class="btn btn-danger" onclick="disableAutoRestart()">
+                                <button class="btn btn-danger" onclick="alert('Demo mode – no API connection')">
                                     <i class="fas fa-stop"></i> Disable Auto-Restart
                                 </button>
                             </div>
@@ -874,8 +740,8 @@
         </div>
 
         <div class="footer">
-            <p>Conveyor Plant Seed Detector | Version 5.0 (REST API) | © 2026 Agricultural Technology</p>
-            <p>Connection: <span id="connectionType">REST API (Disconnected)</span> | Status: <span id="currentStatus">Offline</span></p>
+            <p>Conveyor Plant Seed Detector | Version 5.0 (Static Demo) | © 2026 Agricultural Technology</p>
+            <p>Connection: <span id="connectionType">Demo Mode</span> | Status: <span id="currentStatus">Static</span></p>
         </div>
     </div>
 
@@ -894,14 +760,9 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     
     <script>
-    // ====================== KONFIGURASI ======================
-    let API_BASE_URL = "https://backend1-2nj6l3u4y-anggitdayats-projects.vercel.app"; // Ganti dengan URL backend Anda
-    let DEVICE_ID = "esp32_conveyor";
-    let apiConnected = false;
-    let messageCount = 0;
-    let autoRefreshInterval = null;
+    // ====================== DEMO MODE - STATIC DATA ======================
     
-    // System state
+    // System state (static values)
     let systemState = {
         conveyor: "STOPPED",
         sensor: "CLEAR",
@@ -915,308 +776,7 @@
         uptime: 0
     };
     
-    // ====================== FUNGSI UTAMA ======================
-    
-    // 1. Connect to API
-    async function connectAPI() {
-        API_BASE_URL = document.getElementById('apiUrl').value.trim();
-        DEVICE_ID = document.getElementById('deviceId').value.trim();
-        
-        if (!API_BASE_URL) {
-            showNotification('Please enter API URL', 'error');
-            return;
-        }
-        
-        updateAPIStatus('connecting', 'Testing API connection...');
-        
-        try {
-            // Test connection
-            const response = await fetch(`${API_BASE_URL}/api/state`);
-            
-            if (response.ok) {
-                apiConnected = true;
-                updateAPIStatus('connected', 'Connected to backend API');
-                showNotification('Successfully connected to API', 'success');
-                
-                // Start auto-refresh
-                startAutoRefresh();
-                
-                // Get initial status
-                await getDeviceStatus();
-            } else {
-                throw new Error(`HTTP ${response.status}`);
-            }
-        } catch (error) {
-            apiConnected = false;
-            updateAPIStatus('disconnected', `Connection failed: ${error.message}`);
-            showNotification(`Failed to connect: ${error.message}`, 'error');
-        }
-    }
-    
-    // 2. Test API Connection
-    async function testApiConnection() {
-        const url = document.getElementById('apiUrl').value.trim();
-        if (!url) {
-            showNotification('Please enter API URL', 'error');
-            return;
-        }
-        
-        showLoading(true);
-        try {
-            const response = await fetch(`${url}/api/state`);
-            if (response.ok) {
-                showNotification('API connection successful!', 'success');
-            } else {
-                showNotification(`API returned status: ${response.status}`, 'warning');
-            }
-        } catch (error) {
-            showNotification(`Connection failed: ${error.message}`, 'error');
-        } finally {
-            showLoading(false);
-        }
-    }
-    
-    // 3. Get device status
-    async function getDeviceStatus() {
-        if (!apiConnected) return;
-        
-        messageCount++;
-        document.getElementById('messagesCount').textContent = messageCount;
-        
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/state`);
-            const data = await response.json();
-            
-            if (data.success && data.deviceState) {
-                updateSystemState(data.deviceState);
-                updateUI();
-            }
-        } catch (error) {
-            console.error('Failed to get status:', error);
-        }
-    }
-    
-    // 4. Send command to ESP32
-    async function sendCommand(command, value) {
-        if (!apiConnected) {
-            showNotification('Not connected to API', 'error');
-            return;
-        }
-        
-        showLoading(true);
-        messageCount++;
-        
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/control`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    command: command,
-                    value: value,
-                    deviceId: DEVICE_ID,
-                    timestamp: new Date().toISOString()
-                })
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                showNotification(`Command sent: ${command} = ${value}`, 'success');
-                
-                // Update local state
-                if (command === 'conveyor') {
-                    systemState.conveyor = value;
-                } else if (command === 'sensor') {
-                    systemState.sensorEnabled = value === 'ENABLE';
-                }
-                
-                updateUI();
-                
-                // Refresh status after command
-                setTimeout(getDeviceStatus, 1000);
-            } else {
-                showNotification(`Failed: ${result.error}`, 'error');
-            }
-        } catch (error) {
-            showNotification(`Network error: ${error.message}`, 'error');
-        } finally {
-            showLoading(false);
-        }
-    }
-    
-    // 5. Set manual timer
-    async function setManualTimer() {
-        const input = document.getElementById('manualTimer');
-        const seconds = parseInt(input.value);
-        
-        if (isNaN(seconds) || seconds < 1 || seconds > 3600) {
-            showNotification('Please enter a valid number between 1 and 3600', 'error');
-            return;
-        }
-        
-        await sendCommand('timer', seconds);
-        input.value = '';
-    }
-    
-    // 6. Set auto-restart timer
-    async function setAutoRestartTimer() {
-        const input = document.getElementById('autoRestartTime');
-        const seconds = parseInt(input.value);
-        
-        if (isNaN(seconds) || seconds < 1 || seconds > 3600) {
-            showNotification('Please enter a valid number between 1 and 3600', 'error');
-            return;
-        }
-        
-        systemState.autoRestartTime = seconds;
-        await sendCommand('autoRestartTime', seconds);
-        showNotification(`Auto-restart timer set to ${seconds} seconds`, 'success');
-    }
-    
-    // 7. Enable auto-restart
-    async function enableAutoRestart() {
-        systemState.autoRestart = true;
-        await sendCommand('autoRestart', 'ENABLE');
-        showNotification('Auto-restart enabled', 'success');
-    }
-    
-    // 8. Disable auto-restart
-    async function disableAutoRestart() {
-        systemState.autoRestart = false;
-        await sendCommand('autoRestart', 'DISABLE');
-        showNotification('Auto-restart disabled', 'info');
-    }
-    
-    // 9. Update system state from API
-    function updateSystemState(stateData) {
-        // Update from backend response
-        if (stateData.conveyor) systemState.conveyor = stateData.conveyor;
-        if (stateData.sensor) systemState.sensor = stateData.sensor;
-        if (stateData.sensorEnabled !== undefined) systemState.sensorEnabled = stateData.sensorEnabled;
-        if (stateData.timer !== undefined) systemState.timer = stateData.timer;
-        if (stateData.timerActive !== undefined) systemState.timerActive = stateData.timerActive;
-        if (stateData.autoRestart !== undefined) systemState.autoRestart = stateData.autoRestart;
-        if (stateData.autoRestartTime !== undefined) systemState.autoRestartTime = stateData.autoRestartTime;
-        if (stateData.totalDetections !== undefined) systemState.totalDetections = stateData.totalDetections;
-        if (stateData.totalRuntime !== undefined) systemState.totalRuntime = stateData.totalRuntime;
-        if (stateData.uptime !== undefined) systemState.uptime = stateData.uptime;
-    }
-    
-    // 10. Update UI based on system state
-    function updateUI() {
-        // Update conveyor status
-        const conveyorEl = document.getElementById('conveyorStatus');
-        const conveyorDesc = document.getElementById('conveyorDesc');
-        
-        if (systemState.conveyor === 'START' || systemState.conveyor === 'RUNNING') {
-            conveyorEl.textContent = 'RUNNING';
-            conveyorEl.className = 'status-value status-conveyor';
-            conveyorDesc.textContent = 'Conveyor is running';
-        } else {
-            conveyorEl.textContent = 'STOPPED';
-            conveyorEl.className = 'status-value status-conveyor off';
-            conveyorDesc.textContent = 'Conveyor is stopped';
-        }
-        
-        // Update sensor status
-        const sensorEl = document.getElementById('sensorStatus');
-        const sensorDesc = document.getElementById('sensorDesc');
-        
-        if (systemState.sensor === 'DETECTED') {
-            sensorEl.textContent = 'DETECTED';
-            sensorEl.className = 'status-value status-sensor detected';
-            sensorDesc.textContent = 'Object detected by sensor';
-        } else {
-            sensorEl.textContent = 'CLEAR';
-            sensorEl.className = 'status-value status-sensor';
-            sensorDesc.textContent = 'No object detected';
-        }
-        
-        // Update timer status
-        const timerEl = document.getElementById('timerStatus');
-        const timerDesc = document.getElementById('timerDesc');
-        
-        if (systemState.timerActive && systemState.timer > 0) {
-            timerEl.textContent = systemState.timer + 's';
-            timerDesc.textContent = `Timer active - ${systemState.timer}s remaining`;
-        } else {
-            timerEl.textContent = '0s';
-            timerDesc.textContent = 'No active timer';
-        }
-        
-        // Update statistics
-        document.getElementById('totalDetections').textContent = systemState.totalDetections;
-        document.getElementById('totalRunTime').textContent = systemState.totalRuntime;
-        document.getElementById('systemUptime').textContent = formatTime(systemState.uptime);
-        
-        // Update sensor active status
-        const sensorActiveStatus = document.getElementById('sensorActiveStatus');
-        if (sensorActiveStatus) {
-            sensorActiveStatus.textContent = systemState.sensorEnabled ? 'Enabled' : 'Disabled';
-            sensorActiveStatus.style.color = systemState.sensorEnabled ? '#4CAF50' : '#F44336';
-        }
-        
-        // Update auto-restart status
-        const autoRestartStatus = document.getElementById('autoRestartStatus');
-        const autoRestartInfo = document.getElementById('autoRestartInfo');
-        if (autoRestartStatus && autoRestartInfo) {
-            autoRestartStatus.textContent = systemState.autoRestart ? 'Enabled' : 'Disabled';
-            autoRestartInfo.textContent = systemState.autoRestart ? 'Enabled' : 'Disabled';
-            autoRestartStatus.style.color = systemState.autoRestart ? '#4CAF50' : '#F44336';
-            autoRestartInfo.style.color = systemState.autoRestart ? '#4CAF50' : '#F44336';
-        }
-        
-        // Update current timer info
-        const currentTimerInfo = document.getElementById('currentTimerInfo');
-        if (currentTimerInfo) {
-            if (systemState.timerActive) {
-                currentTimerInfo.textContent = `${systemState.timer}s remaining`;
-                currentTimerInfo.style.color = '#FF9800';
-            } else {
-                currentTimerInfo.textContent = 'No active timer';
-                currentTimerInfo.style.color = '#666';
-            }
-        }
-        
-        // Update connection status
-        document.getElementById('connectionType').textContent = 'REST API';
-        document.getElementById('currentStatus').textContent = apiConnected ? 'Online' : 'Offline';
-    }
-    
-    // 11. Update API status UI
-    function updateAPIStatus(status, message) {
-        const statusElement = document.getElementById('apiStatus');
-        const indicator = document.getElementById('connectionIndicator');
-        
-        statusElement.className = 'api-status ' + status;
-        indicator.className = 'connection-indicator ' + status;
-        
-        switch(status) {
-            case 'connected':
-                document.getElementById('apiStatusTitle').innerHTML = '<i class="fas fa-satellite-dish"></i> API Status: <span>Connected</span>';
-                document.getElementById('apiStatusText').textContent = 'Connected';
-                document.getElementById('apiStatusDetail').textContent = message;
-                document.getElementById('connectionStatusText').textContent = 'Connected to Backend API';
-                document.getElementById('endpointsList').textContent = `${API_BASE_URL}/api`;
-                break;
-            case 'connecting':
-                document.getElementById('apiStatusTitle').innerHTML = '<i class="fas fa-sync-alt"></i> API Status: <span>Connecting</span>';
-                document.getElementById('apiStatusText').textContent = 'Connecting';
-                document.getElementById('apiStatusDetail').textContent = message;
-                document.getElementById('connectionStatusText').textContent = 'Connecting to API...';
-                break;
-            case 'disconnected':
-                document.getElementById('apiStatusTitle').innerHTML = '<i class="fas fa-exclamation-triangle"></i> API Status: <span>Disconnected</span>';
-                document.getElementById('apiStatusText').textContent = 'Disconnected';
-                document.getElementById('apiStatusDetail').textContent = message;
-                document.getElementById('connectionStatusText').textContent = 'Disconnected from API';
-                break;
-        }
-    }
-    
-    // 12. Show notification
+    // Show notification
     function showNotification(message, type = 'info') {
         const notification = document.getElementById('notification');
         notification.textContent = message;
@@ -1228,29 +788,7 @@
         }, 3000);
     }
     
-    // 13. Format time
-    function formatTime(seconds) {
-        if (!seconds) return '0s';
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-        if (hours > 0) return `${hours}h ${minutes}m`;
-        if (minutes > 0) return `${minutes}m ${secs}s`;
-        return `${secs}s`;
-    }
-    
-    // 14. Refresh status
-    function refreshStatus() {
-        if (!apiConnected) {
-            showNotification('Not connected to API', 'error');
-            return;
-        }
-        
-        getDeviceStatus();
-        showNotification('Refreshing status...', 'info');
-    }
-    
-    // 15. Switch tab
+    // Switch tab
     function switchTab(tabName) {
         // Hide all tabs
         document.querySelectorAll('.tab-content').forEach(tab => {
@@ -1269,49 +807,59 @@
         event.currentTarget.classList.add('active');
     }
     
-    // 16. Show/hide loading spinner
-    function showLoading(show) {
-        document.getElementById('loading').style.display = show ? 'block' : 'none';
-    }
-    
-    // 17. Start auto-refresh
-    function startAutoRefresh() {
-        if (autoRefreshInterval) {
-            clearInterval(autoRefreshInterval);
+    // Update UI with static data
+    function updateUI() {
+        // Conveyor
+        document.getElementById('conveyorStatus').textContent = 'STOPPED';
+        document.getElementById('conveyorDesc').textContent = 'Conveyor is stopped';
+        
+        // Sensor
+        document.getElementById('sensorStatus').textContent = 'CLEAR';
+        document.getElementById('sensorDesc').textContent = 'No object detected';
+        
+        // Timer
+        document.getElementById('timerStatus').textContent = '0s';
+        document.getElementById('timerDesc').textContent = 'No active timer';
+        
+        // Statistics
+        document.getElementById('totalDetections').textContent = '0';
+        document.getElementById('totalRunTime').textContent = '0';
+        document.getElementById('systemUptime').textContent = '0s';
+        document.getElementById('messagesCount').textContent = '0';
+        
+        // Sensor active status
+        const sensorActiveStatus = document.getElementById('sensorActiveStatus');
+        if (sensorActiveStatus) {
+            sensorActiveStatus.textContent = 'Enabled';
+            sensorActiveStatus.style.color = '#4CAF50';
         }
         
-        autoRefreshInterval = setInterval(() => {
-            if (apiConnected) {
-                getDeviceStatus();
-            }
-        }, 3000); // Refresh every 3 seconds
+        // Auto-restart info
+        const autoRestartInfo = document.getElementById('autoRestartInfo');
+        if (autoRestartInfo) {
+            autoRestartInfo.textContent = 'Disabled';
+            autoRestartInfo.style.color = '#F44336';
+        }
+        
+        // Current timer info
+        const currentTimerInfo = document.getElementById('currentTimerInfo');
+        if (currentTimerInfo) {
+            currentTimerInfo.textContent = 'No active timer';
+            currentTimerInfo.style.color = '#666';
+        }
+        
+        // Connection status
+        document.getElementById('connectionType').textContent = 'Demo Mode';
+        document.getElementById('currentStatus').textContent = 'Static';
     }
     
-    // ====================== INISIALISASI ======================
+    // Initialization
     document.addEventListener('DOMContentLoaded', function() {
-        // Auto-connect after 1 second
-        setTimeout(() => {
-            if (API_BASE_URL) {
-                connectAPI();
-            }
-        }, 1000);
+        updateUI();
         
-        // Add event listeners for Enter key
-        document.getElementById('manualTimer').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') setManualTimer();
-        });
-        
-        document.getElementById('autoRestartTime').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') setAutoRestartTimer();
-        });
-        
-        document.getElementById('restartTimerInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') setAutoRestartTimer();
-        });
-        
-        document.getElementById('apiUrl').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') connectAPI();
-        });
+        // Set all input fields to disabled (already done in HTML)
+        // Disable all buttons that call API functions by overriding onclick
+        // Buttons already have alert in onclick, so it's fine.
     });
     </script>
 </body>
