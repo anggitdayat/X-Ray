@@ -389,6 +389,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    
 </head>
 <body>
     <div class="cropinsight-container">
@@ -525,17 +526,21 @@
         <p>Processing...</p>
     </div>
 
-    
+    <!-- MQTT Library (via CDN) -->
+    <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 
     <script>
         // ==================== HARDCODED MQTT CONFIGURATION ====================
         // Ganti dengan konfigurasi broker MQTT Anda
         const MQTT_CONFIG = {
-            brokerUrl: 'ws://broker.emqx.io:8083/mqtt',  // WebSocket URL (contoh publik)
+            brokerUrl: 'wss://broker.emqx.io:8084/mqtt',  // WebSocket URL (contoh publik)
             options: {
                 clientId: 'cropinsight_web_' + Math.random().toString(16).substr(2, 8),
-                username: 'your_username',  // Isi dengan username MQTT Anda
-                password: 'your_password',  // Isi dengan password MQTT Anda
+                username: 'Fajrian',  // Isi dengan username MQTT Anda
+                password: '12345678',  // Isi dengan password MQTT Anda
                 clean: true,
                 reconnectPeriod: 5000,
                 connectTimeout: 30 * 1000,
